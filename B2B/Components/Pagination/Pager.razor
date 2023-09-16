@@ -1,0 +1,49 @@
+﻿@inherits PagerModel
+
+@if (Result != null)
+{
+    <div class="row">
+        <div class="col-md-8 col-sm-8">
+            @if (Result.PageCount > 1)
+            {
+                <ul class="pagination">
+                    <li class="page-item @(Result.HasPreviousPage?null:"disabled")" style="cursor:pointer">
+                        <a class="page-link" onclick="@(() => PagerButtonClicked(1))">
+                            İlk
+                        </a>
+                    </li>
+                    @for (var i = StartIndex; i <= FinishIndex; i++)
+                    {
+                        var currentIndex = i;
+                        @if (i == Result.CurrentPage)
+                        {
+                            <li class="page-item active" style="cursor:pointer">
+                                <a class="page-link" onclick="@(()=>PagerButtonClicked(currentIndex))">
+                                    <span>@i</span>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item" style="cursor:pointer">
+                                <a class="page-link" onclick="@(()=>PagerButtonClicked(currentIndex))">
+                                    <span>@i</span>
+                                </a>
+                            </li>
+                        }
+                    }
+                    <li class="page-item @(Result.HasNextPage?null:"disabled")" style="cursor:pointer">
+                        <a class="page-link" style="cursor:pointer"
+                        onclick="@(() => PagerButtonClicked(Result.PageCount))">
+                            Son
+                        </a>
+                    </li>
+                </ul>
+            }
+        </div>
+    </div>
+}
+
+@code {
+
+}

@@ -1,0 +1,74 @@
+﻿@page "/login/{returnUrl}";
+@using DataAccess.Abstract;
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navManager
+@inject IJSRuntime js
+@inject IUserRepository userRepository
+@inject IUserRoleRepository userRoleRepository
+<body>
+  <div class="card">
+            <div class="card-header">
+                Kullanıcı Girişi
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <span>Kullanıcı Adı</span>
+                    </div>
+                    <div class="col-4">
+                        <input name="UserName" @bind="model.Username"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-5">
+                        <span>Kullanıcı Şifresi</span>
+                    </div>
+                    <div class="col-4">
+                <input name="Password" @bind="model.Password" />
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary text-right h-allign" onclick="@entryClick">Giriş</button>
+            </div>
+        </div>
+</body>
+    
+
+@code {
+    [Parameter]
+    public string returnUrl { get; set; }
+    private class Model
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+
+    private Model model = new Model();
+    private void entryClick()
+    {
+        Authenticate();
+    }
+    private async Task Authenticate()
+    {
+        Entity.User user = userRepository.GetUser(model.Username, model.Password).Result;
+        if (user == null)
+        {
+            await js.InvokeVoidAsync("alert", "Invalid User Name or Password...");
+            return;
+        }
+        List<Entity.UserRole> role = userRoleRepository.GetAll(user.Id);
+        string[] roles = new string[role.Count];
+        for (int i = 0; i < role.Count; i++)
+        {
+            roles[i] = role[0].Role.RoleName;
+        }
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        customAuthStateProvider.UpdateAuthenticationState(new UserSession
+            {
+                UserName = model.Username,
+                Role = roles
+            });
+        navManager.NavigateTo($"/{returnUrl}", true);
+    }
+}

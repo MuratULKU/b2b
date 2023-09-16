@@ -1,0 +1,19 @@
+﻿<div class="col-md-4 my-3">
+    <div class="card" style="witdh:18 rem">
+        <img src="..." class="card-img-top" alt="..." />
+        <div class="card-body">
+            <h5 class="card-title">@Title</h5>
+            <p class="card-text">@Body</p>
+            <a href="#" class="btn btn-primary">Urüne Git</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Set By Child";
+
+    [Parameter]
+    public string Body { get; set; } = "Urun Özel";
+
+}

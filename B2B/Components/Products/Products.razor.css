@@ -1,0 +1,16 @@
+﻿.topbar{
+    top:3px;
+    background-color:rgb(245,245,245);
+    margin:auto;
+}
+.icon{
+    width:30px;
+    max-width:40px;
+    display:inline-flex;
+    left:20px;
+    vertical-align:sub;
+   
+}
+.icon:hover{
+    cursor:pointer;
+}

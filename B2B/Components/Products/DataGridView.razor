@@ -1,0 +1,26 @@
+﻿@using Entity;
+<table>
+    <tr>
+        <th>Görsel</th>
+        <th>Ürün</th>
+        <th>Stok</th>
+        <th>Özel Fiyat</th>
+        <th>Fiyat</th>
+        <th>Perakende Fiyat</th>
+    </tr>
+    @foreach (var item in Data)
+    {
+        <tr>
+            <td>görsel yok</td>
+            <td>@item.NAME</td>
+            <td>1</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+        </tr>
+    }
+</table>
+
+@code {
+    [Parameter] public List<Product> Data{ get; set; }
+}

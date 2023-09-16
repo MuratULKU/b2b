@@ -1,0 +1,66 @@
+﻿@page "/user"
+@attribute [Authorize]
+
+@using DataAccess.Abstract;
+@using DataAccess.Concrete;
+@using Entity;
+
+@inject IUserRoleRepository userRepository
+@inject IUserRepository userAccount
+@inject NavigationManager navManager
+<DataGrid TItem="Entity.User"
+          Data="userList"
+          ReadData="@OnReadData"
+          TotalItems="@totalUser"
+          PageSize="1"
+          ShowPager
+          Responsive
+@bind-SelectedRow="@selectedUser">
+
+    <DataGridColumns>
+        <DataGridColumn Field="@nameof(Entity.User.Username)" Caption="Kullanıcı Adı" />
+        <DataGridColumn Field="@nameof(Entity.User.Email)" Caption="Mail" />
+    </DataGridColumns>
+    <ButtonRowTemplate>
+        <Button Color="Color.Success" Clicked="NewUser">Yeni</Button>
+        <Button Color="Color.Primary" Disabled="(selectedUser is null)" Clicked="context.EditCommand.Clicked">Değiştir</Button>
+        <Button Color="Color.Danger" Disabled="(selectedUser is null)" Clicked="context.DeleteCommand.Clicked">Sil</Button>
+    </ButtonRowTemplate>
+</DataGrid>
+@code {
+    private List<Entity.User> userList;
+    private int totalUser;
+    private Entity.User selectedUser;
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        userList = userAccount.GetAllUser();
+        selectedUser = userList.FirstOrDefault();
+        List<UserRole> userRole = userRepository.GetAll(selectedUser.Id);
+    }
+    private async Task OnReadData(DataGridReadDataEventArgs<Entity.User> e)
+    {
+        if (!e.CancellationToken.IsCancellationRequested)
+        {
+            List<Entity.User> response = null;
+            if (e.ReadDataMode is DataGridReadDataMode.Virtualize)
+                response = (userList).Skip(e.VirtualizeOffset).Take(e.VirtualizeCount).ToList();
+            else if (e.ReadDataMode is DataGridReadDataMode.Paging)
+                response = (userList).Skip((e.Page - 1) * e.PageSize).Take(e.PageSize).ToList();
+            else
+                throw new Exception("Unhandled ReadDataMode");
+
+            if (!e.CancellationToken.IsCancellationRequested)
+            {
+                totalUser = (userList).Count;
+                userList = new List<Entity.User>(response); // an actual data for the current page
+            }
+        }
+
+    }
+
+    private void NewUser () 
+    {
+        navManager.NavigateTo("/NewLogin");
+    }
+}

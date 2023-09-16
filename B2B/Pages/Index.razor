@@ -1,0 +1,23 @@
+﻿@page "/"
+@using System.Net;
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello, world!</h1>
+
+<AuthorizeView>
+    <Authorized>
+        <SurveyPrompt Title="How is Blazor working for you?" />
+    </Authorized>
+    <NotAuthorized>
+        
+        Yetkisiz Kullanıcı
+    </NotAuthorized>
+</AuthorizeView>
+
+Welcome to your new app.
+@code{
+   
+}
+
+

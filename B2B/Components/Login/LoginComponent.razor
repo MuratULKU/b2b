@@ -1,0 +1,97 @@
+﻿@using B2B.Components.Login
+@using DataAccess.Abstract;
+@attribute [Authorize]
+@inject IJSRuntime js
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navManager
+@inject IUserRoleRepository userRoleRepository
+@inject IUserRepository userRepository
+
+<div class="popup">
+   <AuthorizeView>
+       <Authorized>
+            <button class="label" onclick="@exitClick">Logout</button>
+       </Authorized>
+       <NotAuthorized>
+            <button class="label" onclick="@buttonClick">Login</button>
+       </NotAuthorized>
+   </AuthorizeView>
+    
+    @if (show)
+    {
+        <div class="card">
+            <div class="card-header">
+                Kullanıcı Girişi
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <span>Kullanıcı Adı</span>
+                    </div>
+                    <div class="col-4">
+                        <input name="UserName" @bind="model.Username"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-5">
+                        <span>Kullanıcı Şifresi</span>
+                    </div>
+                    <div class="col-4">
+                        <input name="Password" @bind="model.Password" />
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary text-right h-allign" onclick="@entryClick">Giriş</button>
+            </div>
+        </div>
+
+    }
+</div>
+@code {
+    private class Model
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+
+    private Model model = new Model();
+
+    private async Task Authenticate()
+    {
+        Entity.User user = userRepository.GetUser(model.Username, model.Password).Result;
+        if(user == null)
+        {
+            await js.InvokeVoidAsync("alert", "Invalid User Name or Password...");
+            return;
+        }
+        List<Entity.UserRole> role = userRoleRepository.GetAll(user.Id);
+        string[] roles = new string[role.Count];
+        for (int i = 0; i < role.Count; i++)
+        {
+            roles[i] = role[0].Role.RoleName;
+        }
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        customAuthStateProvider.UpdateAuthenticationState(new UserSession {
+                UserName = model.Username,
+                Role = roles
+            });
+            navManager.NavigateTo($"/",true);
+    }
+
+    private bool show;
+    private void buttonClick()
+    {
+        show = true ? show == false : show == true;
+    }
+    private void entryClick()
+    {
+        Authenticate();
+    }
+    private void exitClick()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        customAuthStateProvider.UpdateAuthenticationState(null);
+        navManager.NavigateTo("/",true); 
+    }
+}

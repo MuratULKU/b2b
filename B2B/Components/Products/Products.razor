@@ -1,0 +1,60 @@
+﻿@page "/products"
+@using B2B.Components.Pagination
+@using DataAccess.Abstract;
+@using DataAccess.Helpers.Pagination;
+@using Entity;
+@inject IProductRepository _productrepository
+<div class="container">
+    <div class="topbar">
+        <div class="icon">
+            <svg onclick="@ClickCardView" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="grid-2" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-grid-2 fa-lg"><path fill="currentColor" d="M224 80c0-26.5-21.5-48-48-48H80C53.5 32 32 53.5 32 80v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V80zm0 256c0-26.5-21.5-48-48-48H80c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V336zM288 80v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48H336c-26.5 0-48 21.5-48 48zM480 336c0-26.5-21.5-48-48-48H336c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V336z" class=""></path></svg>
+        </div>
+        <div class="icon">
+            <svg onclick="@ClickDataView" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="list-ul" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-list-ul fa-lg"><path fill="currentColor" d="M64 144a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM64 464a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm48-208a48 48 0 1 0 -96 0 48 48 0 1 0 96 0z" class=""></path></svg>
+        </div>
+    </div>
+    <div class="main">
+        @if (view == 0)
+        {
+            <CardGridView Data="(List<Product>)pdata.Results"/>
+        }
+        else if (view == 1)
+        {
+            <DataGridView Data="(List<Product>)pdata.Results" />
+        }
+        else
+        {
+            <p>Hatalı Görünüm Parametresi</p>
+        }
+    </div>
+</div>
+<Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="_pageSize" RowCount="_rowCount" />
+@code {
+    private int view;
+    private int _pageSize;
+    private int _rowCount;
+    protected PagedResult<Product> pdata =new();
+    private void ClickCardView()
+    {
+        view = 0;
+    }
+
+    private void ClickDataView()
+    {
+        view = 1;
+    }
+
+
+    protected override void OnInitialized()
+    {
+        _pageSize = 20;
+        _rowCount = _productrepository.TotalCount();
+        pdata.Results = _productrepository.GetAll(1, _pageSize);
+    }
+    
+    protected void PagerPageChanged(int page)
+    {
+        pdata.Results = _productrepository.GetAll(page, _pageSize);
+        StateHasChanged();
+    }
+}

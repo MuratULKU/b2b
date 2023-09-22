@@ -1,4 +1,5 @@
 ﻿@page "/products"
+@attribute [Authorize]
 @using B2B.Components.Pagination
 @using DataAccess.Abstract;
 @using DataAccess.Helpers.Pagination;
@@ -28,7 +29,7 @@
         }
     </div>
 </div>
-<Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="_pageSize" RowCount="_rowCount" />
+<Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="_pageSize" RowCount="_rowCount" OnPageSizeChanged="pageSizeOnchanged"/>
 @code {
     private int view;
     private int _pageSize;
@@ -47,14 +48,21 @@
 
     protected override void OnInitialized()
     {
-        _pageSize = 20;
+        _pageSize = 5;
         _rowCount = _productrepository.TotalCount();
         pdata.Results = _productrepository.GetAll(1, _pageSize);
     }
-    
+
     protected void PagerPageChanged(int page)
     {
         pdata.Results = _productrepository.GetAll(page, _pageSize);
         StateHasChanged();
+    }
+
+    protected void pageSizeOnchanged(int pageSize)
+    {
+        _pageSize = pageSize;
+        _rowCount = _productrepository.TotalCount();
+        pdata.Results =  _productrepository.GetAll(pdata.CurrentPage, _pageSize);
     }
 }

@@ -3,7 +3,7 @@
 @if (Result != null)
 {
     <div class="row">
-        <div class="col-md-8 col-sm-8">
+        <div class="col-md-7 col-sm-7">
             @if (Result.PageCount > 1)
             {
                 <ul class="pagination">
@@ -34,16 +34,35 @@
                     }
                     <li class="page-item @(Result.HasNextPage?null:"disabled")" style="cursor:pointer">
                         <a class="page-link" style="cursor:pointer"
-                        onclick="@(() => PagerButtonClicked(Result.PageCount))">
+                           onclick="@(() => PagerButtonClicked(Result.PageCount))">
                             Son
                         </a>
                     </li>
                 </ul>
             }
+            <div>
+            </div>
+
         </div>
+        <div class="col-md-5 col-sm-5">
+            <div class="row">
+                <div class="col-md-4 col-sm-4 justify-content-md-start">
+                    <select class="form-select" role="button" @onchange="@(PageSizeChanged)">
+                        @foreach (var i in PageSizeSelectorItems)
+                        {
+                            <option>@i</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4 col-sm-4">page</div>
+            </div>
+        </div>
+
     </div>
+
 }
 
 @code {
+  
 
 }

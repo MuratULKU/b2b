@@ -1,3 +1,4 @@
+using B2B.BackOrder;
 using B2B.Components.Login;
 using B2B.Data;
 using Blazorise;
@@ -6,10 +7,8 @@ using Blazorise.Icons.FontAwesome;
 using DataAccess.Abstract;
 using DataAccess.Concrete;
 using DataAccess.EFCore;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +21,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddDbContext<RepositoryContext>(options =>
 {
     options.EnableSensitiveDataLogging();
-    options.UseSqlite(builder.Configuration.GetConnectionString("sqlConnection"),b=>b.MigrationsAssembly("B2B"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("sqlConnection"), b => b.MigrationsAssembly("B2B"));
 });
 
 builder.Services
@@ -35,10 +34,24 @@ builder.Services
 
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-
+//repository services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IFirmParamRepository, FirmParamRepository>();
+//back order services
+builder.Services.AddSingleton<FirmParameterService>();
+
+builder.Services.AddSingleton<IBackOrderProductService, BackOrderProductService>();
+builder.Services.AddSingleton<IBackOrderCategoryService, BackOrderCategoryService>();
+builder.Services.AddHostedService<BackOrder>();
+builder.Services.AddLogging(
+    options =>
+    {
+        options.AddConsole();
+        options.AddDebug();
+    });
 
 var app = builder.Build();
 

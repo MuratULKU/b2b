@@ -1,6 +1,6 @@
 ﻿namespace B2B.Components.Pagination
 {
-    public class PagedResult<T>:PagedResultBase where T : class
+    public class PagedResult<T> : PagedResultBase where T : class
     {
         public IList<T> Results { get; set; }
 

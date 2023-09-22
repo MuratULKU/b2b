@@ -9,6 +9,7 @@ namespace B2B.Components.Pagination
 
         [Parameter]
         public Action<int> PageChanged { get; set; }
+
         private int _rowCount;
         [Parameter]
         public int RowCount
@@ -44,7 +45,7 @@ namespace B2B.Components.Pagination
             }
             else if (FinishIndex < 5 && Result.PageCount > 5)
                 FinishIndex = 5;
-           
+
             if (FinishIndex - 5 != StartIndex && StartIndex > 2)
                 StartIndex = FinishIndex - 4;
             else if (Result.CurrentPage > Result.PageCount - 5 && StartIndex > 2)
@@ -60,5 +61,13 @@ namespace B2B.Components.Pagination
             PageChanged?.Invoke(page);
         }
 
+        //gösterilecek eleman dsayısını ayarlama
+        protected int[] PageSizeSelectorItems = new int[] { 5, 10, 20, 50 };
+        [Parameter] public EventCallback<int> OnPageSizeChanged { get; set; }
+        protected void PageSizeChanged(ChangeEventArgs args)
+        {
+            int.TryParse(args?.Value?.ToString(), out var newPageSize);
+            OnPageSizeChanged.InvokeAsync(newPageSize);
+        }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using System.Linq;
 using System.Security.Claims;
 
 namespace B2B.Components.Login
@@ -19,7 +18,7 @@ namespace B2B.Components.Login
         {
             try
             {
-                
+
                 var userSessionStrogeResult = await _sessionStroge.GetAsync<UserSession>("UserSession");
                 var userSession = userSessionStrogeResult.Success ? userSessionStrogeResult.Value : null;
                 if (userSession == null)
@@ -57,7 +56,7 @@ namespace B2B.Components.Login
                 {
                     claims.Add(new Claim(ClaimTypes.Role, item));
                 }
-                
+
                 claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
             }
             else

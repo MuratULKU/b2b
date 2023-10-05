@@ -39,24 +39,25 @@
                         </a>
                     </li>
                 </ul>
+                <div class="col-md-5 col-sm-5">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4 justify-content-md-start">
+                            <select class="form-select" role="button" @onchange="@(PageSizeChanged)">
+                                @foreach (var i in PageSizeSelectorItems)
+                                {
+                                    <option>@i</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-sm-4">page</div>
+                    </div>
+                </div>
             }
             <div>
             </div>
 
         </div>
-        <div class="col-md-5 col-sm-5">
-            <div class="row">
-                <div class="col-md-4 col-sm-4 justify-content-md-start">
-                    <select class="form-select" role="button" @onchange="@(PageSizeChanged)">
-                        @foreach (var i in PageSizeSelectorItems)
-                        {
-                            <option>@i</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-4 col-sm-4">page</div>
-            </div>
-        </div>
+        
 
     </div>
 

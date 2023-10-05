@@ -9,6 +9,7 @@ namespace DataAccess.EFCore
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<PriceList> PriceLists { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<FirmParam> FirmParams { get; set; }
         public RepositoryContext(DbContextOptions<RepositoryContext> options) : base(options)

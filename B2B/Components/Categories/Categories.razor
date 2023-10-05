@@ -1,0 +1,49 @@
+﻿@page "/c";
+@using B2B.Data;
+@using B2B.Components.PanelMenu
+@using DataAccess.Abstract;
+@using Entity;
+@inject ICategoryRepository _categoriyRepository;
+
+<PanelMenu DataList="dataList" SelectedItem="m" SelectItemChange="test">
+ 
+</PanelMenu>
+@if (m is not null)
+{
+    @m.menuName
+}
+else
+{
+    <label> mmmmmmm </label>
+}
+
+@code {
+    private List<MenuItemModel>? dataList;
+    private MenuItemModel? m { get; set; }
+
+    void test(MenuItemModel gelen)
+    {
+        m = gelen;
+    }
+
+    private List<MenuItemModel> loadMenuItem(int parentid)
+    {
+        List<MenuItemModel> newItem = new();
+        var d = _categoriyRepository.Get(parentid);
+        if(d is not null && d.Count> 0)
+        {
+            foreach (var item in d)
+            {
+                newItem.Add(new MenuItemModel { id = item.LogicalRef, menuName = item.Name, parent = item.Parent, items = loadMenuItem(item.LogicalRef) });
+            }
+        }
+        return newItem;
+    }
+
+
+    protected override void OnInitialized()
+    {
+        dataList = loadMenuItem(1);
+    }
+
+}

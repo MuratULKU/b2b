@@ -1,0 +1,72 @@
+﻿@using B2B.Data;
+<CascadingValue Value="this">
+    @if (dataModel != null)
+    {
+        <li>
+            <label class="item@(dataModel.isSelected ?" selected" : "")" @onclick:stopPropagation onclick="@(()=>onMenuClick(dataModel))">
+            @if (dataModel.items.Count > 0)
+            {
+                <span class="arrow" @onclick="()=>dataModel.isCollapsed = !dataModel.isCollapsed" @onclick:stopPropagation>
+                    @if (!dataModel.isCollapsed)
+                    {
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 12H20M12 4V20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                    }
+                    else
+                    {
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                    }
+                </span>
+            }
+            else
+            {
+                <span class="arrow-placeholder"> </span>
+            }
+            
+                @dataModel.menuName
+
+            </label>
+
+
+            @if (dataModel.items.Count > 0 && dataModel.isCollapsed)
+            {
+                <ul>
+                    @foreach (var item in dataModel.items)
+                    {
+                        <PanelMenuItem dataModel="item" SelectItemChange="onMenuClick" />
+                    }
+                </ul>
+            }
+        </li>
+    }
+</CascadingValue>
+@code {
+
+    [CascadingParameter]
+    public List<MenuItemModel> DataList { get; set; }
+
+    [Parameter]
+    public MenuItemModel dataModel { get; set; }
+
+    [Parameter]
+    public MenuItemModel SelectedItem { get; set; } //bunu kaldırabliriz şimdilik dursun
+
+    [Parameter]
+    public EventCallback<MenuItemModel> SelectItemChange { get; set; }
+
+    protected void onMenuClick(MenuItemModel model)
+    {
+        updateSelection(DataList, model);
+        SelectItemChange.InvokeAsync(model);
+    }
+
+    private void updateSelection(List<MenuItemModel> items, MenuItemModel selectedItem)
+    {
+        foreach (var item in items)
+        {
+            item.isSelected = item == selectedItem;
+            if (item.items.Count > 0)
+                updateSelection(item.items, selectedItem);
+        }
+    }
+
+}

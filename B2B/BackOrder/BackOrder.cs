@@ -1,4 +1,5 @@
 ﻿using B2B.Data;
+using DataAccess.Abstract;
 
 namespace B2B.BackOrder
 {
@@ -8,13 +9,15 @@ namespace B2B.BackOrder
         private readonly IBackOrderProductService _productService;
         private readonly IBackOrderCategoryService _categoryService;
         private readonly FirmParameterService _firmParameterService;
+        private readonly IBackOrderPriceListService _priceListRepository;
 
-        public BackOrder(ILogger<BackOrder> logger, IBackOrderProductService productService, IBackOrderCategoryService categoryService, FirmParameterService firmParameterService)
+        public BackOrder(ILogger<BackOrder> logger, IBackOrderProductService productService, IBackOrderCategoryService categoryService, FirmParameterService firmParameterService, IBackOrderPriceListService priceListRepository)
         {
             _logger = logger;
             _productService = productService;
             _categoryService = categoryService;
             _firmParameterService = firmParameterService;
+            _priceListRepository = priceListRepository;
         }
 
 
@@ -29,9 +32,10 @@ namespace B2B.BackOrder
                 DateTime? lastUpdateDate = _firmParameterService.FirmParam.LastSync;
                 DateTime updatedate = DateTime.Now;
                 _categoryService.updateCategory(lastUpdateDate);
-                _productService.updateProducts(lastUpdateDate);
+                await _productService.updateProducts(lastUpdateDate);
+                _priceListRepository.updatePrice(lastUpdateDate);
                 _firmParameterService.SetLastUpdate(updatedate);
-                await Task.Delay(300000, stoppingToken);
+                 await Task.Delay(300000, stoppingToken);
             }
         }
     }

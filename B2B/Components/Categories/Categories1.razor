@@ -1,0 +1,54 @@
+﻿@using DataAccess.Abstract;
+@using Entity;
+@inject ICategoryRepository _categoriyRepository
+<div class="category">
+    <ul id="menu">
+        @foreach (var maincaterory in categories)
+        {
+            sub1categories = _categoriyRepository.Get(maincaterory.LogicalRef);
+            <li>
+                <a class="selected" onclick="@(()=>SelectedChange(maincaterory.LogicalRef))">@maincaterory.Name</a>
+                @if (sub1categories.Count > 1)
+                {
+                    <ul>
+                        @foreach (var sub1 in sub1categories)
+                        {
+                            sub2categories = _categoriyRepository.Get(sub1.LogicalRef);
+                            <li><a class="selected" onclick="@(()=>SelectedChange(@sub1.LogicalRef))">@sub1.Name</a></li>
+                            @if (sub2categories.Count > 1)
+                            {
+                                <ul>
+                                    @foreach (var sub2 in sub1categories)
+                                    {
+                                        <li><a class="selected" onclick="@(()=>SelectedChange(@sub2.LogicalRef))">@sub2.Name</a></li>
+                                    }
+                                </ul>
+                            }
+                        }
+                    </ul>
+                }
+            </li>
+        }
+
+    </ul>
+</div>
+@code {
+    List<Category> categories = new List<Category>();
+    List<Category> sub1categories = new List<Category>();
+    List<Category> sub2categories = new List<Category>();
+    protected override void OnInitialized()
+    {
+        categories = _categoriyRepository.Get(1);
+    }
+
+    protected void onChanged(int categoryid)
+    {
+        sub1categories = _categoriyRepository.Get(categoryid);
+    }
+
+    [Parameter] public EventCallback<int> ChangedSelectedCategory { get; set; }
+    protected void SelectedChange(int categoryid)
+    {
+        ChangedSelectedCategory.InvokeAsync(categoryid);
+    }
+}

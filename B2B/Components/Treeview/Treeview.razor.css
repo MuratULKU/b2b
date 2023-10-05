@@ -1,0 +1,19 @@
+﻿.item {
+	display: flex;
+	margin: 0;
+	list-style-type: none;
+	cursor: pointer;
+}
+.item:hover{
+	background-color:aqua;
+}
+.item.selected{
+	background-color:navy;
+}
+.item > arrow, arrow-placeholder{
+	min-width:16px;
+	user-select:none;
+}
+.item > .arrow:hover{
+	color:steelblue;
+}

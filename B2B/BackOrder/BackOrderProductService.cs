@@ -7,7 +7,7 @@ namespace B2B.BackOrder
     public interface IBackOrderProductService
     {
         Task<bool> isApiActiveted();
-        void updateProducts(DateTime? date);
+        Task updateProducts(DateTime? date);
 
     }
     public class BackOrderProductService : IBackOrderProductService
@@ -25,7 +25,7 @@ namespace B2B.BackOrder
 
         }
 
-        public async void updateProducts(DateTime? date)
+        public async Task updateProducts(DateTime? date)
         {
             try
             {
@@ -40,8 +40,8 @@ namespace B2B.BackOrder
                     respone = await _httpClient.GetAsync($"/api/products");
                 if (respone.IsSuccessStatusCode)
                 {
-                    var pList = await respone.Content.ReadFromJsonAsync<List<Product>>();
-                    foreach (var product in pList)
+                    var pList = respone.Content.ReadFromJsonAsync<List<Product>>();
+                    foreach (var product in pList.Result)
                     {
                         if (product.Code is not null && product.Name is not null)
                         {
@@ -59,7 +59,7 @@ namespace B2B.BackOrder
                         }
 
                     }
-
+                    
                 }
             }
             catch (Exception ex)
@@ -67,6 +67,7 @@ namespace B2B.BackOrder
 
 
             }
+            await Task.Delay(1);
         }
 
         public async Task<bool> isApiActiveted()

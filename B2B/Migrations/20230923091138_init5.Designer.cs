@@ -3,6 +3,7 @@ using System;
 using DataAccess.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace B2B.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    partial class RepositoryContextModelSnapshot : ModelSnapshot
+    [Migration("20230923091138_init5")]
+    partial class init5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.11");
@@ -115,13 +118,13 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("1d4a04c5-0b5e-40c3-8b71-fc5408b04348"),
-                            CreateDate = new DateTime(2023, 9, 25, 11, 0, 10, 499, DateTimeKind.Local).AddTicks(6623),
-                            CreateUser = new Guid("59557f0e-65af-435f-9147-7d715f084130"),
+                            Id = new Guid("792b4cd3-d51b-436f-a63f-a9f3f93810da"),
+                            CreateDate = new DateTime(2023, 9, 23, 12, 11, 38, 661, DateTimeKind.Local).AddTicks(8797),
+                            CreateUser = new Guid("8fc135e8-eebb-4204-8a9f-6af16eaa375b"),
                             FirmId = 1,
                             SyncMinute = 60,
-                            UpdateDate = new DateTime(2023, 9, 25, 11, 0, 10, 499, DateTimeKind.Local).AddTicks(6624),
-                            UpdateUser = new Guid("59557f0e-65af-435f-9147-7d715f084130")
+                            UpdateDate = new DateTime(2023, 9, 23, 12, 11, 38, 661, DateTimeKind.Local).AddTicks(8798),
+                            UpdateUser = new Guid("8fc135e8-eebb-4204-8a9f-6af16eaa375b")
                         });
                 });
 
@@ -282,21 +285,21 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e08559ae-27ab-4cc4-974d-1afb14c86229"),
-                            CreateDate = new DateTime(2023, 9, 25, 11, 0, 10, 499, DateTimeKind.Local).AddTicks(6518),
-                            CreateUser = new Guid("59557f0e-65af-435f-9147-7d715f084130"),
+                            Id = new Guid("842bfcd2-1a73-458b-aebe-2423e891dc23"),
+                            CreateDate = new DateTime(2023, 9, 23, 12, 11, 38, 661, DateTimeKind.Local).AddTicks(8619),
+                            CreateUser = new Guid("8fc135e8-eebb-4204-8a9f-6af16eaa375b"),
                             RoleName = "Admin",
-                            UpdateDate = new DateTime(2023, 9, 25, 11, 0, 10, 499, DateTimeKind.Local).AddTicks(6529),
-                            UpdateUser = new Guid("59557f0e-65af-435f-9147-7d715f084130")
+                            UpdateDate = new DateTime(2023, 9, 23, 12, 11, 38, 661, DateTimeKind.Local).AddTicks(8631),
+                            UpdateUser = new Guid("8fc135e8-eebb-4204-8a9f-6af16eaa375b")
                         },
                         new
                         {
-                            Id = new Guid("ca44eca5-01d8-4747-84cb-e2feae90a4a3"),
-                            CreateDate = new DateTime(2023, 9, 25, 11, 0, 10, 499, DateTimeKind.Local).AddTicks(6553),
-                            CreateUser = new Guid("59557f0e-65af-435f-9147-7d715f084130"),
+                            Id = new Guid("4b429cc1-c7ff-4cca-ab43-97a44b7f8dcb"),
+                            CreateDate = new DateTime(2023, 9, 23, 12, 11, 38, 661, DateTimeKind.Local).AddTicks(8680),
+                            CreateUser = new Guid("8fc135e8-eebb-4204-8a9f-6af16eaa375b"),
                             RoleName = "User",
-                            UpdateDate = new DateTime(2023, 9, 25, 11, 0, 10, 499, DateTimeKind.Local).AddTicks(6553),
-                            UpdateUser = new Guid("59557f0e-65af-435f-9147-7d715f084130")
+                            UpdateDate = new DateTime(2023, 9, 23, 12, 11, 38, 661, DateTimeKind.Local).AddTicks(8680),
+                            UpdateUser = new Guid("8fc135e8-eebb-4204-8a9f-6af16eaa375b")
                         });
                 });
 
@@ -337,13 +340,13 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("59557f0e-65af-435f-9147-7d715f084130"),
-                            CreateDate = new DateTime(2023, 9, 25, 11, 0, 10, 499, DateTimeKind.Local).AddTicks(6588),
-                            CreateUser = new Guid("59557f0e-65af-435f-9147-7d715f084130"),
+                            Id = new Guid("8fc135e8-eebb-4204-8a9f-6af16eaa375b"),
+                            CreateDate = new DateTime(2023, 9, 23, 12, 11, 38, 661, DateTimeKind.Local).AddTicks(8735),
+                            CreateUser = new Guid("8fc135e8-eebb-4204-8a9f-6af16eaa375b"),
                             Email = "murat@ulkubilgisayar.com",
                             Password = "Admin",
-                            UpdateDate = new DateTime(2023, 9, 25, 11, 0, 10, 499, DateTimeKind.Local).AddTicks(6589),
-                            UpdateUser = new Guid("59557f0e-65af-435f-9147-7d715f084130"),
+                            UpdateDate = new DateTime(2023, 9, 23, 12, 11, 38, 661, DateTimeKind.Local).AddTicks(8736),
+                            UpdateUser = new Guid("8fc135e8-eebb-4204-8a9f-6af16eaa375b"),
                             Username = "Admin"
                         });
                 });
@@ -365,8 +368,8 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("59557f0e-65af-435f-9147-7d715f084130"),
-                            RoleId = new Guid("e08559ae-27ab-4cc4-974d-1afb14c86229")
+                            UserId = new Guid("8fc135e8-eebb-4204-8a9f-6af16eaa375b"),
+                            RoleId = new Guid("842bfcd2-1a73-458b-aebe-2423e891dc23")
                         });
                 });
 

@@ -1,5 +1,6 @@
 ﻿using DataAccess.Abstract;
 using DataAccess.EFCore;
+using DataAccess.Helpers.Product;
 using Entity;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,10 +31,29 @@ namespace DataAccess.Concrete
                 .ToList();
         }
 
+        public List<Product> GetAll(ProductRequestParameter parameter)
+        {
+            return
+                parameter.CategoryId == 0
+                 ? _dbContext.Products
+                .Skip((parameter.CurrentPage - 1) * parameter.PageSize)
+                .Take(parameter.PageSize)
+                .ToList()
+                : _dbContext.Products
+                .Skip((parameter.CurrentPage - 1) * parameter.PageSize)
+                .Take(parameter.PageSize)
+                .Where(x => x.ParentRef == parameter.CategoryId)
+                .ToList();
+        }
+
         public async Task<Product> GetByCode(string code)
         {
-            var p = await _dbContext.Products.FirstOrDefaultAsync<Product>(x => x.Code == code);
-            return p;
+            return await _dbContext.Products.FirstOrDefaultAsync(x => x.Code == code);
+        }
+
+        public async Task<Product> GetByLogicalref(int logicalref)
+        {
+            return await _dbContext.Products.FirstOrDefaultAsync(x => x.LogicalRef == logicalref);
         }
 
         public void Insert(Product product)

@@ -1,0 +1,56 @@
+﻿#menu, #menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    margin-left: 10px;
+}
+
+.category {
+    position: relative;
+    display: flex;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: 0.25rem;
+    display: inline-grid;
+    margin-top: 5px;
+    width:100%;
+}
+
+#menu li {
+    position: relative;
+    line-height: 2.5em;
+    width: 8em;
+}
+
+    #menu li ul {
+        position: relative;
+        margin-top: 0em;
+        margin-left: 1em;
+       /** display: none;**/
+    }
+
+#menu ul li ul {
+    margin-top: -3em;
+    margin-left: 7em;
+}
+
+#menu a {
+    display: block;
+
+    text-decoration: none;
+    padding: 0 1px;
+}
+
+    #menu a:hover {
+        background-color: #5798B4;
+        color: #fff;
+    }
+/*no show checkbox*/
+.m-menu__checkbox{
+    display:none;
+}
+.overfly{
+    display:none;
+}
+.m-menu__checkbox:checked + .overfly{
+    display:block;
+}

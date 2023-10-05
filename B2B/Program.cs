@@ -38,6 +38,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStat
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IPriceListRepository, PriceListRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IFirmParamRepository, FirmParamRepository>();
 //back order services
@@ -45,6 +46,7 @@ builder.Services.AddSingleton<FirmParameterService>();
 
 builder.Services.AddSingleton<IBackOrderProductService, BackOrderProductService>();
 builder.Services.AddSingleton<IBackOrderCategoryService, BackOrderCategoryService>();
+builder.Services.AddSingleton<IBackOrderPriceListService, BackOrderPriceListService>();
 builder.Services.AddHostedService<BackOrder>();
 builder.Services.AddLogging(
     options =>

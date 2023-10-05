@@ -1,0 +1,56 @@
+﻿@using B2B.Data;
+@if (Items != null)
+{
+    foreach (var item in Items)
+    {
+        <li class="item@(item.IsSelelected ? " selected" : "")" style="padding-left : @(Level*16)px" @onclick="()=>ItemSelected(item)">
+            @if (item.HasChildren)
+            {
+                <span class="arrow" @onclick="()=>item.IsCollapsed = !item.IsCollapsed"
+                @onclick:stopPropagation>
+                    @(item.IsCollapsed ? "▶" : "◢")
+                </span>
+            }
+            else
+            {
+                <span class="arrow-placeholder"></span>
+            }
+            <span class="text">@item.Text</span>
+        </li>
+        @if(item.HasChildren && item.IsCollapsed)
+        {
+            <Treeview Items="@item.Children" Level="@(Level+1)" OnSelect="ItemSelected">
+
+            </Treeview>
+        }
+    }
+}
+
+
+
+@code {
+    [Parameter]
+    public List<TreeviewItem>? Items { get; set; }
+
+    [Parameter]
+    public int Level { get; set; } = 1;
+
+    [Parameter]
+    public EventCallback<TreeviewItem> OnSelect { get; set; }
+
+    private async Task ItemSelected (TreeviewItem selectedItem)
+    {
+        if (Level == 1)
+            UpdateSelection(Items, selectedItem);
+        await OnSelect.InvokeAsync(selectedItem);
+    }
+    private void UpdateSelection(List<TreeviewItem> items, TreeviewItem selectedItem)
+    {
+        foreach (var item in items)
+        {
+            item.IsSelelected = item == selectedItem;
+            if (item.HasChildren)
+                UpdateSelection(item.Children!,selectedItem);
+        }
+    }
+}

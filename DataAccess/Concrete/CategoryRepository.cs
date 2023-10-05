@@ -13,6 +13,11 @@ namespace DataAccess.Concrete
             _dbContext = dbContext;
         }
 
+        public List<Category> Get(int parentref)
+        {
+            return _dbContext.Categories.Where(x=>x.Parent == parentref).ToList();
+        }
+
         public List<Category> GetAll()
         {
             return _dbContext.Categories.ToList();

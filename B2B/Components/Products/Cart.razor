@@ -1,0 +1,40 @@
+﻿@page "/cart"
+@using Business.Abstract;
+@using Business.Concrete;
+@using Entity;
+@inject IOrderService orderService
+@inject UserManager userService
+@attribute [Authorize]
+@if(baskets != null)
+{
+  <table>
+      <tr>
+          <th>Stok Kodu</th>
+          <th>Stok Adı</th>
+          <th>Miktar</th>
+          <th>Fiyat</th>
+      </tr>
+      @foreach (var item in baskets)
+        {
+            <tr>
+                <td>@item.ProductCode</td>
+                <td>@item.ProductName</td>
+                <td>@item.Amount</td>
+                <td>@item.Price</td>
+            </tr>
+        }
+  </table>
+}
+else
+{
+    <label>Sepet Boş</label>
+}
+
+@code {
+    private List<Basket> baskets { get; set; }
+
+    protected override void OnInitialized()
+    {
+        baskets = orderService.GetAll(userService.User);
+    }
+}

@@ -4,6 +4,8 @@ using B2B.Data;
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
+using Business.Abstract;
+using Business.Concrete;
 using DataAccess.Abstract;
 using DataAccess.Concrete;
 using DataAccess.EFCore;
@@ -41,9 +43,14 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IPriceListRepository, PriceListRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IFirmParamRepository, FirmParamRepository>();
-//back order services
-builder.Services.AddSingleton<FirmParameterService>();
+builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 
+
+//back order services
+builder.Services.AddScoped<IOrderService, OrderManager>();
+
+builder.Services.AddSingleton<FirmParameterService>();
+builder.Services.AddSingleton<UserManager>();
 builder.Services.AddSingleton<IBackOrderProductService, BackOrderProductService>();
 builder.Services.AddSingleton<IBackOrderCategoryService, BackOrderCategoryService>();
 builder.Services.AddSingleton<IBackOrderPriceListService, BackOrderPriceListService>();
@@ -64,7 +71,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
+app.InitializeDatabase();
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();

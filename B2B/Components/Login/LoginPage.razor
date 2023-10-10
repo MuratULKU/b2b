@@ -1,39 +1,43 @@
 ﻿@page "/login/{returnUrl}";
+@using Business.Concrete;
 @using DataAccess.Abstract;
 @inject AuthenticationStateProvider authStateProvider
 @inject NavigationManager navManager
 @inject IJSRuntime js
 @inject IUserRepository userRepository
 @inject IUserRoleRepository userRoleRepository
+@inject UserManager _userManager
 <body>
-  <div class="card">
-            <div class="card-header">
-                Kullanıcı Girişi
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-5">
-                        <span>Kullanıcı Adı</span>
-                    </div>
-                    <div class="col-4">
-                        <input name="UserName" @bind="model.Username"/>
-                    </div>
+    <div class="card">
+        <div class="card-header">
+            Kullanıcı Girişi
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-5">
+                    <span>Kullanıcı Adı</span>
                 </div>
-                <div class="row">
-                    <div class="col-5">
-                        <span>Kullanıcı Şifresi</span>
-                    </div>
-                    <div class="col-4">
-                <input name="Password" @bind="model.Password" />
-                    </div>
+                <div class="col-4">
+                    <input name="UserName" @bind="model.Username" />
                 </div>
             </div>
-            <div class="card-footer">
-                <button class="btn btn-primary text-right h-allign" onclick="@entryClick">Giriş</button>
+            <div class="row">
+                <div class="col-5">
+                    <span>Kullanıcı Şifresi</span>
+                </div>
+                <div class="col-4">
+                    <input name="Password" @bind="model.Password" />
+                </div>
             </div>
         </div>
+        <div class="card-footer">
+            <div class="container-fluid">
+                <button class="btn btn-primary" style="width:200px;" onclick="@entryClick">Giriş</button>
+            </div>
+        </div>
+    </div>
 </body>
-    
+
 
 @code {
     [Parameter]
@@ -69,6 +73,7 @@
                 UserName = model.Username,
                 Role = roles
             });
+        _userManager.User = user;
         navManager.NavigateTo($"/{returnUrl}", true);
     }
 }

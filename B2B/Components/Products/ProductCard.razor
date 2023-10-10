@@ -1,19 +1,25 @@
-﻿<div class="col-md-4 my-3">
+﻿@using Entity;
+<div class="col-md-4 my-3">
     <div class="card" style="witdh:18 rem">
         <img src="..." class="card-img-top" alt="..." />
         <div class="card-body">
-            <h5 class="card-title">@Title</h5>
-            <p class="card-text">@Body</p>
+            <h5 class="card-title">@product.Code</h5>
+            <p class="card-text">@product.Name</p>
             <a href="#" class="btn btn-primary">Urüne Git</a>
+            <a onclick="@AddProduct" class="btn btn-secondary">Ürün Ekle</a>
         </div>
     </div>
 </div>
 
 @code {
-    [Parameter]
-    public string Title { get; set; } = "Set By Child";
+    [CascadingParameter(Name = "Product")]
+    private Product? product{ get; set; }
 
-    [Parameter]
-    public string Body { get; set; } = "Urun Özel";
+    [CascadingParameter] 
+    public ProductsMain? mainparent { get; set; } //üst class referans
 
+    private void AddProduct()
+    {
+        mainparent?.AddOrder(product!);
+    }
 }

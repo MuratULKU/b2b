@@ -1,14 +1,18 @@
 ﻿@page "/products"
 @using B2B.Components.Pagination;
 @using B2B.Data;
+@using Business.Abstract;
+@using Business.Concrete;
 @using DataAccess.Abstract;
 @using DataAccess.Helpers.Product;
 @using Entity;
 @attribute [Authorize]
 
 
-@inject ICategoryRepository _categoriyRepository;
-@inject IProductRepository _productrepository;
+@inject ICategoryRepository _categoriyRepository
+@inject IProductRepository _productrepository
+@inject IOrderService _orderService
+@inject UserManager _userManager
 <div class="container">
     <div class="topbar">
         <div class="icon">
@@ -25,7 +29,9 @@
         <div class="main col-md-9">
             @if (view == 0)
             {
-                <CardGridView Data="(List<Product>)pdata.Results" />
+                <CascadingValue Value="this"> <!--parametre olarak bu class ı gönderiyoruz-->
+                    <CardGridView Data="(List<Product>)pdata.Results" />
+                </CascadingValue>
             }
             else if (view == 1)
             {
@@ -39,6 +45,7 @@
         </div>
     </div>
 </div>
+
 
 @code {
 
@@ -57,7 +64,7 @@
     private void ClickDataView()
     {
         view = 1;
-        
+
     }
 
     private void ChanegedCategory(MenuItemModel model)
@@ -100,7 +107,19 @@
         pdata.Results = _productrepository.GetAll(requestParameter);
     }
 
-
+    //ürün eklendiği zaman sepete ekleme işi burdan yapılacak
+    //child componentden çağrılıyor....
+    public void AddOrder(Product product)
+    {
+        if(product!= null)
+        {
+            _orderService.AddProduct(_userManager.User, product, 1, 1);
+        }
+        else
+        {
+            //notification componenet kullanacağız....
+        }
+    }
 }
 
 

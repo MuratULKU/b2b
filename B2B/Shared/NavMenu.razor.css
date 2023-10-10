@@ -21,7 +21,8 @@
 .nav-item {
     font-size: 0.9rem;
     padding-bottom: 0.5rem;
-}
+    display:inline-block;
+    }
 
     .nav-item:first-of-type {
         padding-top: 1rem;
@@ -35,7 +36,7 @@
         color: #d7d7d7;
         border-radius: 4px;
         height: 3rem;
-        display: flex;
+        display: inline;
         align-items: center;
         line-height: 3rem;
     }
@@ -59,4 +60,13 @@
         /* Never collapse the sidebar for wide screens */
         display: block;
     }
+}
+
+.menu {
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
 }

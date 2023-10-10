@@ -4,36 +4,94 @@
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
+        <B2B.Components.Login.LoginComponent />
     </div>
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
+    <nav>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
+            <NavLink class="nav-link" href="products">
+                <span class="oi oi-plus" aria-hidden="true"></span> Ürünler
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+            <NavLink class="nav-link" href="payment">
+                <span class="oi oi-credit-card" aria-hidden="true"></span> Ödeme
             </NavLink>
         </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="cart">
+                <span class="oi oi-cart" aria-hidden="true"></span> Sepet
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" @onclick="() => TogleSubmenu(NavSubmenu.Second)">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Banka
+            </NavLink>
+            @if (navSubmenu == NavSubmenu.Second)
+            {
+                <div class="menu">
+                    <div class="px-3">
+                        <NavLink class="nav-link darkcolor" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="bank">
+                            <span class="oi oi-plus" aria-hidden="true"></span> Banka Tanımları
+                        </NavLink>
+                    </div>
+                    <div class="px-3">
+                        <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="creditcard">
+                            <span class="oi oi-credit-card" aria-hidden="true"></span> Kredi Kartı Tanımları
+                        </NavLink>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+
+
+
     </nav>
 </div>
 
 @code {
+
+    private enum NavSubmenu
+    {
+        None,
+        First,
+        Second
+    }
+
+    private NavSubmenu navSubmenu = NavSubmenu.None;
+
+    private void ToggleNavMenu(NavSubmenu? submenu = null)
+    {
+        navSubmenu = submenu ?? navSubmenu;
+    }
+
+    private void TogleSubmenu(NavSubmenu submenu)
+    {
+        if (navSubmenu == submenu)
+            navSubmenu = NavSubmenu.None;
+        else
+            navSubmenu = submenu;
+    }
+
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
-        collapseNavMenu = !collapseNavMenu;
+        if(navSubmenu == NavSubmenu.None)
+          collapseNavMenu = !collapseNavMenu;
+
     }
+
+    private bool expandSubNav;
 }

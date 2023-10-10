@@ -32,3 +32,14 @@ span{
 .h-allign{
     align-content:end;
 }
+.nav-item {
+    cursor: pointer;
+    color: white;
+}
+.text-white{
+    color:white;
+}
+.card-footer{
+    text-align:right;
+    padding-right:20px;
+}

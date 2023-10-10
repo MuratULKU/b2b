@@ -1,12 +1,16 @@
 ﻿@using Entity;
 <div class="row my-3">
-@foreach (var item in Data)
-    {
-        <ProductCard Title="@item.Code" Body="@item.Name" />
+    @foreach (var item in Data!)
+    {   
+        <CascadingValue Value="item" Name="Product">
+            <ProductCard />
+        </CascadingValue>
     }
 
 </div>
 @code {
-    [Parameter] public List<Product> Data{ get; set; }
+    [Parameter] public List<Product>? Data { get; set; }
+   
+
 
 }

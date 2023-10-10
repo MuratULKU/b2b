@@ -12,6 +12,15 @@ namespace DataAccess.EFCore
         public DbSet<PriceList> PriceLists { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<FirmParam> FirmParams { get; set; }
+        public DbSet<Basket> Baskets { get; set; }
+        public DbSet<BankCard> BankCards { get; set; }
+        public DbSet<BankParameter> BankParameters { get; set; }
+        public DbSet<CreditCard> CreditCards { get; set; }
+        public DbSet<CreditCardInstallment> CreditCardInstallments { get; set; }
+        public DbSet<CreditCardPrefix> CreditCardPrefixes { get; set; }
+        public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+        public DbSet<VirtualPos> VirtualPos { get; set; }
+        public DbSet<CardBrand> CardBrands { get; set; }
         public RepositoryContext(DbContextOptions<RepositoryContext> options) : base(options)
         {
 

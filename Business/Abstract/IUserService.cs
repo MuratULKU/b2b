@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Business.Abstract
 {
-    public class IUserService
+    public interface IUserService
     {
-        List<UserAcount> GetAllUser();
+        User User { get; set; } 
     }
 }

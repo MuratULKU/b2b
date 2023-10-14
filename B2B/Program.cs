@@ -12,6 +12,7 @@ using DataAccess.EFCore;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
+using SanalMagaza.DataAccess.Concrete;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,18 +40,22 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStat
 //repository services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IPriceListRepository, PriceListRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IFirmParamRepository, FirmParamRepository>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
-
-
+builder.Services.AddScoped<IBankCardRepository, BankCardRepository>();
+builder.Services.AddScoped<IBankCardService,BankCardManager>();
+builder.Services.AddScoped<ICreditCardRepository,CreditCardRepository>();
+builder.Services.AddScoped<IVirtualPosRepository, VirtualPosRepository>();
+builder.Services.AddScoped<IVirtualPosService, VirtualPosManager>();
 //back order services
 builder.Services.AddScoped<IOrderService, OrderManager>();
-
 builder.Services.AddSingleton<FirmParameterService>();
 builder.Services.AddSingleton<UserManager>();
+
 builder.Services.AddSingleton<IBackOrderProductService, BackOrderProductService>();
 builder.Services.AddSingleton<IBackOrderCategoryService, BackOrderCategoryService>();
 builder.Services.AddSingleton<IBackOrderPriceListService, BackOrderPriceListService>();

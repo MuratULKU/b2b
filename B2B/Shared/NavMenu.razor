@@ -31,10 +31,10 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="() => TogleSubmenu(NavSubmenu.Second)">
+            <NavLink class="nav-link" @onclick="() => TogleSubmenu(NavSubmenu.First)">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Banka
             </NavLink>
-            @if (navSubmenu == NavSubmenu.Second)
+            @if (navSubmenu == NavSubmenu.First)
             {
                 <div class="menu">
                     <div class="px-3">
@@ -47,11 +47,37 @@
                             <span class="oi oi-credit-card" aria-hidden="true"></span> Kredi Kartı Tanımları
                         </NavLink>
                     </div>
+                    <div class="px-3">
+                        <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="virtualpos">
+                            <span class="oi oi-credit-card" aria-hidden="true"></span>Sanal Pos Tanımları
+                        </NavLink>
+                    </div>
                 </div>
             }
 
         </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" @onclick="() => TogleSubmenu(NavSubmenu.Second)">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Yönetim
+            </NavLink>
+            @if (navSubmenu == NavSubmenu.Second)
+            {
+                <div class="menu">
+                    <div class="px-3">
+                        <NavLink class="nav-link darkcolor" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="userlist">
+                            <span class="oi oi-plus" aria-hidden="true"></span> Kullanıcı Tanımları
+                        </NavLink>
+                    </div>
+                    <div class="px-3">
+                        <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="creditcard">
+                            <span class="oi oi-credit-card" aria-hidden="true"></span> Firma Parametreleri
+                        </NavLink>
+                    </div>
+                    
+                </div>
+            }
 
+        </div>
 
 
 

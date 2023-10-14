@@ -284,10 +284,7 @@ namespace B2B.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BankCardId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("BankCardId1")
+                    b.Property<Guid>("BankCardId")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Business")
@@ -299,10 +296,7 @@ namespace B2B.Migrations
                     b.Property<Guid>("CreateUser")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("CreditCardId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("CreditCardId1")
+                    b.Property<Guid>("CreditCardId")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Deleted")
@@ -322,9 +316,9 @@ namespace B2B.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BankCardId1");
+                    b.HasIndex("BankCardId");
 
-                    b.HasIndex("CreditCardId1");
+                    b.HasIndex("CreditCardId");
 
                     b.ToTable("CreditCardInstallments");
                 });
@@ -440,13 +434,13 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("75b6a30a-d653-49e2-acb4-d66885ffa221"),
-                            CreateDate = new DateTime(2023, 10, 10, 18, 40, 21, 21, DateTimeKind.Local).AddTicks(1752),
-                            CreateUser = new Guid("a5b54d1f-516f-488f-b6e4-50ae90ead0d0"),
+                            Id = new Guid("b8cd39f9-c5ba-499b-8713-8f596dfa6cfa"),
+                            CreateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1261),
+                            CreateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
                             FirmId = 1,
                             SyncMinute = 60,
-                            UpdateDate = new DateTime(2023, 10, 10, 18, 40, 21, 21, DateTimeKind.Local).AddTicks(1753),
-                            UpdateUser = new Guid("a5b54d1f-516f-488f-b6e4-50ae90ead0d0")
+                            UpdateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1262),
+                            UpdateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107")
                         });
                 });
 
@@ -698,21 +692,21 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("f0373dc4-cf0c-4935-9088-e43223267c7b"),
-                            CreateDate = new DateTime(2023, 10, 10, 18, 40, 21, 21, DateTimeKind.Local).AddTicks(1611),
-                            CreateUser = new Guid("a5b54d1f-516f-488f-b6e4-50ae90ead0d0"),
+                            Id = new Guid("9dbe0af9-8daf-475e-832c-297d2a92903b"),
+                            CreateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1162),
+                            CreateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
                             RoleName = "Admin",
-                            UpdateDate = new DateTime(2023, 10, 10, 18, 40, 21, 21, DateTimeKind.Local).AddTicks(1625),
-                            UpdateUser = new Guid("a5b54d1f-516f-488f-b6e4-50ae90ead0d0")
+                            UpdateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1173),
+                            UpdateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107")
                         },
                         new
                         {
-                            Id = new Guid("32bd2994-955f-4595-a3ce-0a4219c8c41a"),
-                            CreateDate = new DateTime(2023, 10, 10, 18, 40, 21, 21, DateTimeKind.Local).AddTicks(1646),
-                            CreateUser = new Guid("a5b54d1f-516f-488f-b6e4-50ae90ead0d0"),
+                            Id = new Guid("21550ee8-fc26-4a86-b624-5121887a91a1"),
+                            CreateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1193),
+                            CreateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
                             RoleName = "User",
-                            UpdateDate = new DateTime(2023, 10, 10, 18, 40, 21, 21, DateTimeKind.Local).AddTicks(1647),
-                            UpdateUser = new Guid("a5b54d1f-516f-488f-b6e4-50ae90ead0d0")
+                            UpdateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1193),
+                            UpdateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107")
                         });
                 });
 
@@ -753,13 +747,13 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("a5b54d1f-516f-488f-b6e4-50ae90ead0d0"),
-                            CreateDate = new DateTime(2023, 10, 10, 18, 40, 21, 21, DateTimeKind.Local).AddTicks(1697),
-                            CreateUser = new Guid("a5b54d1f-516f-488f-b6e4-50ae90ead0d0"),
+                            Id = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
+                            CreateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1227),
+                            CreateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
                             Email = "murat@ulkubilgisayar.com",
                             Password = "Admin",
-                            UpdateDate = new DateTime(2023, 10, 10, 18, 40, 21, 21, DateTimeKind.Local).AddTicks(1698),
-                            UpdateUser = new Guid("a5b54d1f-516f-488f-b6e4-50ae90ead0d0"),
+                            UpdateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1227),
+                            UpdateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
                             Username = "Admin"
                         });
                 });
@@ -772,6 +766,21 @@ namespace B2B.Migrations
                     b.Property<Guid>("RoleId")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
@@ -781,8 +790,13 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("a5b54d1f-516f-488f-b6e4-50ae90ead0d0"),
-                            RoleId = new Guid("f0373dc4-cf0c-4935-9088-e43223267c7b")
+                            UserId = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
+                            RoleId = new Guid("9dbe0af9-8daf-475e-832c-297d2a92903b"),
+                            CreateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1244),
+                            CreateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
+                            Id = new Guid("ce5a325e-e991-4138-a82a-268729547305"),
+                            UpdateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1244),
+                            UpdateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107")
                         });
                 });
 
@@ -796,10 +810,7 @@ namespace B2B.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("BankCardId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("BankCardId1")
+                    b.Property<Guid>("BankCardId")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("CardBrands")
@@ -823,7 +834,7 @@ namespace B2B.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BankCardId1");
+                    b.HasIndex("BankCardId");
 
                     b.ToTable("VirtualPos");
                 });
@@ -854,13 +865,13 @@ namespace B2B.Migrations
                 {
                     b.HasOne("Entity.BankCard", "BankCard")
                         .WithMany("Installments")
-                        .HasForeignKey("BankCardId1")
+                        .HasForeignKey("BankCardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entity.CreditCard", "CreditCard")
                         .WithMany("Installments")
-                        .HasForeignKey("CreditCardId1")
+                        .HasForeignKey("CreditCardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -912,7 +923,7 @@ namespace B2B.Migrations
                 {
                     b.HasOne("Entity.BankCard", "BankCard")
                         .WithMany("VirtualPos")
-                        .HasForeignKey("BankCardId1")
+                        .HasForeignKey("BankCardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

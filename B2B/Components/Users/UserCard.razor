@@ -1,0 +1,96 @@
+﻿@page "/user"
+@page "/user/{id:guid}"
+@using B2B.Components.SelectList
+@using Business.Abstract;
+@using Business.Concrete;
+@using DataAccess.Abstract;
+@using Entity;
+@inject IUserRepository userReposiyory
+@inject IRoleRepository roleRepository
+@inject IUserRoleRepository userRoleRepository
+@inject UserManager userManager;
+@inject NavigationManager navManager;
+<div class="container">
+    <div class="usercard">
+        <div class="col-5">
+            <label>Kullanıcı Adı</label>
+        </div>
+        <div class="col-7">
+            <input class="form-control" @bind-value="user.Username"/>
+        </div>
+        <div class="col-5">
+            <label>Kullanıcı Maili</label>
+        </div>
+        <div class="col-7">
+            <input class="form-control" @bind-value="user.Email" />
+        </div>
+        <div class="col-5">
+            <label>Kullanıcı Şifresi</label>
+        </div>
+        <div class="col-7">
+            <input class="form-control" @bind-value="user.Password"/>
+        </div>
+        <div class="col-5">
+            <label>Kullanıcı Rolü</label>
+        </div>
+        <div class="col-7">
+            <SelectList TItem="Role" Items="userRole" Selected="@selectedRole.ToString()" DisplayField="RoleName" ValueField="Id" SelectedChanged="(e)=>selectedRole = new Guid(e)" />
+        </div>
+    </div>
+    <div class="col-5 my-3"></div>
+    <div class="col-7 align-items-center">
+        <button class="btn btn-danger" style="width:180px;" @onclick="Back">Kullanıcı Listesi</button>
+        <button class="btn btn-primary" style="width:130px;" @onclick="Save">Kaydet</button>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public Guid id { get; set; }
+    private User user;
+    private Guid selectedRole;
+    private List<Role> userRole;
+    protected async override void OnInitialized()
+    {
+        user = await userReposiyory.GetUser(id);
+        if (user == null)
+            user = new();
+        userRole = roleRepository.GetAllRole();
+        if (id == Guid.Empty)
+            selectedRole = userRole.FirstOrDefault().Id;
+        else
+            selectedRole = user.UsersRoles.FirstOrDefault().Id; 
+
+    }
+
+    private void Save()
+    {
+        if(id == Guid.Empty)
+        {
+            user.Id = Guid.NewGuid();
+            user.CreateDate = DateTime.Now;
+            user.UpdateDate = DateTime.Now;
+            user.CreateUser = userManager.User.Id;
+            user.UpdateUser = userManager.User.Id;
+            UserRole userRole = new();
+            userRole.RoleId = selectedRole;
+            userRole.UserId = user.Id;
+            userReposiyory.AddUser(user);
+            userRoleRepository.AddRole(userRole);
+        }
+        else
+        {
+            user.UpdateDate = DateTime.Now;
+            user.UpdateUser = userManager.User.Id;
+            userReposiyory.UpdateUser(user);
+            UserRole userrole = user.UsersRoles.FirstOrDefault();
+            userrole.RoleId = selectedRole;
+            userRoleRepository.UpdateRole(userrole);
+        }
+
+        navManager.NavigateTo("/userlist");
+    }
+    private void Back()
+    {
+        navManager.NavigateTo("/userlist");
+    }
+}

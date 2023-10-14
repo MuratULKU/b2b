@@ -2,13 +2,13 @@
 
 namespace Entity
 {
-    public class BaseEntity
+    public abstract class BaseEntity
     {
         [Key]
-        public Guid Id { get; set; }
-        public DateTime CreateDate { get; set; } = DateTime.Now;
-        public DateTime UpdateDate { get; set; } = DateTime.Now;
-        public Guid CreateUser { get; set; }
-        public Guid UpdateUser { get; set; }
+        public virtual Guid Id { get; set; }
+        public virtual DateTime CreateDate { get; set; } = DateTime.Now;
+        public virtual DateTime UpdateDate { get; set; } = DateTime.Now;
+        public virtual Guid CreateUser { get; set; }
+        public virtual Guid UpdateUser { get; set; }
     }
 }

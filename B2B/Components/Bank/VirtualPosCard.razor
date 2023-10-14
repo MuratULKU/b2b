@@ -1,0 +1,77 @@
+﻿@page "/virtualposcard/"
+@page "/virtualposcard/{selectedBankGuid}"
+@using B2B.Components.SelectList
+@using B2B.Data;
+@using Business.Abstract;
+@using Business.Concrete;
+@using DataAccess.Abstract;
+@using Entity;
+
+@inject IBankCardRepository bankCardRepository;
+@inject IVirtualPosService virtualPosService;
+@inject FirmParameterService param;
+@inject UserManager userManager;
+@if (selectedBankGuid != Guid.Empty)
+{
+    SelectBankCard(selectedBankGuid);
+}
+<div class="container">
+    
+    <div class="col-6">
+        <div class="col-4">
+            <label>Sanal Pos Adı</label>
+        </div>
+        <div class="col-8">
+            <input class="form-control" id="sanalpos" @bind-value="virtualPos.Name"/>
+        </div>
+        <div class="col-4">
+            <label>Banka Adı</label>
+        </div>
+        <div class="col-8">
+            <SelectList TItem="BankCard" Items="bankCardList" DisplayField="Name" ValueField="Id" SelectedChanged="(e)=>virtualPos.BankCardId = new Guid(e)"></SelectList>
+        </div>
+        <div class="col-4">
+            <label>Muhasebe Kodu</label>
+        </div>
+        <div class="col-8">
+            <input class="form-control" id="sanalmuhasebekodu" @bind-value="virtualPos.AccountCode"/>
+        </div>
+        <div class="col-4">
+
+        </div>
+        <div class="col-8 py-3">
+            <button class="btn btn-danger" style="width:130px;">Sil</button>
+            <button class="btn btn-primary" style="width:130px;" onclick="@Save">Kaydet</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<BankCard> bankCardList { get; set; }
+    [Parameter]
+    public Guid selectedBankGuid { get; set; }
+    private VirtualPos virtualPos { get; set; } = new();
+
+    private BankCard selectedBankCard { get; set; }
+
+    protected override void OnInitialized()
+    {
+        bankCardList = bankCardRepository.GetAllBank();
+    }
+
+    private void SelectBankCard(Guid selectedbank)
+    {
+        selectedBankCard = bankCardRepository.GetBank(selectedbank).Result;
+
+    }
+
+    private void Save()
+    {
+
+        virtualPos.CreateUser = userManager.User.Id;
+        virtualPos.UpdateUser = userManager.User.Id;
+        virtualPos.CreateDate = DateTime.Now;
+        virtualPos.UpdateDate = DateTime.Now;
+        virtualPosService.CreateVirtualPos(virtualPos);
+    }
+}

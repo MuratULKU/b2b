@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using DataAccess.Abstract;
 using Entity;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,6 @@ namespace Business.Concrete
     public class UserManager : IUserService
     {
         public User User { get; set; }
+
     }
 }

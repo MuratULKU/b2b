@@ -1,5 +1,76 @@
 ﻿@page "/creditcard"
+@using DataAccess.Abstract;
+@using Entity;
+@inject ICreditCardRepository creditCardRepository;
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <DataGrid @ref="dataGridRef"
+                      TItem="CreditCard"
+                      Data="@creditCardList"
+            @bind-SelectedRow="selectCreditCard"
+                                Editable
+                                Responsive
+                                ShowPager
+                      CommandMode="DataGridCommandMode.ButtonRow"
+                      PageSize="10">
+
+                <DataGridColumns>
+                    <DataGridCommandColumn />
+                    <DataGridColumn Width="350px;" Field="@nameof(CreditCard.Bank.Name)" Caption="Banka Adı">
+                        <DisplayTemplate>
+                            @{
+                                var name = (context as CreditCard).Bank?.Name;
+                                @name
+                            }
+                        </DisplayTemplate>
+                    </DataGridColumn>
+
+                    <DataGridColumn Field="@nameof(CreditCard.Name)" Caption="Kredi Kartı" Sortable="true" />
+
+                </DataGridColumns>
+
+            </DataGrid>
+
+        </div>
+        <div class="col-6">
+            @if (selectCreditCard != null && selectCreditCard.Installments != null)
+            {
+                <DataGrid 
+                TItem="CreditCardInstallment"
+                Data="@selectCreditCard.Installments"
+                @bind-SelectedRow="selectedInstallment"
+
+                Editable
+
+                Responsive
+
+                ShowPager
+                CommandMode="DataGridCommandMode.ButtonRow"
+                      PageSize="10">
+
+                <DataGridColumns>
+                    <DataGridCommandColumn />
+                    <DataGridColumn Field="@nameof(selectedInstallment.Installment)" Caption="Banka Adı"/>
+
+                    <DataGridColumn Field="@nameof(CreditCard.Name)" Caption="Kredi Kartı" Sortable="true" />
+
+                </DataGridColumns>
+
+            </DataGrid>
+            }
+        </div>
+    </div>
+</div>
 
 @code {
+    private DataGrid<CreditCard> dataGridRef;
+    private List<CreditCard> creditCardList;
+    private CreditCard selectCreditCard;
+    private CreditCardInstallment selectedInstallment;
 
+    protected override void OnInitialized()
+    {
+        creditCardList = creditCardRepository.GetAll();
+    }
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace B2B.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class init1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -246,14 +246,13 @@ namespace B2B.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    BankCardId = table.Column<int>(type: "INTEGER", nullable: false),
+                    BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Active = table.Column<bool>(type: "INTEGER", nullable: false),
                     ManufacturerCard = table.Column<bool>(type: "INTEGER", nullable: false),
                     CampaignCard = table.Column<bool>(type: "INTEGER", nullable: false),
                     Deleted = table.Column<bool>(type: "INTEGER", nullable: false),
                     BrandCode = table.Column<int>(type: "INTEGER", nullable: false),
-                    BankId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -263,8 +262,8 @@ namespace B2B.Migrations
                 {
                     table.PrimaryKey("PK_CreditCards", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CreditCards_BankCards_BankId",
-                        column: x => x.BankId,
+                        name: "FK_CreditCards_BankCards_BankCardId",
+                        column: x => x.BankCardId,
                         principalTable: "BankCards",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -317,9 +316,8 @@ namespace B2B.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    BankCardId = table.Column<int>(type: "INTEGER", nullable: false),
+                    BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    BankCardId1 = table.Column<Guid>(type: "TEXT", nullable: false),
                     AccountCode = table.Column<string>(type: "TEXT", nullable: false),
                     CardBrands = table.Column<int>(type: "INTEGER", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -331,8 +329,8 @@ namespace B2B.Migrations
                 {
                     table.PrimaryKey("PK_VirtualPos", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_VirtualPos_BankCards_BankCardId1",
-                        column: x => x.BankCardId1,
+                        name: "FK_VirtualPos_BankCards_BankCardId",
+                        column: x => x.BankCardId,
                         principalTable: "BankCards",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -343,7 +341,12 @@ namespace B2B.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    RoleId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    RoleId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UpdateUser = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -367,15 +370,13 @@ namespace B2B.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CreditCardId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreditCardId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Installment = table.Column<int>(type: "INTEGER", nullable: false),
                     InstallmentRate = table.Column<decimal>(type: "TEXT", nullable: false),
                     Active = table.Column<bool>(type: "INTEGER", nullable: false),
                     Deleted = table.Column<bool>(type: "INTEGER", nullable: false),
-                    BankCardId = table.Column<int>(type: "INTEGER", nullable: false),
+                    BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Business = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreditCardId1 = table.Column<Guid>(type: "TEXT", nullable: false),
-                    BankCardId1 = table.Column<Guid>(type: "TEXT", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -385,14 +386,14 @@ namespace B2B.Migrations
                 {
                     table.PrimaryKey("PK_CreditCardInstallments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CreditCardInstallments_BankCards_BankCardId1",
-                        column: x => x.BankCardId1,
+                        name: "FK_CreditCardInstallments_BankCards_BankCardId",
+                        column: x => x.BankCardId,
                         principalTable: "BankCards",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CreditCardInstallments_CreditCards_CreditCardId1",
-                        column: x => x.CreditCardId1,
+                        name: "FK_CreditCardInstallments_CreditCards_CreditCardId",
+                        column: x => x.CreditCardId,
                         principalTable: "CreditCards",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -403,7 +404,7 @@ namespace B2B.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CreditCardId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreditCardId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Prefix = table.Column<string>(type: "TEXT", nullable: false),
                     BankCode = table.Column<int>(type: "INTEGER", nullable: false),
                     BrandCode = table.Column<int>(type: "INTEGER", nullable: false),
@@ -411,7 +412,6 @@ namespace B2B.Migrations
                     Active = table.Column<bool>(type: "INTEGER", nullable: false),
                     Deleted = table.Column<bool>(type: "INTEGER", nullable: false),
                     isInstallment = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreditCardId1 = table.Column<Guid>(type: "TEXT", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -421,35 +421,36 @@ namespace B2B.Migrations
                 {
                     table.PrimaryKey("PK_CreditCardPrefixes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CreditCardPrefixes_CreditCards_CreditCardId1",
-                        column: x => x.CreditCardId1,
+                        name: "FK_CreditCardPrefixes_CreditCards_CreditCardId",
+                        column: x => x.CreditCardId,
                         principalTable: "CreditCards",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
                 table: "FirmParams",
                 columns: new[] { "Id", "Address1", "Address2", "City", "Country", "CreateDate", "CreateUser", "FirmId", "FirmName", "LastSync", "MailAddress", "Phone1", "Phone2", "SyncMinute", "Town", "UpdateDate", "UpdateUser" },
-                values: new object[] { new Guid("141e24ac-fe65-410d-8096-ba2d095676bb"), null, null, null, null, new DateTime(2023, 10, 10, 18, 17, 59, 921, DateTimeKind.Local).AddTicks(5337), new Guid("56f5576b-f209-4a40-b305-0b44580a6f3e"), 1, null, null, null, null, null, 60, null, new DateTime(2023, 10, 10, 18, 17, 59, 921, DateTimeKind.Local).AddTicks(5337), new Guid("56f5576b-f209-4a40-b305-0b44580a6f3e") });
+                values: new object[] { new Guid("b8cd39f9-c5ba-499b-8713-8f596dfa6cfa"), null, null, null, null, new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1261), new Guid("92e7385b-0384-494b-a242-30145b26c107"), 1, null, null, null, null, null, 60, null, new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1262), new Guid("92e7385b-0384-494b-a242-30145b26c107") });
 
             migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "Id", "CreateDate", "CreateUser", "RoleName", "UpdateDate", "UpdateUser" },
                 values: new object[,]
                 {
-                    { new Guid("d87f6657-2979-4e8c-9f66-bee8e985696a"), new DateTime(2023, 10, 10, 18, 17, 59, 921, DateTimeKind.Local).AddTicks(5271), new Guid("56f5576b-f209-4a40-b305-0b44580a6f3e"), "User", new DateTime(2023, 10, 10, 18, 17, 59, 921, DateTimeKind.Local).AddTicks(5272), new Guid("56f5576b-f209-4a40-b305-0b44580a6f3e") },
-                    { new Guid("d90f5099-a426-4433-a19b-4c214d6fdd78"), new DateTime(2023, 10, 10, 18, 17, 59, 921, DateTimeKind.Local).AddTicks(5247), new Guid("56f5576b-f209-4a40-b305-0b44580a6f3e"), "Admin", new DateTime(2023, 10, 10, 18, 17, 59, 921, DateTimeKind.Local).AddTicks(5255), new Guid("56f5576b-f209-4a40-b305-0b44580a6f3e") }
+                    { new Guid("21550ee8-fc26-4a86-b624-5121887a91a1"), new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1193), new Guid("92e7385b-0384-494b-a242-30145b26c107"), "User", new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1193), new Guid("92e7385b-0384-494b-a242-30145b26c107") },
+                    { new Guid("9dbe0af9-8daf-475e-832c-297d2a92903b"), new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1162), new Guid("92e7385b-0384-494b-a242-30145b26c107"), "Admin", new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1173), new Guid("92e7385b-0384-494b-a242-30145b26c107") }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "CreateDate", "CreateUser", "Email", "Password", "UpdateDate", "UpdateUser", "Username" },
-                values: new object[] { new Guid("56f5576b-f209-4a40-b305-0b44580a6f3e"), new DateTime(2023, 10, 10, 18, 17, 59, 921, DateTimeKind.Local).AddTicks(5303), new Guid("56f5576b-f209-4a40-b305-0b44580a6f3e"), "murat@ulkubilgisayar.com", "Admin", new DateTime(2023, 10, 10, 18, 17, 59, 921, DateTimeKind.Local).AddTicks(5304), new Guid("56f5576b-f209-4a40-b305-0b44580a6f3e"), "Admin" });
+                values: new object[] { new Guid("92e7385b-0384-494b-a242-30145b26c107"), new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1227), new Guid("92e7385b-0384-494b-a242-30145b26c107"), "murat@ulkubilgisayar.com", "Admin", new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1227), new Guid("92e7385b-0384-494b-a242-30145b26c107"), "Admin" });
 
             migrationBuilder.InsertData(
                 table: "UserRoles",
-                columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("d90f5099-a426-4433-a19b-4c214d6fdd78"), new Guid("56f5576b-f209-4a40-b305-0b44580a6f3e") });
+                columns: new[] { "RoleId", "UserId", "CreateDate", "CreateUser", "Id", "UpdateDate", "UpdateUser" },
+                values: new object[] { new Guid("9dbe0af9-8daf-475e-832c-297d2a92903b"), new Guid("92e7385b-0384-494b-a242-30145b26c107"), new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1244), new Guid("92e7385b-0384-494b-a242-30145b26c107"), new Guid("ce5a325e-e991-4138-a82a-268729547305"), new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1244), new Guid("92e7385b-0384-494b-a242-30145b26c107") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_BankParameters_BankId",
@@ -457,24 +458,24 @@ namespace B2B.Migrations
                 column: "BankId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CreditCardInstallments_BankCardId1",
+                name: "IX_CreditCardInstallments_BankCardId",
                 table: "CreditCardInstallments",
-                column: "BankCardId1");
+                column: "BankCardId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CreditCardInstallments_CreditCardId1",
+                name: "IX_CreditCardInstallments_CreditCardId",
                 table: "CreditCardInstallments",
-                column: "CreditCardId1");
+                column: "CreditCardId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CreditCardPrefixes_CreditCardId1",
+                name: "IX_CreditCardPrefixes_CreditCardId",
                 table: "CreditCardPrefixes",
-                column: "CreditCardId1");
+                column: "CreditCardId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CreditCards_BankId",
+                name: "IX_CreditCards_BankCardId",
                 table: "CreditCards",
-                column: "BankId");
+                column: "BankCardId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentTransactions_BankId",
@@ -487,9 +488,9 @@ namespace B2B.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_VirtualPos_BankCardId1",
+                name: "IX_VirtualPos_BankCardId",
                 table: "VirtualPos",
-                column: "BankCardId1");
+                column: "BankCardId");
         }
 
         /// <inheritdoc />

@@ -1,5 +1,57 @@
 ﻿@page "/bank"
+@using Business.Abstract;
+@using Entity;
+
+<DataGrid @ref="dataGridRef"
+          TItem="BankCard"
+          Data="@bankCardList"
+          @bind-SelectedRow="selectBankCard"
+          Editable
+          Responsive
+          ShowPager
+          CommandMode="DataGridCommandMode.ButtonRow"
+          PageSize="10">
+
+    <DataGridColumns>
+        <DataGridCommandColumn />
+
+        <DataGridColumn Field="@nameof(BankCard.BankCode)" Caption="Banka Kodu" Sortable="true" />
+        <DataGridColumn Field="@nameof(BankCard.Name)" Caption="Banka Adı" Sortable="true" Editable />
+
+    </DataGridColumns>
+
+</DataGrid>
 
 @code {
+    [Inject]
+    IBankCardService bankCardService { get; set; }
 
+
+    private List<BankCard> bankCardList;
+    private DataGrid<BankCard> dataGridRef;
+    private BankCard bankCard;
+
+    private BankCard selectBankCard
+    {
+        get
+        {
+            if (bankCard == null)
+            {
+                bankCard = new BankCard();
+            }
+            return bankCard;
+        }
+        set
+        {
+            bankCard = value;
+        }
+    }
+
+
+    protected override Task OnInitializedAsync()
+    {
+        bankCardList = bankCardService.GetAllBank();
+
+        return base.OnInitializedAsync();
+    }
 }

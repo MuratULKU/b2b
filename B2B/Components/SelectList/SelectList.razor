@@ -1,26 +1,31 @@
-﻿@typeparam TItem
-@foreach (var item in Items)
-{
-    <label for="1">@ItemTeplate(item)</label>
-    <input type="checkbox" id="1" @onchange="()=>onChange(item)"/>
-}
-@code {
-    [Parameter]
-    public IEnumerable<TItem> Items { get; set; }
+﻿@using System.Linq.Expressions;
+@typeparam TItem
 
-    [Parameter]
-    public RenderFragment<TItem> ItemTeplate { get; set; }
-
-    [Parameter]
-    public List<TItem> SelectedItems { get; set; }
-
-    [Parameter]
-    public EventCallback<List<TItem>> SelectedItemsChanged{ get; set; }
-
-    private void onChange(TItem item)
+<select class="form-select" value="@Selected" @onchange="Update">
+    @foreach (var item in Items)
     {
-        SelectedItems.Add(item);
-        SelectedItemsChanged.InvokeAsync(SelectedItems);
+        <option value="@Text(item,ValueField)">@Text(item,DisplayField)</option>
+    }
+</select>
+
+@code {
+
+    [Parameter, EditorRequired] public List<TItem> Items { get; set; }
+
+    [Parameter] public string Selected { get; set; }
+    [Parameter, EditorRequired] public string DisplayField { get; set; }
+    [Parameter, EditorRequired] public string ValueField { get; set; }
+
+    [Parameter] public EventCallback<string> SelectedChanged { get; set; }
+
+    private async Task Update(ChangeEventArgs e)
+    {
+        await SelectedChanged.InvokeAsync((string)e.Value); 
     }
 
+    private string Text(TItem item,string columnName)
+    {
+        return item.GetType().GetProperty(columnName)
+        .GetValue(item,null).ToString();
+    }
 }

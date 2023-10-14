@@ -1,0 +1,78 @@
+﻿@page "/virtualpos"
+@using B2B.Components.Confirm
+@using Business.Abstract;
+@using DataAccess.Abstract;
+@using Entity;
+@inject IVirtualPosRepository virtualPosRepository;
+@inject NavigationManager navManager;
+
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <DataGrid @ref="dataGridRef"
+                      TItem="VirtualPos"
+                      Data="@virtualPosList"
+            @bind-SelectedRow="selectVirtualPos"
+                                Editable
+                                Responsive
+                                ShowPager
+                      CommandMode="DataGridCommandMode.ButtonRow">
+
+                <DataGridColumns>
+                    <DataGridCommandColumn />
+
+                    <DataGridColumn Field="@nameof(VirtualPos.Id)" Caption="Banka Kodu" Sortable="true" />
+                    <DataGridColumn Field="@nameof(VirtualPos.Name)" Caption="Banka Adı" Sortable="true" />
+                    <DataGridColumn Field="@nameof(VirtualPos.AccountCode)" Caption="Muhasebe Kodu"  />
+
+                </DataGridColumns>
+                <ButtonRowTemplate>
+
+                    <Button Color="Blazorise.Color.Success" Clicked="@(()=>navManager.NavigateTo("/virtualposcard"))">Yeni</Button>
+                    <Button Color="Blazorise.Color.Primary" Clicked="@(()=>navManager.NavigateTo("/virtualposcard"))">Değiştir</Button>
+                    <Button Color="Blazorise.Color.Danger" Clicked="deletePos">Sil</Button>
+                   
+
+                </ButtonRowTemplate>
+            </DataGrid>
+
+        </div>
+        <div class="col-6">
+            <div class="row">
+                kredi kartı tanımları
+            </div>
+            <div class="row">
+                taksit tanımları
+            </div>
+        </div>
+    </div>
+</div>
+
+<Confirm BodyText="Kayıt Silinecek Onaylıyormusunuz." ConfirmationChanged="ConfirmDeleteClick"></Confirm>
+@code {
+    private DataGrid<VirtualPos> dataGridRef;
+    private List<VirtualPos> virtualPosList;
+    private VirtualPos selectVirtualPos;
+
+
+    
+    private void deletePos()
+    {
+        //DeleteConfirmation.Show();
+    }
+
+    protected async Task ConfirmDeleteClick(bool deletedConfirm)
+    {
+        if (deletedConfirm)
+        {
+            virtualPosRepository.Delete(selectVirtualPos);
+            virtualPosList = virtualPosRepository.GetAll();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+
+        virtualPosList = virtualPosRepository.GetAll();
+    }
+}

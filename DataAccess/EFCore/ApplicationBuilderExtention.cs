@@ -44,6 +44,14 @@ namespace DataAccess.EFCore
                 dataContext.CardBrands.Add(new CardBrand
                 {
                     Id = Guid.NewGuid(),
+                    Code = 0,
+                    Name = "Standart",
+                    CreateDate = DateTime.Now,
+                    UpdateDate = DateTime.Now
+                });
+                dataContext.CardBrands.Add(new CardBrand
+                {
+                    Id = Guid.NewGuid(),
                     Code = 2,
                     Name = "Axess",
                     CreateDate = DateTime.Now,
@@ -78,6 +86,22 @@ namespace DataAccess.EFCore
                     Id = Guid.NewGuid(),
                     Code = 6,
                     Name = "Maximum",
+                    CreateDate = DateTime.Now,
+                    UpdateDate = DateTime.Now
+                });
+                dataContext.CardBrands.Add(new CardBrand
+                {
+                    Id = Guid.NewGuid(),
+                    Code = 7,
+                    Name = "Miles&Smiles",
+                    CreateDate = DateTime.Now,
+                    UpdateDate = DateTime.Now
+                });
+                dataContext.CardBrands.Add(new CardBrand
+                {
+                    Id = Guid.NewGuid(),
+                    Code = 9,
+                    Name = "Sağlam Kart",
                     CreateDate = DateTime.Now,
                     UpdateDate = DateTime.Now
                 });
@@ -142,6 +166,14 @@ namespace DataAccess.EFCore
                     Id = Guid.NewGuid(),
                     Code = 17,
                     Name = "Neo",
+                    CreateDate = DateTime.Now,
+                    UpdateDate = DateTime.Now
+                });
+                dataContext.CardBrands.Add(new CardBrand
+                {
+                    Id = Guid.NewGuid(),
+                    Code = 18,
+                    Name = "Tosla",
                     CreateDate = DateTime.Now,
                     UpdateDate = DateTime.Now
                 });
@@ -211,7 +243,8 @@ namespace DataAccess.EFCore
                                 Deleted = false,
                                 CreateDate = DateTime.Now,
                                 UpdateDate = DateTime.Now,
-                                BrandCode = Convert.ToInt32(item.brand)
+                                BrandCode = Convert.ToInt32(item.brand),
+                                CardBrandId = dataContext.CardBrands.FirstOrDefault(x => x.Code == Convert.ToInt32(item.brand)).Id
 
                             }).Entity;
                             dataContext.SaveChanges();

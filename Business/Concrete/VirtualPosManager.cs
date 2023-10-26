@@ -36,14 +36,14 @@ namespace Business.Concrete
             throw new NotImplementedException();
         }
 
-        public Task<VirtualPos> GetVirtualPosAsync(Guid virtualPosId)
+        public async Task<VirtualPos> GetVirtualPosAsync(Guid virtualPosId)
         {
-            throw new NotImplementedException();
+            return _virtualPosRepository.Get(virtualPosId);
         }
 
         public VirtualPos UpdateVirtualPos(VirtualPos virtualPos)
         {
-            throw new NotImplementedException();
+            return _virtualPosRepository.Update(virtualPos);
         }
     }
 }

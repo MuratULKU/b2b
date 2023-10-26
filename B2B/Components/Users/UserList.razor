@@ -24,7 +24,7 @@
     <ButtonRowTemplate>
         <Button Color="Color.Success" Clicked="@(()=>navManager.NavigateTo("/user"))">Yeni</Button>
         <Button Color="Color.Primary" Disabled="(selectedUser is null)" Clicked="@(()=>navManager.NavigateTo($"/user/{selectedUser.Id}"))">Değiştir</Button>
-        <Button Color="Color.Danger" Disabled="(selectedUser is null)" Clicked="context.DeleteCommand.Clicked">Sil</Button>
+        <Button Color="Color.Danger" Disabled="(selectedUser is null)" Clicked="@(()=>{userAccount.DeleteUser(selectedUser);userList = userAccount.GetAllUser();})">Sil</Button>
     </ButtonRowTemplate>
 </DataGrid>
 @code {

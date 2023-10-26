@@ -1,61 +1,106 @@
 ﻿@page "/virtualpos"
 @using B2B.Components.Confirm
 @using Business.Abstract;
+@using Business.Concrete;
 @using DataAccess.Abstract;
 @using Entity;
-@inject IVirtualPosRepository virtualPosRepository;
-@inject NavigationManager navManager;
+@inject IVirtualPosRepository virtualPosRepository
+@inject NavigationManager navManager
+@inject UserManager userManager
+@inject ICreditCardInstallmentService creditCardInstallmentManager
 
 <div class="container">
     <div class="row">
         <div class="col-6">
-            <DataGrid @ref="dataGridRef"
-                      TItem="VirtualPos"
-                      Data="@virtualPosList"
-            @bind-SelectedRow="selectVirtualPos"
-                                Editable
-                                Responsive
-                                ShowPager
-                      CommandMode="DataGridCommandMode.ButtonRow">
-
-                <DataGridColumns>
-                    <DataGridCommandColumn />
-
-                    <DataGridColumn Field="@nameof(VirtualPos.Id)" Caption="Banka Kodu" Sortable="true" />
-                    <DataGridColumn Field="@nameof(VirtualPos.Name)" Caption="Banka Adı" Sortable="true" />
-                    <DataGridColumn Field="@nameof(VirtualPos.AccountCode)" Caption="Muhasebe Kodu"  />
-
-                </DataGridColumns>
-                <ButtonRowTemplate>
-
-                    <Button Color="Blazorise.Color.Success" Clicked="@(()=>navManager.NavigateTo("/virtualposcard"))">Yeni</Button>
-                    <Button Color="Blazorise.Color.Primary" Clicked="@(()=>navManager.NavigateTo("/virtualposcard"))">Değiştir</Button>
-                    <Button Color="Blazorise.Color.Danger" Clicked="deletePos">Sil</Button>
-                   
-
-                </ButtonRowTemplate>
-            </DataGrid>
-
+          <VirtualPosListPage dataGridRef="dataGridRef" virtualPosList="virtualPosList" OnChanged="(e)=>selectVirtualPos = e"/>
         </div>
         <div class="col-6">
             <div class="row">
-                kredi kartı tanımları
+                @if (selectVirtualPos != null)
+                {
+                    <DataGrid TItem="CreditCard" Data="selectVirtualPos.BankCard.CreditCards"
+                    @bind-SelectedRow="selectedCreditCard">
+                        <DataGridColumn Field="@nameof(CreditCard.Name)" Caption="Kredi Kartı Adı" Sortable="true" />
+                    </DataGrid>
+                }
             </div>
             <div class="row">
-                taksit tanımları
+                @if (selectedCreditCard != null)
+                {
+                    <DataGrid TItem="CreditCardInstallment" Data="selectedCreditCard.Installments"
+                    @bind-SelectedRow="selectInstallment" ShowPager
+                              CommandMode="DataGridCommandMode.ButtonRow">
+                        <DataGridColumns>
+                            <DataGridCommandColumn />
+                            <DataGridColumn  Caption="Kart Tipi" Sortable="true">
+                              <DisplayTemplate>
+                                   @{@(selectedCreditCard.CardBrand.Name)}
+                              </DisplayTemplate>
+                            </DataGridColumn>
+                            <DataGridColumn Field="@nameof(CreditCardInstallment.Installment)" Caption="Taksit Sayısı" Sortable="true" TextAlignment="TextAlignment.End"/>
+                            <DataGridColumn Field="@nameof(CreditCardInstallment.InstallmentRate)" Caption="Taksit Oranı" Sortable="true" TextAlignment="TextAlignment.End"/>
+
+                        </DataGridColumns>
+                        <ButtonRowTemplate>
+                            <Button Color="Blazorise.Color.Success" Clicked="@(installmentModel.Show)">Ekle</Button>
+                            <Button Color="Blazorise.Color.Primary" Clicked="deletePos">Değiştir</Button>
+                            <Button Color="Blazorise.Color.Danger" Clicked="deletePos">Sil</Button>
+                        </ButtonRowTemplate>
+
+                    </DataGrid>
+                }
             </div>
         </div>
     </div>
+    @*Kredi kartı taksit planı*@
+    <Modal @ref="installmentModel" Closing="installmentModelClosing">
+        <ModalContent Centered>
+            <ModalHeader>
+                <label>Kredi Kartı Taksit Ekleme Değiştirme</label>
+            </ModalHeader>
+            <ModalBody>
+                <div class="col-md-4">
+                    <Label>Kredi Kartı Tipi</Label>
+                </div>
+                <div class="col-md-8">
+                    <Select TValue="bool" @bind-SelectedValue="selectInstallment.Business">
+                        <SelectItem Value="false">Bireysel</SelectItem>
+                        <SelectItem Value="true">Ticari</SelectItem>
+                    </Select>
+                </div>
+                <div class="col-4">
+                    <label>Taksit Sayısı</label>
+                </div>
+                <div class="col-8">
+                    <NumericEdit TValue="decimal" @bind-Value="selectInstallment.InstallmentRate" />
+                </div>
+                <div class="col-4">
+                    <label>Komisyon Oranı</label>
+                </div>
+                <div class="col-8">
+                    <NumericEdit TValue="int" @bind-Value="selectInstallment.Installment" />
+                </div>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="@CloseModal">Vazgeç</Button>
+                <Button Color="Color.Primary" Clicked="@TryCloseModal">Kaydet</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
 </div>
+
+
 
 <Confirm BodyText="Kayıt Silinecek Onaylıyormusunuz." ConfirmationChanged="ConfirmDeleteClick"></Confirm>
 @code {
     private DataGrid<VirtualPos> dataGridRef;
     private List<VirtualPos> virtualPosList;
     private VirtualPos selectVirtualPos;
+    private CreditCardInstallment selectInstallment = new();
+    private CreditCard selectedCreditCard;
+    private Modal installmentModel;
+    private bool cancelClose;
 
-
-    
     private void deletePos()
     {
         //DeleteConfirmation.Show();
@@ -70,9 +115,38 @@
         }
     }
 
+    private Task CloseModal()
+    {
+        cancelClose = false;
+
+        return installmentModel.Hide();
+    }
+
+    private Task TryCloseModal()
+    {
+        selectInstallment.BankCardId = selectVirtualPos.BankCardId;
+        selectInstallment.CreditCardId = selectedCreditCard.Id;
+        selectInstallment.CardBrandId = selectedCreditCard.CardBrandId;
+        selectInstallment.CreateUser = userManager.User.Id;
+        selectInstallment.CreateDate = DateTime.Now;
+        selectInstallment.UpdateUser = userManager.User.Id;
+        selectInstallment.UpdateDate = DateTime.Now;
+       
+        creditCardInstallmentManager.Create(selectInstallment);
+        cancelClose = true;
+        return installmentModel.Hide();
+    }
+
+    private Task installmentModelClosing(ModalClosingEventArgs e)
+    {
+        e.Cancel = cancelClose
+           || e.CloseReason != CloseReason.UserClosing;
+
+        return Task.CompletedTask;
+    }
+
     protected override void OnInitialized()
     {
-
         virtualPosList = virtualPosRepository.GetAll();
     }
 }

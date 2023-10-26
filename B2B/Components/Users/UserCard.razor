@@ -58,7 +58,7 @@
         if (id == Guid.Empty)
             selectedRole = userRole.FirstOrDefault().Id;
         else
-            selectedRole = user.UsersRoles.FirstOrDefault().Id; 
+            selectedRole = user.UsersRoles.FirstOrDefault().Role.Id;
 
     }
 

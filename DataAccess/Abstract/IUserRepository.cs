@@ -9,5 +9,6 @@ namespace DataAccess.Abstract
         Task<User> GetUser(Guid id);
         User AddUser(User user);
         User UpdateUser(User user);
+        User DeleteUser(User user);
     }
 }

@@ -14,7 +14,7 @@ namespace Entity
             Value = value;
         }
 
-        public int BankCardId { get; set; }
+        public Guid BankCardId { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
 

@@ -34,13 +34,21 @@ namespace DataAccess.Concrete
         public async Task<User> GetUser(Guid id)
         {
             return await _dbContext.Users
-                .Include(x=>x.UsersRoles)
+                .Include(x => x.UsersRoles)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public User UpdateUser(User user)
         {
             var result = _dbContext.Users.Update(user);
+            _dbContext.SaveChanges();
+            return result.Entity;
+        }
+
+
+        public User DeleteUser(User user)
+        {
+            var result = _dbContext.Users.Remove(user);
             _dbContext.SaveChanges();
             return result.Entity;
         }

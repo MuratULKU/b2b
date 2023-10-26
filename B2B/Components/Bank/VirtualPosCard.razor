@@ -1,5 +1,5 @@
 ﻿@page "/virtualposcard/"
-@page "/virtualposcard/{selectedBankGuid}"
+@page "/virtualposcard/{selectedGuid:guid}"
 @using B2B.Components.SelectList
 @using B2B.Data;
 @using Business.Abstract;
@@ -7,22 +7,23 @@
 @using DataAccess.Abstract;
 @using Entity;
 
-@inject IBankCardRepository bankCardRepository;
-@inject IVirtualPosService virtualPosService;
-@inject FirmParameterService param;
-@inject UserManager userManager;
-@if (selectedBankGuid != Guid.Empty)
+@inject IBankCardRepository bankCardRepository
+@inject IVirtualPosService virtualPosService
+@inject FirmParameterService param
+@inject UserManager userManager
+@inject NavigationManager navManager
+@if (selectedGuid != Guid.Empty)
 {
-    SelectBankCard(selectedBankGuid);
+    SelectVirtualPos(selectedGuid);
 }
 <div class="container">
-    
+
     <div class="col-6">
         <div class="col-4">
             <label>Sanal Pos Adı</label>
         </div>
         <div class="col-8">
-            <input class="form-control" id="sanalpos" @bind-value="virtualPos.Name"/>
+            <input class="form-control" id="sanalpos" @bind-value="virtualPos.Name" />
         </div>
         <div class="col-4">
             <label>Banka Adı</label>
@@ -34,10 +35,9 @@
             <label>Muhasebe Kodu</label>
         </div>
         <div class="col-8">
-            <input class="form-control" id="sanalmuhasebekodu" @bind-value="virtualPos.AccountCode"/>
+            <input class="form-control" id="sanalmuhasebekodu" @bind-value="virtualPos.AccountCode" />
         </div>
         <div class="col-4">
-
         </div>
         <div class="col-8 py-3">
             <button class="btn btn-danger" style="width:130px;">Sil</button>
@@ -49,7 +49,7 @@
 @code {
     private List<BankCard> bankCardList { get; set; }
     [Parameter]
-    public Guid selectedBankGuid { get; set; }
+    public Guid selectedGuid { get; set; }
     private VirtualPos virtualPos { get; set; } = new();
 
     private BankCard selectedBankCard { get; set; }
@@ -59,19 +59,29 @@
         bankCardList = bankCardRepository.GetAllBank();
     }
 
-    private void SelectBankCard(Guid selectedbank)
+    private async void SelectVirtualPos(Guid selectedbank)
     {
-        selectedBankCard = bankCardRepository.GetBank(selectedbank).Result;
+        virtualPos = await virtualPosService.GetVirtualPosAsync(selectedGuid);
 
     }
 
     private void Save()
     {
-
-        virtualPos.CreateUser = userManager.User.Id;
-        virtualPos.UpdateUser = userManager.User.Id;
-        virtualPos.CreateDate = DateTime.Now;
-        virtualPos.UpdateDate = DateTime.Now;
-        virtualPosService.CreateVirtualPos(virtualPos);
+        if (virtualPos.Id == Guid.Empty)
+        {
+            virtualPos.CreateUser = userManager.User.Id;
+            virtualPos.UpdateUser = userManager.User.Id;
+            virtualPos.CreateDate = DateTime.Now;
+            virtualPos.UpdateDate = DateTime.Now;
+            virtualPosService.CreateVirtualPos(virtualPos);
+            navManager.NavigateTo("/virtualpos");
+        }
+        else
+        {
+            virtualPos.UpdateDate = DateTime.Now;
+            virtualPos.UpdateUser = userManager.User.Id;
+            virtualPosService.UpdateVirtualPos(virtualPos);
+            navManager.NavigateTo("/virtualpos");
+        }
     }
 }

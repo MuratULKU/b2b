@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace B2B.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20231014133607_init1")]
-    partial class init1
+    [Migration("20231026072225_init3")]
+    partial class init3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -67,10 +67,7 @@ namespace B2B.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("BankCardId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("BankId")
+                    b.Property<Guid>("BankCardId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreateDate")
@@ -95,7 +92,7 @@ namespace B2B.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BankId");
+                    b.HasIndex("BankCardId");
 
                     b.ToTable("BankParameters");
                 });
@@ -249,6 +246,9 @@ namespace B2B.Migrations
                     b.Property<bool>("CampaignCard")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("CardBrandId")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("TEXT");
 
@@ -275,6 +275,8 @@ namespace B2B.Migrations
 
                     b.HasIndex("BankCardId");
 
+                    b.HasIndex("CardBrandId");
+
                     b.ToTable("CreditCards");
                 });
 
@@ -292,6 +294,9 @@ namespace B2B.Migrations
 
                     b.Property<bool>("Business")
                         .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("CardBrandId")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("TEXT");
@@ -320,6 +325,8 @@ namespace B2B.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BankCardId");
+
+                    b.HasIndex("CardBrandId");
 
                     b.HasIndex("CreditCardId");
 
@@ -437,13 +444,13 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("b8cd39f9-c5ba-499b-8713-8f596dfa6cfa"),
-                            CreateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1261),
-                            CreateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
+                            Id = new Guid("9f16798e-503e-4e1f-a30b-d5c3157758f7"),
+                            CreateDate = new DateTime(2023, 10, 26, 10, 22, 25, 372, DateTimeKind.Local).AddTicks(470),
+                            CreateUser = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08"),
                             FirmId = 1,
                             SyncMinute = 60,
-                            UpdateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1262),
-                            UpdateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107")
+                            UpdateDate = new DateTime(2023, 10, 26, 10, 22, 25, 372, DateTimeKind.Local).AddTicks(471),
+                            UpdateUser = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08")
                         });
                 });
 
@@ -695,21 +702,21 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("9dbe0af9-8daf-475e-832c-297d2a92903b"),
-                            CreateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1162),
-                            CreateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
+                            Id = new Guid("94fc3abd-f2c1-4f93-99f0-5fb423ebcd70"),
+                            CreateDate = new DateTime(2023, 10, 26, 10, 22, 25, 372, DateTimeKind.Local).AddTicks(353),
+                            CreateUser = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08"),
                             RoleName = "Admin",
-                            UpdateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1173),
-                            UpdateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107")
+                            UpdateDate = new DateTime(2023, 10, 26, 10, 22, 25, 372, DateTimeKind.Local).AddTicks(366),
+                            UpdateUser = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08")
                         },
                         new
                         {
-                            Id = new Guid("21550ee8-fc26-4a86-b624-5121887a91a1"),
-                            CreateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1193),
-                            CreateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
+                            Id = new Guid("5c1ee23c-bc95-4df9-9216-267f68ab1a7a"),
+                            CreateDate = new DateTime(2023, 10, 26, 10, 22, 25, 372, DateTimeKind.Local).AddTicks(392),
+                            CreateUser = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08"),
                             RoleName = "User",
-                            UpdateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1193),
-                            UpdateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107")
+                            UpdateDate = new DateTime(2023, 10, 26, 10, 22, 25, 372, DateTimeKind.Local).AddTicks(392),
+                            UpdateUser = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08")
                         });
                 });
 
@@ -750,13 +757,13 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
-                            CreateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1227),
-                            CreateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
+                            Id = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08"),
+                            CreateDate = new DateTime(2023, 10, 26, 10, 22, 25, 372, DateTimeKind.Local).AddTicks(434),
+                            CreateUser = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08"),
                             Email = "murat@ulkubilgisayar.com",
                             Password = "Admin",
-                            UpdateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1227),
-                            UpdateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
+                            UpdateDate = new DateTime(2023, 10, 26, 10, 22, 25, 372, DateTimeKind.Local).AddTicks(435),
+                            UpdateUser = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08"),
                             Username = "Admin"
                         });
                 });
@@ -793,13 +800,13 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
-                            RoleId = new Guid("9dbe0af9-8daf-475e-832c-297d2a92903b"),
-                            CreateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1244),
-                            CreateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107"),
-                            Id = new Guid("ce5a325e-e991-4138-a82a-268729547305"),
-                            UpdateDate = new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1244),
-                            UpdateUser = new Guid("92e7385b-0384-494b-a242-30145b26c107")
+                            UserId = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08"),
+                            RoleId = new Guid("94fc3abd-f2c1-4f93-99f0-5fb423ebcd70"),
+                            CreateDate = new DateTime(2023, 10, 26, 10, 22, 25, 372, DateTimeKind.Local).AddTicks(450),
+                            CreateUser = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08"),
+                            Id = new Guid("41667a37-db9e-48f4-b37a-a7ff3c9ea74b"),
+                            UpdateDate = new DateTime(2023, 10, 26, 10, 22, 25, 372, DateTimeKind.Local).AddTicks(450),
+                            UpdateUser = new Guid("1b570d99-052a-43b4-bbb9-bdac1037de08")
                         });
                 });
 
@@ -846,7 +853,7 @@ namespace B2B.Migrations
                 {
                     b.HasOne("Entity.BankCard", "Bank")
                         .WithMany("Parameters")
-                        .HasForeignKey("BankId")
+                        .HasForeignKey("BankCardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -861,7 +868,15 @@ namespace B2B.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Entity.CardBrand", "CardBrand")
+                        .WithMany()
+                        .HasForeignKey("CardBrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Bank");
+
+                    b.Navigation("CardBrand");
                 });
 
             modelBuilder.Entity("Entity.CreditCardInstallment", b =>
@@ -872,6 +887,12 @@ namespace B2B.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Entity.CardBrand", "CardBrand")
+                        .WithMany()
+                        .HasForeignKey("CardBrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Entity.CreditCard", "CreditCard")
                         .WithMany("Installments")
                         .HasForeignKey("CreditCardId")
@@ -879,6 +900,8 @@ namespace B2B.Migrations
                         .IsRequired();
 
                     b.Navigation("BankCard");
+
+                    b.Navigation("CardBrand");
 
                     b.Navigation("CreditCard");
                 });

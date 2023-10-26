@@ -14,8 +14,10 @@ namespace Entity
         public bool Active { get; set; }
         public bool Deleted { get; set; }
         public Guid BankCardId { get; set; }
+        public Guid CardBrandId { get; set; }
         public bool Business { get; set; } = false;
         public CreditCard CreditCard { get; set; }
         public BankCard BankCard { get; set; }
+        public CardBrand CardBrand { get; set; }
     }
 }

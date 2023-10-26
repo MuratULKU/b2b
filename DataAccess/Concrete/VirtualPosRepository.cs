@@ -53,6 +53,7 @@ namespace SanalMagaza.DataAccess.Concrete
                 .Include(x=>x.BankCard)
                 .Include(x=>x.BankCard.CreditCards)
                 .ThenInclude(x=>x.Installments)
+                .ThenInclude(x=>x.CardBrand)
                 .ToList();
         }
 

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace B2B.Migrations
 {
     /// <inheritdoc />
-    public partial class init1 : Migration
+    public partial class init2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -242,34 +242,6 @@ namespace B2B.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CreditCards",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Active = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ManufacturerCard = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CampaignCard = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Deleted = table.Column<bool>(type: "INTEGER", nullable: false),
-                    BrandCode = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UpdateUser = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CreditCards", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CreditCards_BankCards_BankCardId",
-                        column: x => x.BankCardId,
-                        principalTable: "BankCards",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PaymentTransactions",
                 columns: table => new
                 {
@@ -337,6 +309,41 @@ namespace B2B.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CreditCards",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CardBrandId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Active = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ManufacturerCard = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CampaignCard = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Deleted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    BrandCode = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UpdateUser = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CreditCards", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CreditCards_BankCards_BankCardId",
+                        column: x => x.BankCardId,
+                        principalTable: "BankCards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CreditCards_CardBrands_CardBrandId",
+                        column: x => x.CardBrandId,
+                        principalTable: "CardBrands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserRoles",
                 columns: table => new
                 {
@@ -376,6 +383,7 @@ namespace B2B.Migrations
                     Active = table.Column<bool>(type: "INTEGER", nullable: false),
                     Deleted = table.Column<bool>(type: "INTEGER", nullable: false),
                     BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CardBrandId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Business = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -389,6 +397,12 @@ namespace B2B.Migrations
                         name: "FK_CreditCardInstallments_BankCards_BankCardId",
                         column: x => x.BankCardId,
                         principalTable: "BankCards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CreditCardInstallments_CardBrands_CardBrandId",
+                        column: x => x.CardBrandId,
+                        principalTable: "CardBrands",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -431,26 +445,26 @@ namespace B2B.Migrations
             migrationBuilder.InsertData(
                 table: "FirmParams",
                 columns: new[] { "Id", "Address1", "Address2", "City", "Country", "CreateDate", "CreateUser", "FirmId", "FirmName", "LastSync", "MailAddress", "Phone1", "Phone2", "SyncMinute", "Town", "UpdateDate", "UpdateUser" },
-                values: new object[] { new Guid("b8cd39f9-c5ba-499b-8713-8f596dfa6cfa"), null, null, null, null, new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1261), new Guid("92e7385b-0384-494b-a242-30145b26c107"), 1, null, null, null, null, null, 60, null, new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1262), new Guid("92e7385b-0384-494b-a242-30145b26c107") });
+                values: new object[] { new Guid("b3cceac2-8743-45be-a9af-2fea0151101f"), null, null, null, null, new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6709), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), 1, null, null, null, null, null, 60, null, new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6709), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b") });
 
             migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "Id", "CreateDate", "CreateUser", "RoleName", "UpdateDate", "UpdateUser" },
                 values: new object[,]
                 {
-                    { new Guid("21550ee8-fc26-4a86-b624-5121887a91a1"), new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1193), new Guid("92e7385b-0384-494b-a242-30145b26c107"), "User", new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1193), new Guid("92e7385b-0384-494b-a242-30145b26c107") },
-                    { new Guid("9dbe0af9-8daf-475e-832c-297d2a92903b"), new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1162), new Guid("92e7385b-0384-494b-a242-30145b26c107"), "Admin", new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1173), new Guid("92e7385b-0384-494b-a242-30145b26c107") }
+                    { new Guid("6093673e-7b0d-4e6a-802e-8e3b99e54f09"), new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6645), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), "User", new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6645), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b") },
+                    { new Guid("b47d4a53-b042-47ff-9af8-82046f5950e0"), new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6617), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), "Admin", new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6628), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b") }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "CreateDate", "CreateUser", "Email", "Password", "UpdateDate", "UpdateUser", "Username" },
-                values: new object[] { new Guid("92e7385b-0384-494b-a242-30145b26c107"), new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1227), new Guid("92e7385b-0384-494b-a242-30145b26c107"), "murat@ulkubilgisayar.com", "Admin", new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1227), new Guid("92e7385b-0384-494b-a242-30145b26c107"), "Admin" });
+                values: new object[] { new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6675), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), "murat@ulkubilgisayar.com", "Admin", new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6676), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), "Admin" });
 
             migrationBuilder.InsertData(
                 table: "UserRoles",
                 columns: new[] { "RoleId", "UserId", "CreateDate", "CreateUser", "Id", "UpdateDate", "UpdateUser" },
-                values: new object[] { new Guid("9dbe0af9-8daf-475e-832c-297d2a92903b"), new Guid("92e7385b-0384-494b-a242-30145b26c107"), new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1244), new Guid("92e7385b-0384-494b-a242-30145b26c107"), new Guid("ce5a325e-e991-4138-a82a-268729547305"), new DateTime(2023, 10, 14, 16, 36, 7, 313, DateTimeKind.Local).AddTicks(1244), new Guid("92e7385b-0384-494b-a242-30145b26c107") });
+                values: new object[] { new Guid("b47d4a53-b042-47ff-9af8-82046f5950e0"), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6690), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), new Guid("366290ae-3504-471c-9d58-7884f5deb0f0"), new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6691), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_BankParameters_BankId",
@@ -461,6 +475,11 @@ namespace B2B.Migrations
                 name: "IX_CreditCardInstallments_BankCardId",
                 table: "CreditCardInstallments",
                 column: "BankCardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CreditCardInstallments_CardBrandId",
+                table: "CreditCardInstallments",
+                column: "CardBrandId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CreditCardInstallments_CreditCardId",
@@ -476,6 +495,11 @@ namespace B2B.Migrations
                 name: "IX_CreditCards_BankCardId",
                 table: "CreditCards",
                 column: "BankCardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CreditCards_CardBrandId",
+                table: "CreditCards",
+                column: "CardBrandId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentTransactions_BankId",
@@ -501,9 +525,6 @@ namespace B2B.Migrations
 
             migrationBuilder.DropTable(
                 name: "Baskets");
-
-            migrationBuilder.DropTable(
-                name: "CardBrands");
 
             migrationBuilder.DropTable(
                 name: "Categories");
@@ -543,6 +564,9 @@ namespace B2B.Migrations
 
             migrationBuilder.DropTable(
                 name: "BankCards");
+
+            migrationBuilder.DropTable(
+                name: "CardBrands");
         }
     }
 }

@@ -8,5 +8,6 @@ namespace DataAccess.Abstract
         Task<UserRole> GetUserRole(Guid id);
         UserRole AddRole(UserRole role);
         UserRole UpdateRole(UserRole role);
+        UserRole DeleteRole(UserRole role);
     }
 }

@@ -1,0 +1,42 @@
+﻿@using Entity;
+@inject NavigationManager navManager
+<div class="container">
+    <DataGrid @ref="dataGridRef"
+              TItem="VirtualPos"
+              Data="@virtualPosList"
+              Editable
+              Responsive
+              ShowPager
+              CommandMode="DataGridCommandMode.ButtonRow"
+              SelectedRowChanged="ItemSelected">
+
+        <DataGridColumns>
+            <DataGridCommandColumn />
+            <DataGridColumn Field="@nameof(VirtualPos.Name)" Caption="Banka Adı" Sortable="true" />
+            <DataGridColumn Field="@nameof(VirtualPos.AccountCode)" Caption="Muhasebe Kodu" />
+
+        </DataGridColumns>
+        <ButtonRowTemplate>
+
+            <Button Color="Blazorise.Color.Success" Clicked="@(()=>navManager.NavigateTo("/virtualposcard"))">Yeni</Button>
+            <Button Color="Blazorise.Color.Primary" Disabled="selectVirtualPos==null" Clicked="@(()=>navManager.NavigateTo($"/virtualposcard/{selectVirtualPos.Id}"))">Değiştir</Button>
+            @* <Button Color="Blazorise.Color.Danger" Clicked="deletePos">Sil</Button>*@
+
+
+        </ButtonRowTemplate>
+    </DataGrid>
+
+</div>
+
+
+@code {
+    [Parameter] public DataGrid<VirtualPos> dataGridRef { get; set; }
+    [Parameter] public List<VirtualPos> virtualPosList { get; set; }
+    [Parameter] public VirtualPos selectVirtualPos { get; set; }
+    [Parameter] public EventCallback<VirtualPos> OnChanged { get; set; }
+    private async Task ItemSelected(VirtualPos selectedItem)
+    {
+        selectVirtualPos = selectedItem;
+        await OnChanged.InvokeAsync(selectedItem);
+    }
+}

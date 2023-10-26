@@ -51,6 +51,10 @@ builder.Services.AddScoped<IBankCardService,BankCardManager>();
 builder.Services.AddScoped<ICreditCardRepository,CreditCardRepository>();
 builder.Services.AddScoped<IVirtualPosRepository, VirtualPosRepository>();
 builder.Services.AddScoped<IVirtualPosService, VirtualPosManager>();
+builder.Services.AddScoped<ICreditCardInstallmentRepository, CreditCardInstallmentRepository>();
+builder.Services.AddScoped<ICreditCardInstallmentService, CreditCardInstallmentManager>();
+builder.Services.AddScoped<IBankParameterRepository, BankParameterRepository>();
+builder.Services.AddScoped<IBankParameterService, BankParameterManager>();
 //back order services
 builder.Services.AddScoped<IOrderService, OrderManager>();
 builder.Services.AddSingleton<FirmParameterService>();

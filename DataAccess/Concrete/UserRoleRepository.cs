@@ -40,5 +40,11 @@ namespace DataAccess.Concrete
             _context.SaveChanges();
             return result.Entity;
         }
+
+        public UserRole DeleteRole(UserRole role) { 
+            var result = _context.UserRoles .Remove(role);
+            _context.SaveChanges();
+            return result.Entity;
+        }
     }
 }

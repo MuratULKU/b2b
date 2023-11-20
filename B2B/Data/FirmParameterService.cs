@@ -13,27 +13,23 @@ namespace B2B.Data
         public FirmParameterService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            using var scope = _serviceProvider.CreateScope();
-            _firmParamRepository = scope.ServiceProvider.GetRequiredService<IFirmParamRepository>();
-            _firmParam = _firmParamRepository.firmParam();
+            
         }
 
-        public void SetLastUpdate(DateTime date)
+        public object Get(int no)
         {
             using var scope = _serviceProvider.CreateScope();
             _firmParamRepository = scope.ServiceProvider.GetRequiredService<IFirmParamRepository>();
-            _firmParam.LastSync = date;
-            _firmParamRepository.Update(_firmParam);
+            return _firmParamRepository.Get(no);
         }
 
-        public FirmParam FirmParam
+        public void Set(int no, object value)
         {
-            get
-            {
-                return _firmParam;
-            }
+            using var scope = _serviceProvider.CreateScope();
+            _firmParamRepository = scope.ServiceProvider.GetRequiredService<IFirmParamRepository>();
+            _firmParamRepository.Update(no,value);
         }
-
+        
 
     }
 }

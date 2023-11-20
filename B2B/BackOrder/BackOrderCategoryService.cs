@@ -5,7 +5,7 @@ namespace B2B.BackOrder
 {
     public interface IBackOrderCategoryService
     {
-        void updateCategory(DateTime? date);
+        Task updateCategory(DateTime? date);
     }
     public class BackOrderCategoryService : IBackOrderCategoryService
     {
@@ -17,7 +17,7 @@ namespace B2B.BackOrder
         }
 
 
-        public async void updateCategory(DateTime? date)
+        public async Task updateCategory(DateTime? date)
         {
             try
             {
@@ -59,6 +59,7 @@ namespace B2B.BackOrder
 
 
             }
+            await Task.Delay(1);
         }
     }
 }

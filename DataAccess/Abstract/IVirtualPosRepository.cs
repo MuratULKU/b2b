@@ -12,11 +12,10 @@ namespace DataAccess.Abstract
     {
         List<VirtualPos> GetAll();
         VirtualPos Get(Guid id);
-        VirtualPos GetByBankId(int id, bool isBusiness);
-        VirtualPos GetByBrandCode(int id, bool isBusiness);
+        VirtualPos GetByBankCode(int id, bool isBusiness);
+        List<VirtualPos> GetByBrandCode(int brandCode);
         VirtualPos Create(VirtualPos virtualPos);
         VirtualPos Update(VirtualPos virtualPos);
         VirtualPos Delete(VirtualPos virtualPos);
-
     }
 }

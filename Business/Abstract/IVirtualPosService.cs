@@ -13,7 +13,8 @@ namespace Business.Abstract
         VirtualPos DeleteVirtualPos(VirtualPos virtualPos);
         VirtualPos UpdateVirtualPos(VirtualPos virtualPos);
         Task<List<VirtualPos>> GetVirtualPosAsync();
+        Task<VirtualPos> GetByBankCode(int id, bool isBusiness);
         Task<VirtualPos> GetVirtualPosAsync(Guid virtualPosId);
-
+       Task<List<VirtualPos>> GetByBrandCode(int brandCode);
     }
 }

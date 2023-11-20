@@ -24,8 +24,10 @@ namespace DataAccess.Concrete
         public List<UserRole> GetAll(Guid UserId)
         {
             return _context.UserRoles
+                
                 .Include(x => x.User)
                 .Include(x => x.Role)
+                .Where(x => x.UserId == UserId)
                 .ToList();
         }
 

@@ -31,9 +31,20 @@ namespace Business.Concrete
             throw new NotImplementedException();
         }
 
-        public Task<List<VirtualPos>> GetVirtualPosAsync()
+        public async Task<VirtualPos> GetByBankCode(int id, bool isBusiness)
         {
-            throw new NotImplementedException();
+            return _virtualPosRepository.GetByBankCode(id, isBusiness);
+        }
+
+      
+        public async Task<List<VirtualPos>> GetByBrandCode(int brandCode)
+        {
+            return _virtualPosRepository.GetByBrandCode(brandCode);
+        }
+
+        public async Task<List<VirtualPos>> GetVirtualPosAsync()
+        {
+            return _virtualPosRepository.GetAll();
         }
 
         public async Task<VirtualPos> GetVirtualPosAsync(Guid virtualPosId)
@@ -45,5 +56,7 @@ namespace Business.Concrete
         {
             return _virtualPosRepository.Update(virtualPos);
         }
+
+      
     }
 }

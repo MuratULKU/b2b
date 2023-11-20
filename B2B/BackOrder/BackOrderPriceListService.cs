@@ -46,11 +46,21 @@ namespace B2B.BackOrder
                                     price.Code);
                                 if (item is null)
                                 {
-                                    _priceListRepository.Insert(price);
+                                    item = new PriceList();
+                                    item.Code = price.Code;
+                                    item.Cardref = price.Cardref;
+                                    item.Id = Guid.NewGuid();
+                                    item.ProductCode = product.Code;
+                                    item.Name = price.Name;
+                                    item.Currency = price.Currency;
+                                    item.Priorty = price.Priorty;
+                                    item.Price = price.Price;
+                                    item.ProductId = product.Id;
+                                    _priceListRepository.Insert(item);
                                 }
                                 else
                                 {
-                                    price.Price = item.Price;
+                                    item.Price = price.Price;
                                     _priceListRepository.Update(item);
 
                                 }

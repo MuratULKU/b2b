@@ -14,13 +14,13 @@ namespace Entity
         public string? LogoPath { get; set; }
         public bool UseCommonPaymentPage { get; set; } = false;
         public bool Active { get; set; } = true;
-
-
+     
 
         public List<CreditCardInstallment> Installments { get; set; } = new List<CreditCardInstallment>();
         public List<CreditCard> CreditCards { get; set; } = new List<CreditCard>();
         public List<BankParameter> Parameters { get; set; } = new List<BankParameter>();
         public List<VirtualPos> VirtualPos { get; set; } = new List<VirtualPos>();
+        
 
     }
 }

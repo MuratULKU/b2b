@@ -1,0 +1,21 @@
+﻿@using B2B.Data;
+<h3>Ödeme Planı Seçimi</h3>
+<DataGrid @ref="dataGridRef" 
+    TItem="InstallmentViewModel.InstallmentRate" 
+    Data="paymentPage.installmentViewModel.InstallmentRates"
+    @bind-SelectedRow ="paymentPage.selectInstallment" ShowPager>
+    <DataGridColumns>
+        <DataGridCommandColumn />
+        <DataGridColumn Field="@nameof(InstallmentViewModel.InstallmentRate.Text)" Caption="Banka Adı" />
+        <DataGridColumn Field="@nameof(InstallmentViewModel.InstallmentRate.Text)" Caption="Taksit Sayısı" />
+        <DataGridColumn Field="@nameof(InstallmentViewModel.InstallmentRate.Amount)" Caption="Taksit Tutarı" TextAlignment="TextAlignment.End" />
+        <DataGridColumn Field="@nameof(InstallmentViewModel.InstallmentRate.TotalAmount)" Caption="Toplam Tutar" TextAlignment="TextAlignment.End" />
+
+    </DataGridColumns>
+</DataGrid>
+@code {
+    private DataGrid<InstallmentViewModel.InstallmentRate> dataGridRef;
+
+    [CascadingParameter] public Payment paymentPage{get;set;}
+   
+}

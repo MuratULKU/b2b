@@ -36,7 +36,7 @@ namespace SanalMagaza.DataAccess.Concrete
                 FirstOrDefault(x => x.Id == id);
         }
 
-        public VirtualPos GetByBankId(int bankCode,bool isBusiness)
+        public VirtualPos GetByBankCode(int bankCode,bool isBusiness)
         {
             var id = _dbContext.BankCards.FirstOrDefault(x=>x.BankCode == bankCode).Id;
             return _dbContext.VirtualPos.
@@ -50,10 +50,10 @@ namespace SanalMagaza.DataAccess.Concrete
         public List<VirtualPos> GetAll()
         {
             return _dbContext.VirtualPos
-                .Include(x=>x.BankCard)
-                .Include(x=>x.BankCard.CreditCards)
-                .ThenInclude(x=>x.Installments)
-                .ThenInclude(x=>x.CardBrand)
+               .Include(x=>x.BankCard)
+               .Include(x=>x.CardBrand)
+               .Include(x=>x.BankCard.CreditCards)
+               .ThenInclude(x=>x.Installments)
                 .ToList();
         }
 
@@ -64,18 +64,12 @@ namespace SanalMagaza.DataAccess.Concrete
             return virtualPos;
         }
 
-        public VirtualPos GetByBrandCode(int brandCode,bool isBusiness)
+        public List<VirtualPos> GetByBrandCode(int brandCode)
         {
-            if (_dbContext.VirtualPos.FirstOrDefault(x => x.CardBrands == brandCode) == null)
-                return null;
-            var id = _dbContext.VirtualPos.FirstOrDefault(x => x.CardBrands == brandCode).BankCardId;
-            return _dbContext.VirtualPos
-                .Include(x => x.BankCard)
-                .ThenInclude(x => x.Installments.Where(i => i.Business == isBusiness && i.BankCardId == id))
-                .FirstOrDefault(x => x.BankCardId == id);
-
-
-
+            return _dbContext.VirtualPos.Where(x => x.CardBrand.Code == brandCode)
+                .Include(x=>x.BankCard)
+                .ThenInclude(x=>x.Installments)
+                .ToList();
         }
     }
 }

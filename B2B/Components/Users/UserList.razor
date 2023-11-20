@@ -8,25 +8,30 @@
 @inject IUserRoleRepository userRepository
 @inject IUserRepository userAccount
 @inject NavigationManager navManager
-<DataGrid TItem="Entity.User"
-          Data="userList"
-          ReadData="@OnReadData"
-          TotalItems="@totalUser"
-          PageSize="10"
-          ShowPager
-          Responsive
-@bind-SelectedRow="@selectedUser">
+<div class="container">
+    <DataGrid TItem="Entity.User"
+              Data="userList"
+              ReadData="@OnReadData"
+              TotalItems="@totalUser"
+              PageSize="10"
+                ShowPager
+                Responsive
+    @bind-SelectedRow="@selectedUser">
 
-    <DataGridColumns>
-        <DataGridColumn Field="@nameof(Entity.User.Username)" Caption="Kullanıcı Adı" />
-        <DataGridColumn Field="@nameof(Entity.User.Email)" Caption="Mail" />
-    </DataGridColumns>
-    <ButtonRowTemplate>
-        <Button Color="Color.Success" Clicked="@(()=>navManager.NavigateTo("/user"))">Yeni</Button>
-        <Button Color="Color.Primary" Disabled="(selectedUser is null)" Clicked="@(()=>navManager.NavigateTo($"/user/{selectedUser.Id}"))">Değiştir</Button>
-        <Button Color="Color.Danger" Disabled="(selectedUser is null)" Clicked="@(()=>{userAccount.DeleteUser(selectedUser);userList = userAccount.GetAllUser();})">Sil</Button>
-    </ButtonRowTemplate>
-</DataGrid>
+        <DataGridColumns>
+            <DataGridColumn Field="@nameof(Entity.User.Username)" Caption="Kullanıcı Adı" />
+            <DataGridColumn Field="@nameof(Entity.User.Email)" Caption="Mail" />
+            <DataGridColumn Field="@nameof(Entity.User.AccountCode)" Caption="Muhasebe Kodu" />
+
+
+        </DataGridColumns>
+        <ButtonRowTemplate>
+            <Button Color="Color.Success" Clicked="@(()=>navManager.NavigateTo("/user"))">Yeni</Button>
+            <Button Color="Color.Primary" Disabled="(selectedUser is null)" Clicked="@(()=>navManager.NavigateTo($"/user/{selectedUser.Id}"))">Değiştir</Button>
+            <Button Color="Color.Danger" Disabled="(selectedUser is null)" Clicked="@(()=>{userAccount.DeleteUser(selectedUser);userList = userAccount.GetAllUser();})">Sil</Button>
+        </ButtonRowTemplate>
+    </DataGrid>
+</div>
 @code {
     private List<Entity.User> userList;
     private int totalUser;
@@ -59,5 +64,5 @@
 
     }
 
-    
+
 }

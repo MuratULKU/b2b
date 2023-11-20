@@ -2,13 +2,12 @@
 @using B2B.Components.Confirm
 @using Business.Abstract;
 @using Business.Concrete;
-@using DataAccess.Abstract;
 @using Entity;
-@inject IVirtualPosRepository virtualPosRepository
+@inject IVirtualPosService virtualPosService
 @inject NavigationManager navManager
 @inject UserManager userManager
 @inject ICreditCardInstallmentService creditCardInstallmentManager
-
+@attribute [Authorize]
 <div class="container">
     <div class="row">
         <div class="col-6">
@@ -72,13 +71,13 @@
                     <label>Taksit Sayısı</label>
                 </div>
                 <div class="col-8">
-                    <NumericEdit TValue="decimal" @bind-Value="selectInstallment.InstallmentRate" />
+                    <NumericEdit TValue="int" @bind-Value="selectInstallment.Installment" />
                 </div>
                 <div class="col-4">
                     <label>Komisyon Oranı</label>
                 </div>
                 <div class="col-8">
-                    <NumericEdit TValue="int" @bind-Value="selectInstallment.Installment" />
+                    <NumericEdit TValue="decimal" @bind-Value="selectInstallment.InstallmentRate" />
                 </div>
             </ModalBody>
             <ModalFooter>
@@ -110,8 +109,8 @@
     {
         if (deletedConfirm)
         {
-            virtualPosRepository.Delete(selectVirtualPos);
-            virtualPosList = virtualPosRepository.GetAll();
+            virtualPosService.DeleteVirtualPos(selectVirtualPos);
+            virtualPosList = await virtualPosService.GetVirtualPosAsync();
         }
     }
 
@@ -131,7 +130,7 @@
         selectInstallment.CreateDate = DateTime.Now;
         selectInstallment.UpdateUser = userManager.User.Id;
         selectInstallment.UpdateDate = DateTime.Now;
-       
+
         creditCardInstallmentManager.Create(selectInstallment);
         cancelClose = true;
         return installmentModel.Hide();
@@ -145,8 +144,8 @@
         return Task.CompletedTask;
     }
 
-    protected override void OnInitialized()
+    protected async override void OnInitialized()
     {
-        virtualPosList = virtualPosRepository.GetAll();
+        virtualPosList = await virtualPosService.GetVirtualPosAsync();
     }
 }

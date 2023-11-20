@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace B2B.Migrations
 {
     /// <inheritdoc />
-    public partial class init2 : Migration
+    public partial class init1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -42,6 +42,7 @@ namespace B2B.Migrations
                     UserGuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     Date_ = table.Column<DateTime>(type: "TEXT", nullable: false),
                     LineNUmber = table.Column<int>(type: "INTEGER", nullable: false),
+                    DocNo = table.Column<string>(type: "TEXT", nullable: false),
                     ProductGuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     ProductCode = table.Column<string>(type: "TEXT", nullable: false),
                     ProductName = table.Column<string>(type: "TEXT", nullable: false),
@@ -52,6 +53,8 @@ namespace B2B.Migrations
                     VatPrice = table.Column<double>(type: "REAL", nullable: false),
                     DiscountRate = table.Column<double>(type: "REAL", nullable: false),
                     DiscountPrice = table.Column<double>(type: "REAL", nullable: false),
+                    Send = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Total = table.Column<double>(type: "REAL", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -99,44 +102,27 @@ namespace B2B.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FirmParams",
+                name: "DocumentNo",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    FirmId = table.Column<int>(type: "INTEGER", nullable: false),
-                    SyncMinute = table.Column<int>(type: "INTEGER", nullable: false),
-                    LastSync = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    FirmName = table.Column<string>(type: "TEXT", nullable: true),
-                    Address1 = table.Column<string>(type: "TEXT", nullable: true),
-                    Address2 = table.Column<string>(type: "TEXT", nullable: true),
-                    Town = table.Column<string>(type: "TEXT", nullable: true),
-                    City = table.Column<string>(type: "TEXT", nullable: true),
-                    Country = table.Column<string>(type: "TEXT", nullable: true),
-                    Phone1 = table.Column<string>(type: "TEXT", nullable: true),
-                    Phone2 = table.Column<string>(type: "TEXT", nullable: true),
-                    MailAddress = table.Column<string>(type: "TEXT", nullable: true),
-                    CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UpdateUser = table.Column<Guid>(type: "TEXT", nullable: false)
+                    DocType = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Prefix = table.Column<string>(type: "TEXT", nullable: false),
+                    DocNo = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FirmParams", x => x.Id);
+                    table.PrimaryKey("PK_DocumentNo", x => x.DocType);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PriceLists",
+                name: "FirmParams",
                 columns: table => new
                 {
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
+                    No = table.Column<int>(type: "INTEGER", nullable: false),
+                    Value = table.Column<byte[]>(type: "BLOB", nullable: false),
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Cardref = table.Column<int>(type: "INTEGER", nullable: false),
-                    Code = table.Column<string>(type: "TEXT", nullable: true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Price = table.Column<double>(type: "REAL", nullable: false),
-                    Currency = table.Column<int>(type: "INTEGER", nullable: false),
-                    ProductCode = table.Column<string>(type: "TEXT", nullable: false),
-                    Priorty = table.Column<int>(type: "INTEGER", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -144,7 +130,7 @@ namespace B2B.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PriceLists", x => x.Id);
+                    table.PrimaryKey("PK_FirmParams", x => x.Key);
                 });
 
             migrationBuilder.CreateTable(
@@ -206,6 +192,7 @@ namespace B2B.Migrations
                     Username = table.Column<string>(type: "TEXT", nullable: false),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     Password = table.Column<string>(type: "TEXT", nullable: false),
+                    AccountCode = table.Column<string>(type: "TEXT", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -221,10 +208,9 @@ namespace B2B.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    BankCardId = table.Column<int>(type: "INTEGER", nullable: false),
+                    BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Key = table.Column<string>(type: "TEXT", nullable: false),
                     Value = table.Column<string>(type: "TEXT", nullable: false),
-                    BankId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -234,8 +220,8 @@ namespace B2B.Migrations
                 {
                     table.PrimaryKey("PK_BankParameters", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BankParameters_BankCards_BankId",
-                        column: x => x.BankId,
+                        name: "FK_BankParameters_BankCards_BankCardId",
+                        column: x => x.BankCardId,
                         principalTable: "BankCards",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -251,7 +237,7 @@ namespace B2B.Migrations
                     ReferenceNumber = table.Column<string>(type: "TEXT", nullable: true),
                     UserIpAddress = table.Column<string>(type: "TEXT", nullable: true),
                     UserAgent = table.Column<string>(type: "TEXT", nullable: true),
-                    BankCardId = table.Column<int>(type: "INTEGER", nullable: false),
+                    BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CardPrefix = table.Column<string>(type: "TEXT", nullable: true),
                     CardHolderName = table.Column<string>(type: "TEXT", nullable: true),
                     Installment = table.Column<int>(type: "INTEGER", nullable: false),
@@ -265,7 +251,6 @@ namespace B2B.Migrations
                     BankRequest = table.Column<string>(type: "TEXT", nullable: true),
                     BankResponse = table.Column<string>(type: "TEXT", nullable: true),
                     MaskedCardNumber = table.Column<string>(type: "TEXT", nullable: true),
-                    BankId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -276,32 +261,7 @@ namespace B2B.Migrations
                 {
                     table.PrimaryKey("PK_PaymentTransactions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PaymentTransactions_BankCards_BankId",
-                        column: x => x.BankId,
-                        principalTable: "BankCards",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "VirtualPos",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    AccountCode = table.Column<string>(type: "TEXT", nullable: false),
-                    CardBrands = table.Column<int>(type: "INTEGER", nullable: true),
-                    CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UpdateUser = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VirtualPos", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_VirtualPos_BankCards_BankCardId",
+                        name: "FK_PaymentTransactions_BankCards_BankCardId",
                         column: x => x.BankCardId,
                         principalTable: "BankCards",
                         principalColumn: "Id",
@@ -339,6 +299,115 @@ namespace B2B.Migrations
                         name: "FK_CreditCards_CardBrands_CardBrandId",
                         column: x => x.CardBrandId,
                         principalTable: "CardBrands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VirtualPos",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CardBrandId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    AccountCode = table.Column<string>(type: "TEXT", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UpdateUser = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VirtualPos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_VirtualPos_BankCards_BankCardId",
+                        column: x => x.BankCardId,
+                        principalTable: "BankCards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VirtualPos_CardBrands_CardBrandId",
+                        column: x => x.CardBrandId,
+                        principalTable: "CardBrands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FirmDocs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    InfoType = table.Column<int>(type: "INTEGER", nullable: false),
+                    LineNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProtuctId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    LData = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    ProductId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UpdateUser = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FirmDocs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FirmDocs_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PriceLists",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Cardref = table.Column<int>(type: "INTEGER", nullable: false),
+                    Code = table.Column<string>(type: "TEXT", nullable: true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Price = table.Column<double>(type: "REAL", nullable: false),
+                    Currency = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProductCode = table.Column<string>(type: "TEXT", nullable: false),
+                    Priorty = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProductId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UpdateUser = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PriceLists", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PriceLists_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductAmounts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    StockRef = table.Column<int>(type: "INTEGER", nullable: false),
+                    OnHand = table.Column<double>(type: "REAL", nullable: false),
+                    ProductId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UpdateUser = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductAmounts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductAmounts_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -443,33 +512,28 @@ namespace B2B.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "FirmParams",
-                columns: new[] { "Id", "Address1", "Address2", "City", "Country", "CreateDate", "CreateUser", "FirmId", "FirmName", "LastSync", "MailAddress", "Phone1", "Phone2", "SyncMinute", "Town", "UpdateDate", "UpdateUser" },
-                values: new object[] { new Guid("b3cceac2-8743-45be-a9af-2fea0151101f"), null, null, null, null, new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6709), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), 1, null, null, null, null, null, 60, null, new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6709), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b") });
-
-            migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "Id", "CreateDate", "CreateUser", "RoleName", "UpdateDate", "UpdateUser" },
                 values: new object[,]
                 {
-                    { new Guid("6093673e-7b0d-4e6a-802e-8e3b99e54f09"), new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6645), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), "User", new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6645), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b") },
-                    { new Guid("b47d4a53-b042-47ff-9af8-82046f5950e0"), new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6617), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), "Admin", new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6628), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b") }
+                    { new Guid("1e8aa23c-343f-48a8-aa6e-0a8cbf9232d6"), new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(99), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), "User", new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(100), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39") },
+                    { new Guid("c226ba28-e656-46c9-b8b5-465edf0dffa3"), new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(68), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), "Admin", new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(81), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39") }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "CreateDate", "CreateUser", "Email", "Password", "UpdateDate", "UpdateUser", "Username" },
-                values: new object[] { new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6675), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), "murat@ulkubilgisayar.com", "Admin", new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6676), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), "Admin" });
+                columns: new[] { "Id", "AccountCode", "CreateDate", "CreateUser", "Email", "Password", "UpdateDate", "UpdateUser", "Username" },
+                values: new object[] { new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), "", new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(133), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), "murat@ulkubilgisayar.com", "Admin", new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(134), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), "Admin" });
 
             migrationBuilder.InsertData(
                 table: "UserRoles",
                 columns: new[] { "RoleId", "UserId", "CreateDate", "CreateUser", "Id", "UpdateDate", "UpdateUser" },
-                values: new object[] { new Guid("b47d4a53-b042-47ff-9af8-82046f5950e0"), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6690), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b"), new Guid("366290ae-3504-471c-9d58-7884f5deb0f0"), new DateTime(2023, 10, 16, 19, 31, 22, 83, DateTimeKind.Local).AddTicks(6691), new Guid("085d5805-7b6d-40cc-9575-1e677580fd4b") });
+                values: new object[] { new Guid("c226ba28-e656-46c9-b8b5-465edf0dffa3"), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(151), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), new Guid("4666365f-014c-4fc7-87f4-4dfe96174263"), new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(151), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39") });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BankParameters_BankId",
+                name: "IX_BankParameters_BankCardId",
                 table: "BankParameters",
-                column: "BankId");
+                column: "BankCardId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CreditCardInstallments_BankCardId",
@@ -502,9 +566,24 @@ namespace B2B.Migrations
                 column: "CardBrandId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PaymentTransactions_BankId",
+                name: "IX_FirmDocs_ProductId",
+                table: "FirmDocs",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PaymentTransactions_BankCardId",
                 table: "PaymentTransactions",
-                column: "BankId");
+                column: "BankCardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PriceLists_ProductId",
+                table: "PriceLists",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductAmounts_ProductId",
+                table: "ProductAmounts",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
@@ -515,6 +594,11 @@ namespace B2B.Migrations
                 name: "IX_VirtualPos_BankCardId",
                 table: "VirtualPos",
                 column: "BankCardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VirtualPos_CardBrandId",
+                table: "VirtualPos",
+                column: "CardBrandId");
         }
 
         /// <inheritdoc />
@@ -536,6 +620,12 @@ namespace B2B.Migrations
                 name: "CreditCardPrefixes");
 
             migrationBuilder.DropTable(
+                name: "DocumentNo");
+
+            migrationBuilder.DropTable(
+                name: "FirmDocs");
+
+            migrationBuilder.DropTable(
                 name: "FirmParams");
 
             migrationBuilder.DropTable(
@@ -545,7 +635,7 @@ namespace B2B.Migrations
                 name: "PriceLists");
 
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "ProductAmounts");
 
             migrationBuilder.DropTable(
                 name: "UserRoles");
@@ -555,6 +645,9 @@ namespace B2B.Migrations
 
             migrationBuilder.DropTable(
                 name: "CreditCards");
+
+            migrationBuilder.DropTable(
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Roles");

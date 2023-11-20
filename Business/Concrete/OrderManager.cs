@@ -20,16 +20,44 @@ namespace Business.Concrete
             _basketRepository = basketRepository;
         }
 
-        public void AddProduct(User user, Product product, double amount, double price)
+      
+
+        public void AddProduct(User user, Product product, double amount, double price,string docNo)
         {
-            _basketRepository.Insert(user,product,amount,price,1,0,0,0);
+            _basketRepository.Insert(user, product, amount, price, product.SellVat ?? 0, (price * product.SellVat ?? 0) / 100, 0, 0, docNo);
         }
 
         public List<Basket> GetAll(User user)
         {
             if (user != null)
-            return _basketRepository.GetAll(user.Id).ToList();
-            return null;
+            Basket= _basketRepository.GetAll(user.Id).ToList();
+            return Basket;
+            
+        }
+
+        public List<Basket> GetAll(Guid userId)
+        {
+            return _basketRepository.GetAll(userId).Where(x=>x.Send == true).ToList();
+        }
+
+        public void DeleteProduct(Basket basket)
+        {
+            _basketRepository.Delete(basket);
+            
+        }
+
+        public void DeleteBasket(Guid guid)
+        {
+            _basketRepository.Delete(guid);
+        }
+
+        public void UpdateBasket(Basket basket) {
+            _basketRepository.Update(basket);
+        }
+
+        public List<Basket> GetAllBasket()
+        {
+           return _basketRepository.GetAll().Where(x=>x.Send == true).ToList();
         }
     }
 }

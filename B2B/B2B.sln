@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "..\DataAccess
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Business", "..\Business\Business.csproj", "{300191DB-C1E7-46A0-802A-CFD43DD17E4B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SanalMagaza.CCPayment", "..\3DPayment\SanalMagaza.CCPayment.csproj", "{8BA780BF-C9DB-4483-BF29-97D83005B401}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{300191DB-C1E7-46A0-802A-CFD43DD17E4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{300191DB-C1E7-46A0-802A-CFD43DD17E4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{300191DB-C1E7-46A0-802A-CFD43DD17E4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BA780BF-C9DB-4483-BF29-97D83005B401}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BA780BF-C9DB-4483-BF29-97D83005B401}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BA780BF-C9DB-4483-BF29-97D83005B401}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BA780BF-C9DB-4483-BF29-97D83005B401}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -12,15 +12,16 @@
 
     [Parameter, EditorRequired] public List<TItem> Items { get; set; }
 
-    [Parameter] public string Selected { get; set; }
+    //[Parameter] public string Selected { get; set; }
+    [Parameter] public object Selected{ get; set; }
     [Parameter, EditorRequired] public string DisplayField { get; set; }
     [Parameter, EditorRequired] public string ValueField { get; set; }
 
-    [Parameter] public EventCallback<string> SelectedChanged { get; set; }
+    [Parameter] public EventCallback<object> SelectedChanged { get; set; }
 
     private async Task Update(ChangeEventArgs e)
     {
-        await SelectedChanged.InvokeAsync((string)e.Value); 
+        await SelectedChanged.InvokeAsync(e.Value); 
     }
 
     private string Text(TItem item,string columnName)

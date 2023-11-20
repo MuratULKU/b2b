@@ -20,6 +20,6 @@ namespace Business.Abstract
       
         Task<CreditCard> GetCreditCardByPrefix(string prefix,
             bool includeInstallments = false);
-        Task<List<BankParameter>> GetBankParameters(int bankId);
+        Task<List<BankParameter>> GetBankParameters(Guid bankId);
     }
 }

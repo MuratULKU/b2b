@@ -1,6 +1,7 @@
 ﻿@page "/creditcard"
 @using DataAccess.Abstract;
 @using Entity;
+@attribute [Authorize]
 @inject ICreditCardRepository creditCardRepository;
 <div class="container">
     <div class="row">

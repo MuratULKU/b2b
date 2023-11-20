@@ -31,10 +31,16 @@
             <input class="form-control" @bind-value="user.Password"/>
         </div>
         <div class="col-5">
+            <label>Muhasebe Programı Cari Hesap Kodu</label>
+        </div>
+        <div class="col-7">
+            <input class="form-control" @bind-value="user.AccountCode" />
+        </div>
+        <div class="col-5">
             <label>Kullanıcı Rolü</label>
         </div>
         <div class="col-7">
-            <SelectList TItem="Role" Items="userRole" Selected="@selectedRole.ToString()" DisplayField="RoleName" ValueField="Id" SelectedChanged="(e)=>selectedRole = new Guid(e)" />
+            <SelectList TItem="Role" Items="userRole" Selected="@selectedRole.ToString()" DisplayField="RoleName" ValueField="Id" SelectedChanged="(e)=>selectedRole = new Guid(e.ToString())" />
         </div>
     </div>
     <div class="col-5 my-3"></div>
@@ -67,6 +73,7 @@
         if(id == Guid.Empty)
         {
             user.Id = Guid.NewGuid();
+            user.AccountCode = userManager.User.AccountCode;
             user.CreateDate = DateTime.Now;
             user.UpdateDate = DateTime.Now;
             user.CreateUser = userManager.User.Id;

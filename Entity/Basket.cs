@@ -11,6 +11,8 @@ namespace Entity
         public Guid UserGuid { get; set; }  
         public DateTime Date_ { get; set; }
         public int LineNUmber { get; set; }
+
+        public string DocNo { get; set; }
         public Guid ProductGuid { get; set; }
         public string ProductCode { get; set; }
         public string ProductName { get; set; } 
@@ -21,5 +23,11 @@ namespace Entity
         public double VatPrice { get; set; }
         public double DiscountRate { get; set; }
         public double DiscountPrice { get; set; }
+        public bool Send { get; set; }
+        public double Total
+        {
+            get;set;
+        }
+        
     }
 }

@@ -10,7 +10,7 @@ using DataAccess.EFCore;
 
 namespace DataAccess.Concrete
 {
-    public class BankCardRepository:IBankCardRepository
+    public class BankCardRepository : IBankCardRepository
     {
         private readonly RepositoryContext _dataContext;
         public BankCardRepository(RepositoryContext dataContext)
@@ -63,15 +63,12 @@ namespace DataAccess.Concrete
             return c;
         }
 
-      
-        public Task<List<BankParameter>> GetBankParameters(int bankId)
-        {
-            if (bankId == 0)
-                return Task.FromResult(Array.Empty<BankParameter>().ToList());
 
+        public Task<List<BankParameter>> GetBankParameters(Guid bankId)
+        {
             return _dataContext.BankParameters
-                .Where(bp => bp.BankCardId.Equals(bankId))
-                .ToListAsync();
+              .Where(bp => bp.BankCardId.Equals(bankId))
+              .ToListAsync();
         }
 
         public Task<BankCard> GetBank(Guid id)
@@ -82,13 +79,25 @@ namespace DataAccess.Concrete
         public Task<BankCard> GetBankbyCode(int Code)
         {
             return _dataContext.BankCards
-                .Include(x=>x.CreditCards)
+                .Include(x => x.CreditCards)
                 .FirstOrDefaultAsync(x => x.BankCode == Code);
         }
 
         public Task<BankCard> GetBank(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public Task<List<CardBrand>> GetCardBrandById(int brandCode)
+        {
+            return _dataContext.CardBrands.Where(x => x.Code == brandCode)
+                .ToListAsync();
+        }
+
+        public Task<List<CardBrand>> GetCardBrand()
+        {
+            return _dataContext.CardBrands
+               .ToListAsync();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Entity
         public string? ReferenceNumber { get; set; }
         public string? UserIpAddress { get; set; }
         public string? UserAgent { get; set; }
-        public int BankCardId { get; set; }
+        public Guid BankCardId { get; set; }
         public string? CardPrefix { get; set; }
         public string? CardHolderName { get; set; }
         public int Installment { get; set; }
@@ -28,7 +28,7 @@ namespace Entity
         public string? BankRequest { get; set; }
         public string? BankResponse { get; set; }
         public string? MaskedCardNumber { get; set; }
-        public BankCard Bank { get; set; }
+        public BankCard BankCard { get; set; }
 
         public PaymentStatus Status
         {

@@ -16,6 +16,10 @@ namespace Entity
         public int Currency { get; set; }
         public string ProductCode { get; set; }
         public int Priorty { get; set; }
+       public Guid ProductId { get; set; }
 
+        public Product Product { get; set; }    
+
+        
     }
 }

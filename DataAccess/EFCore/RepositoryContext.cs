@@ -21,6 +21,9 @@ namespace DataAccess.EFCore
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
         public DbSet<VirtualPos> VirtualPos { get; set; }
         public DbSet<CardBrand> CardBrands { get; set; }
+        public DbSet<ProductAmount> ProductAmounts { get; set; }
+        public DbSet<FirmDoc> FirmDocs { get; set; }
+        public DbSet<DocumentNo> DocumentNo { get; set; }
         public RepositoryContext(DbContextOptions<RepositoryContext> options) : base(options)
         {
 
@@ -48,19 +51,14 @@ namespace DataAccess.EFCore
                 );
             modelBuilder.Entity<User>()
                 .HasData(
-                new { Id = userId, Username = "Admin", Password = "Admin", Email = "murat@ulkubilgisayar.com", CreateUser = userId, UpdateUser = userId, CreateDate = DateTime.Now, UpdateDate = DateTime.Now }
+                new { Id = userId, Username = "Admin", Password = "Admin", Email = "murat@ulkubilgisayar.com", AccountCode = "" ,CreateUser = userId, UpdateUser = userId, CreateDate = DateTime.Now, UpdateDate = DateTime.Now }
                 );
             modelBuilder.Entity<UserRole>()
                  .HasData(
                 new { Id = Guid.NewGuid(), UserId = userId, RoleId = roleId, CreateUser = userId, UpdateUser = userId, CreateDate = DateTime.Now, UpdateDate = DateTime.Now }
             );
-            modelBuilder.Entity<FirmParam>()
-                .HasData(
-                new { Id = Guid.NewGuid(), CreateUser = userId, UpdateUser = userId, CreateDate = DateTime.Now, UpdateDate = DateTime.Now, FirmId = 1, SyncMinute = 60 });
-
-
-
-
+            modelBuilder.Entity<FirmParam>().HasKey(no=>no.Key);
+            modelBuilder.Entity<DocumentNo>().HasKey(type =>type.DocType);
         }
     }
 }

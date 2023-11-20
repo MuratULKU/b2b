@@ -6,7 +6,8 @@
 @using Business.Concrete;
 @using DataAccess.Abstract;
 @using Entity;
-
+@using System.Text;
+@attribute [Authorize]
 @inject IBankCardRepository bankCardRepository
 @inject IVirtualPosService virtualPosService
 @inject FirmParameterService param
@@ -29,7 +30,13 @@
             <label>Banka Adı</label>
         </div>
         <div class="col-8">
-            <SelectList TItem="BankCard" Items="bankCardList" DisplayField="Name" ValueField="Id" SelectedChanged="(e)=>virtualPos.BankCardId = new Guid(e)"></SelectList>
+            <SelectList TItem="BankCard" Items="bankCardList" DisplayField="Name" ValueField="Id" SelectedChanged="(e)=>virtualPos.BankCardId = new Guid(e.ToString())"></SelectList>
+        </div>
+        <div class="col-4">
+            <label>Üyesi Olduğu Kart Sistemi Adı</label>
+        </div>
+        <div class="col-8">
+            <SelectList TItem="CardBrand" Items="brandCardList" DisplayField="Name" ValueField="Id" @bind-Selected="ParamValue"></SelectList>
         </div>
         <div class="col-4">
             <label>Muhasebe Kodu</label>
@@ -48,20 +55,37 @@
 
 @code {
     private List<BankCard> bankCardList { get; set; }
+    private List<CardBrand> brandCardList{ get; set; }
+
     [Parameter]
     public Guid selectedGuid { get; set; }
     private VirtualPos virtualPos { get; set; } = new();
 
     private BankCard selectedBankCard { get; set; }
+    private CardBrand selectedBrandCard { get; set; }
 
     protected override void OnInitialized()
     {
         bankCardList = bankCardRepository.GetAllBank();
+        brandCardList = bankCardRepository.GetCardBrand().Result;
     }
 
     private async void SelectVirtualPos(Guid selectedbank)
     {
         virtualPos = await virtualPosService.GetVirtualPosAsync(selectedGuid);
+
+    }
+
+    private object ParamValue
+    {
+        get
+        {
+            return virtualPos.CardBrandId;
+        }
+        set
+        {
+            virtualPos.CardBrandId = new Guid(value.ToString());
+        }
 
     }
 
@@ -73,6 +97,7 @@
             virtualPos.UpdateUser = userManager.User.Id;
             virtualPos.CreateDate = DateTime.Now;
             virtualPos.UpdateDate = DateTime.Now;
+          
             virtualPosService.CreateVirtualPos(virtualPos);
             navManager.NavigateTo("/virtualpos");
         }
@@ -80,6 +105,7 @@
         {
             virtualPos.UpdateDate = DateTime.Now;
             virtualPos.UpdateUser = userManager.User.Id;
+          
             virtualPosService.UpdateVirtualPos(virtualPos);
             navManager.NavigateTo("/virtualpos");
         }

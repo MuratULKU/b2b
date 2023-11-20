@@ -14,7 +14,7 @@
             Kullanıcı Girişi
         </div>
         <div class="card-body">
-            <div class="row">
+            <div class="row my-1">
                 <div class="col-5">
                     <span>Kullanıcı Adı</span>
                 </div>
@@ -22,7 +22,7 @@
                     <input name="UserName" @bind="model.Username" />
                 </div>
             </div>
-            <div class="row">
+            <div class="row my-1">
                 <div class="col-5">
                     <span>Kullanıcı Şifresi</span>
                 </div>
@@ -71,7 +71,7 @@
         var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
         customAuthStateProvider.UpdateAuthenticationState(new UserSession
             {
-                UserName = model.Username,
+                UserName = user.Username,
                 Role = roles
             });
         _userManager.User = user;

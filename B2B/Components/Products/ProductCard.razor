@@ -1,25 +1,55 @@
 ﻿@using Entity;
 <div class="col-md-4 my-3">
-    <div class="card" style="witdh:18 rem">
-        <img src="..." class="card-img-top" alt="..." />
+    <div class="card" style="width:18 rem; height:25 rem;">
+        <div style="height:200px;">
+        <img src="@Image(product)" class="card-img-top" alt="..." style="background-size:cover" />
+        </div>
         <div class="card-body">
-            <h5 class="card-title">@product.Code</h5>
+            <h5 class="card-title"><label>Stok Durumu : </label>@Miktar1(product)</h5>
             <p class="card-text">@product.Name</p>
-            <a href="#" class="btn btn-primary">Urüne Git</a>
-            <a onclick="@AddProduct" class="btn btn-secondary">Ürün Ekle</a>
+            <div class="row">
+                <div class="col-8">
+                    <p class="card-text">@Fiyat1(product)</p>
+                </div>
+                <div class="col-4">
+                    <button type="button" onclick="@AddProduct">
+                        <span class="oi oi-cart" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 @code {
     [CascadingParameter(Name = "Product")]
-    private Product? product{ get; set; }
+    private Product? product { get; set; }
 
-    [CascadingParameter] 
+    [CascadingParameter]
     public ProductsMain? mainparent { get; set; } //üst class referans
 
     private void AddProduct()
     {
-        mainparent?.AddOrder(product!);
+        mainparent?.AddOrder(product!,1,product.PriceLists[0].Price);
+    }
+
+    private string Fiyat1(Product t)
+    {
+        return t.ProductAmounts.Count > 0 ? t.PriceLists[0].Price.ToString() : string.Empty;
+    }
+    private string Miktar1(Product t)
+    {
+        return t.ProductAmounts.Count > 0 ? t.ProductAmounts[0].OnHand.ToString() : string.Empty;
+    }
+
+    private string Image(Product t)
+    {
+        if (t.firmDocs?.Count > 0)
+        {
+            var result = "data:image/jpg;base64,";
+            result += Convert.ToBase64String(t.firmDocs[0].LData);
+            return result;
+        }
+        return "data:image/jpg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAARABADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKACiiigD/9k=";
     }
 }

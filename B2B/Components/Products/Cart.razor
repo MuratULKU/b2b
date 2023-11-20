@@ -1,41 +1,133 @@
 ﻿@page "/cart"
+@using B2B.Components.Confirm
 @using B2B.Data;
 @using Business.Abstract;
 @using Business.Concrete;
 @using Entity;
 @inject IOrderService orderService
 @inject UserManager userService
+
 @attribute [Authorize]
-@if(baskets != null)
+@if (baskets != null)
 {
-  <table>
-      <tr>
-          <th>Stok Kodu</th>
-          <th>Stok Adı</th>
-          <th>Miktar</th>
-          <th>Fiyat</th>
-      </tr>
-      @foreach (var item in baskets)
-        {
-            <tr>
-                <td>@item.ProductCode</td>
-                <td>@item.ProductName</td>
-                <td>@item.Amount</td>
-                <td>@item.Price</td>
-            </tr>
-        }
-  </table>
+    <div class="container">
+        <div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Görsel</th>
+                        <th>Ürün</th>
+                        <th>Stok</th>
+                        <th>KDV</th>
+                        <th>Miktar</th>
+                        <th>Birim Fiyat</th>
+                        <th>Tutar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in baskets)
+                    {
+                        <tr>
+                            <td>Görsel</td>
+                            <td>@item.ProductName</td>
+                            <td class="text-right">@item.Amount.ToString("N2")</td>
+                            <td class="text-right">@item.VatRate</td>
+                            <td>Stok Miktarı</td>
+                            <td class="text-right">@item.Price.ToString("N2")</td>
+                            <td class="text-right">@item.Total.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="row">
+                <div class="col-md-7" style="margin-top:20px;">
+                   <label>Açıklama</label>
+                   <input class="form-control" type="text">
+                    </div>
+                <div class="col-md-5">
+                    <table class="table">
+                        <thead>
+                            <tr class="text-left">
+                                <th class="text-left">Alt Toplam</th>
+                                <th class="text-left">Tutar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="width:200px;">
+                                <td class="text-left">Ara Toplam</td>
+                                <td class="text-right">@baskets.Sum(x=>x.Total).ToString("N2")</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Vergi Tutarı</td>
+                                <td class="text-right">@baskets.Sum(x=>x.VatPrice).ToString("N2")</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Genel Toplam</td>
+                                <td class="text-right">@baskets.Sum(x=>x.Total + x.VatPrice).ToString("N2")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="row">
+                <div class="col-7">
+                    <button class="btn btn-primary">Sepeti Güncelle</button>
+                    <button class="btn btn-primary">Sepeti Boşalt</button>
+                </div>
+                <div class="col-5" style="text-align:right;">
+                    <button class="btn btn-danger" onclick="@SendData">Siparişi Tamamla</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 else
 {
     <label>Sepet Boş</label>
 }
-
+<Confirm @ref="ConfirmRef" ConfirmationChanged="ConfirmDeleteBasket"></Confirm>
 @code {
     private List<Basket> baskets { get; set; }
-
+    private Basket selectedBasket;
+    private Confirm ConfirmRef;
     protected override void OnInitialized()
     {
-        baskets = orderService.GetAll(userService.User);
+        baskets = orderService.GetAll(userService.User).Where(x=>x.Send == false).ToList();
     }
+    private void LineDelete(MouseEventArgs e)
+    {
+        if (selectedBasket != null)
+        {
+            orderService.DeleteProduct(selectedBasket);
+            baskets = orderService.GetAll(userService.User);
+        }
+    }
+    private void BasketDelete(MouseEventArgs e)
+    {
+        ConfirmRef.BodyText = "Sepetteki Tüm Ürünler Silinecek Onaylıyormusunuz.?";
+        ConfirmRef.Show();
+    }
+
+    private void ConfirmDeleteBasket(bool confirm)
+    {
+        if (confirm)
+        {
+            orderService.DeleteBasket(userService.User.Id);
+            baskets = orderService.GetAll(userService.User);
+        }
+    }
+
+    private void SendData()
+    {
+        foreach (var basket in baskets)
+        {
+            basket.Send = true;
+            orderService.UpdateBasket(basket);
+        }
+       
+    }
+
 }

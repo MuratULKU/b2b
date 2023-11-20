@@ -22,5 +22,9 @@
         public decimal? Unit2rate { get; set; }
         public string? Unit3 { get; set; }
         public decimal? Unit3rate { get; set; }
+        
+        public List<ProductAmount> ProductAmounts { get; set; }
+        public List<PriceList> PriceLists { get; set; }
+        public List<FirmDoc>? firmDocs { get; set; }
     }
 }

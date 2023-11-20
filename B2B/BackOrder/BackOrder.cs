@@ -1,5 +1,7 @@
 ﻿using B2B.Data;
+using Business.Concrete;
 using DataAccess.Abstract;
+using System.Text;
 
 namespace B2B.BackOrder
 {
@@ -10,14 +12,19 @@ namespace B2B.BackOrder
         private readonly IBackOrderCategoryService _categoryService;
         private readonly FirmParameterService _firmParameterService;
         private readonly IBackOrderPriceListService _priceListRepository;
+        private readonly IBackOrderProductAmountService _productAmountRepository;
+        private readonly IBackOrderOder _backOrderOder;
 
-        public BackOrder(ILogger<BackOrder> logger, IBackOrderProductService productService, IBackOrderCategoryService categoryService, FirmParameterService firmParameterService, IBackOrderPriceListService priceListRepository)
+
+        public BackOrder(ILogger<BackOrder> logger, IBackOrderProductService productService, IBackOrderCategoryService categoryService, FirmParameterService firmParameterService, IBackOrderPriceListService priceListRepository, IBackOrderProductAmountService productAmountRepository, IBackOrderOder backOrderOder)
         {
             _logger = logger;
             _productService = productService;
             _categoryService = categoryService;
             _firmParameterService = firmParameterService;
             _priceListRepository = priceListRepository;
+            _productAmountRepository = productAmountRepository;
+            _backOrderOder = backOrderOder;
         }
 
 
@@ -29,13 +36,17 @@ namespace B2B.BackOrder
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                DateTime? lastUpdateDate = _firmParameterService.FirmParam.LastSync;
+                DateTime? lastUpdateDate = Convert.ToDateTime( Encoding.UTF8.GetString(((byte[])_firmParameterService.Get(8))));
                 DateTime updatedate = DateTime.Now;
-                _categoryService.updateCategory(lastUpdateDate);
+                await _categoryService.updateCategory(lastUpdateDate);
                 await _productService.updateProducts(lastUpdateDate);
                 _priceListRepository.updatePrice(lastUpdateDate);
-                _firmParameterService.SetLastUpdate(updatedate);
-                 await Task.Delay(300000, stoppingToken);
+                _productAmountRepository.updateProducts(lastUpdateDate);
+                _backOrderOder.SentData();
+                _firmParameterService.Set(8, updatedate);
+                var time = Convert.ToInt32(Encoding.UTF8.GetString((byte[])_firmParameterService.Get(18)));
+
+                await Task.Delay(60000*time, stoppingToken); 
             }
         }
     }

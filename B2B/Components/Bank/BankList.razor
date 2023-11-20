@@ -1,27 +1,28 @@
 ﻿@page "/bank"
 @using Business.Abstract;
 @using Entity;
+@attribute [Authorize]
+<div class="container">
+    <DataGrid @ref="dataGridRef"
+              TItem="BankCard"
+              Data="@bankCardList"
+              @bind-SelectedRow="selectBankCard"
+                Editable
+                Responsive
+                ShowPager
+              CommandMode="DataGridCommandMode.ButtonRow"
+              PageSize="10">
 
-<DataGrid @ref="dataGridRef"
-          TItem="BankCard"
-          Data="@bankCardList"
-          @bind-SelectedRow="selectBankCard"
-          Editable
-          Responsive
-          ShowPager
-          CommandMode="DataGridCommandMode.ButtonRow"
-          PageSize="10">
+        <DataGridColumns>
+            <DataGridCommandColumn />
 
-    <DataGridColumns>
-        <DataGridCommandColumn />
+            <DataGridColumn Field="@nameof(BankCard.BankCode)" Caption="Banka Kodu" Sortable="true" />
+            <DataGridColumn Field="@nameof(BankCard.Name)" Caption="Banka Adı" Sortable="true" Editable />
 
-        <DataGridColumn Field="@nameof(BankCard.BankCode)" Caption="Banka Kodu" Sortable="true" />
-        <DataGridColumn Field="@nameof(BankCard.Name)" Caption="Banka Adı" Sortable="true" Editable />
+        </DataGridColumns>
 
-    </DataGridColumns>
-
-</DataGrid>
-
+    </DataGrid>
+</div>
 @code {
     [Inject]
     IBankCardService bankCardService { get; set; }

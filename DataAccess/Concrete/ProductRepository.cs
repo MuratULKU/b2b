@@ -20,12 +20,16 @@ namespace DataAccess.Concrete
         public List<Product> GetAll()
         {
             return _dbContext.Products
+                .Include(x=>x.ProductAmounts)
+                .Include(x=>x.PriceLists)
                 .ToList();
         }
 
         public List<Product> GetAll(int currentPage, int pageSize)
         {
             return _dbContext.Products
+                .Include(x=>x.ProductAmounts)
+                .Include(x => x.PriceLists  )
                 .Skip((currentPage - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -36,10 +40,13 @@ namespace DataAccess.Concrete
             return
                 parameter.CategoryId == 0
                  ? _dbContext.Products
+                 .Include(x=>x.ProductAmounts)
+                 .Include(x=>x.PriceLists)
+                 .Include(x=>x.firmDocs)
                 .Skip((parameter.CurrentPage - 1) * parameter.PageSize)
                 .Take(parameter.PageSize)
                 .ToList()
-                : _dbContext.Products
+                : _dbContext.Products.Include(x => x.ProductAmounts) .Include(x => x.PriceLists )
                 .Skip((parameter.CurrentPage - 1) * parameter.PageSize)
                 .Take(parameter.PageSize)
                 .Where(x => x.ParentRef == parameter.CategoryId)
@@ -48,7 +55,9 @@ namespace DataAccess.Concrete
 
         public async Task<Product> GetByCode(string code)
         {
-            return await _dbContext.Products.FirstOrDefaultAsync(x => x.Code == code);
+            return await _dbContext.Products
+                .Include(x=>x.firmDocs)
+                .FirstOrDefaultAsync(x => x.Code == code);
         }
 
         public async Task<Product> GetByLogicalref(int logicalref)
@@ -70,7 +79,7 @@ namespace DataAccess.Concrete
 
         public void Update(Product product)
         {
-            _dbContext.Update(product);
+            _dbContext.Products.Update(product);
             _dbContext.SaveChanges();
         }
     }

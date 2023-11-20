@@ -13,37 +13,53 @@
 @inject IProductRepository _productrepository
 @inject IOrderService _orderService
 @inject UserManager _userManager
+@inject IFirmParamService firmParamService
+@inject IDocumentNoRepository _docNoService;
 <div class="container">
-    <div class="topbar">
-        <div class="icon">
-            <svg color="@(view==0 ? "#007bee":"gray")" onclick="@ClickCardView" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="grid-2" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-grid-2 fa-lg"><path fill="currentColor" d="M224 80c0-26.5-21.5-48-48-48H80C53.5 32 32 53.5 32 80v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V80zm0 256c0-26.5-21.5-48-48-48H80c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V336zM288 80v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48H336c-26.5 0-48 21.5-48 48zM480 336c0-26.5-21.5-48-48-48H336c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V336z" class=""></path></svg>
+    @if (!firmParamService.ToBoolean(16))
+    {
+        <div class="topbar">
+            <div class="icon">
+                <svg color="@(view==0 ? "#007bee":"gray")" onclick="@ClickCardView" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="grid-2" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-grid-2 fa-lg"><path fill="currentColor" d="M224 80c0-26.5-21.5-48-48-48H80C53.5 32 32 53.5 32 80v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V80zm0 256c0-26.5-21.5-48-48-48H80c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V336zM288 80v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48H336c-26.5 0-48 21.5-48 48zM480 336c0-26.5-21.5-48-48-48H336c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V336z" class=""></path></svg>
+            </div>
+            <div class="icon">
+                <svg color="@(view==1 ? "#007bee":"gray")" onclick="@ClickDataView" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="list-ul" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-list-ul fa-lg"><path fill="currentColor" d="M64 144a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM64 464a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm48-208a48 48 0 1 0 -96 0 48 48 0 1 0 96 0z" class=""></path></svg>
+            </div>
         </div>
-        <div class="icon">
-            <svg color="@(view==1 ? "#007bee":"gray")" onclick="@ClickDataView" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="list-ul" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-list-ul fa-lg"><path fill="currentColor" d="M64 144a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM64 464a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm48-208a48 48 0 1 0 -96 0 48 48 0 1 0 96 0z" class=""></path></svg>
-        </div>
-    </div>
-    <div class="row">
-        <div class="leftside col-md-3 my-3">
-            <B2B.Components.PanelMenu.PanelMenu DataList="dataList" SelectItemChange="ChanegedCategory" />
-        </div>
-        <div class="main col-md-9">
-            @if (view == 0)
+        <div class="row">
+            @if (dataList.Count > 0)
             {
-                <CascadingValue Value="this"> <!--parametre olarak bu class ı gönderiyoruz-->
-                    <CardGridView Data="(List<Product>)pdata.Results" />
-                </CascadingValue>
+                <div class="leftside col-md-3 my-3">
+                    <B2B.Components.PanelMenu.PanelMenu DataList="dataList" SelectItemChange="ChanegedCategory" />
+                </div>
             }
-            else if (view == 1)
-            {
-                <DataGridView Data="(List<Product>)pdata.Results" />
-            }
-            else
-            {
-                <p>Hatalı Görünüm Parametresi</p>
-            }
-            <Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="requestParameter.PageSize" RowCount="requestParameter.PageSize" OnPageSizeChanged="pageSizeOnchanged" />
+            <div class="main col-md-9">
+                @if (view == 0)
+                {
+                    <CascadingValue Value="this">
+                        <!--parametre olarak bu class ı gönderiyoruz-->
+                        <CardGridView Data="(List<Product>)pdata.Results" />
+                    </CascadingValue>
+                }
+                else if (view == 1)
+                {
+                    <CascadingValue Value="this">
+                        <DataGridView Data="(List<Product>)pdata.Results" />
+                    </CascadingValue>
+                }
+                else
+                {
+                    <p>Hatalı Görünüm Parametresi</p>
+                }
+                <Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="requestParameter.PageSize" RowCount="requestParameter.PageSize" OnPageSizeChanged="pageSizeOnchanged" />
+            </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <label>Bakım Modunda Sipariş Verilemez</label>
+    }
+
 </div>
 
 
@@ -55,7 +71,7 @@
     private ProductRequestParameter requestParameter = new ProductRequestParameter();
     protected PagedResult<Product> pdata = new();
     private List<MenuItemModel>? dataList;
-
+    private string docNo;
     private void ClickCardView()
     {
         view = 0;
@@ -91,6 +107,7 @@
     protected override void OnInitialized()
     {
         dataList = loadMenuItem(1);
+        view = firmParamService.ToInteger(17);
         pdata.Results = _productrepository.GetAll(requestParameter);
     }
 
@@ -109,11 +126,24 @@
 
     //ürün eklendiği zaman sepete ekleme işi burdan yapılacak
     //child componentden çağrılıyor....
-    public void AddOrder(Product product)
+    public void AddOrder(Product product,double amount, double price)
     {
-        if(product!= null)
+        if (product != null)
         {
-            _orderService.AddProduct(_userManager.User, product, 1, 1);
+            if (docNo == null || docNo == string.Empty)
+            {
+                var basket = _orderService.GetAll(_userManager.User.Id).FirstOrDefault(x=>x.Send == false);
+                if(basket == null)
+                {
+                    docNo = _docNoService.GetDocNo(1).DocNo.ToString();
+                }
+                else
+                {
+                    docNo = basket.DocNo.ToString();
+                }
+            }
+
+            _orderService.AddProduct(_userManager.User, product, amount, price,docNo);
         }
         else
         {

@@ -1,26 +1,68 @@
 ﻿@using Entity;
-<table>
-    <tr>
-        <th>Görsel</th>
-        <th>Ürün</th>
-        <th>Stok</th>
-        <th>Özel Fiyat</th>
-        <th>Fiyat</th>
-        <th>Perakende Fiyat</th>
-    </tr>
-    @foreach (var item in Data)
-    {
+<table class="table">
+    
+    <thead class="thead-dark">
         <tr>
-            <td>görsel yok</td>
-            <td>@item.Name</td>
-            <td>1</td>
-            <td>5</td>
-            <td>6</td>
-            <td>7</td>
-        </tr>
-    }
+    <th scope="col">Görsel</th>
+    <th scope="col">Ürün</th>
+    <th scope="col">Stok</th>
+    <th scope="col">Özel Fiyat</th>
+    <th scope="col">Fiyat</th>
+    <th scope="col">Perakende Fiyat</th>
+    <th scope="col"></th>
+    </tr>
+    </thead>
+    
+    <tbody>
+        @foreach (var item in Data)
+        {
+            <tr>
+                <td><img width="50px" src="@Image(item)" /></td>
+                <td>@item.Name</td>
+                <td>@Miktar1(item) @item.Unit</td>
+                <td>@Fiyat1(item)</td>
+                <td>0</td>
+                <td>
+                    0
+                </td>
+                <td>
+                    <button type="button" onclick="@(()=>AddProduct(item))">
+                        <span class="oi oi-cart" aria-hidden="true"></span>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
 
 @code {
-    [Parameter] public List<Product> Data{ get; set; }
+    [Parameter] public List<Product> Data { get; set; }
+
+    [CascadingParameter]
+    public ProductsMain? mainparent { get; set; }
+
+    private string Miktar1(Product t)
+    {
+        return t.ProductAmounts.Count > 0 ? t.ProductAmounts[0].OnHand.ToString() : string.Empty;
+    }
+    private string Fiyat1(Product t)
+    {
+        return t.ProductAmounts.Count > 0 ? t.PriceLists[0].Price.ToString() : string.Empty;
+    }
+
+    private string Image(Product t)
+    {
+        if (t.firmDocs?.Count > 0)
+        {
+            var result = "data:image/jpg;base64,";
+            result += Convert.ToBase64String(t.firmDocs[0].LData);
+            return result;
+        }
+        return string.Empty;
+    }
+
+    private void AddProduct(Product product)
+    {
+        mainparent?.AddOrder(product,1,product.PriceLists[0].Price);
+    }
 }

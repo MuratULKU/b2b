@@ -43,7 +43,7 @@ namespace Business.Concrete
         {
             return bankCardRepository.GetBankbyCode(Code);
         }
-        public Task<List<BankParameter>> GetBankParameters(int bankId)
+        public Task<List<BankParameter>> GetBankParameters(Guid bankId)
         {
             return bankCardRepository.GetBankParameters(bankId);
         }

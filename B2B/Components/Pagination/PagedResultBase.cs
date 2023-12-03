@@ -11,7 +11,7 @@
         public bool HasNextPage => CurrentPage < PageCount;
         public int FirstRowOnPage
         {
-            get { return (CurrentPage - 1) * PageSize + 1; }
+            get {return (CurrentPage - 1) * PageSize + 1; }
         }
 
         public int LastRowOnPage

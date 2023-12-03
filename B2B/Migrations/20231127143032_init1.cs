@@ -139,8 +139,8 @@ namespace B2B.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     LogicalRef = table.Column<int>(type: "INTEGER", nullable: false),
-                    Code = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Code = table.Column<string>(type: "TEXT COLLATE NOCASE", nullable: false),
+                    Name = table.Column<string>(type: "TEXT COLLATE NOCASE", nullable: false),
                     ParentRef = table.Column<int>(type: "INTEGER", nullable: true),
                     Vat = table.Column<double>(type: "REAL", nullable: true),
                     SellVat = table.Column<double>(type: "REAL", nullable: true),
@@ -516,19 +516,19 @@ namespace B2B.Migrations
                 columns: new[] { "Id", "CreateDate", "CreateUser", "RoleName", "UpdateDate", "UpdateUser" },
                 values: new object[,]
                 {
-                    { new Guid("1e8aa23c-343f-48a8-aa6e-0a8cbf9232d6"), new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(99), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), "User", new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(100), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39") },
-                    { new Guid("c226ba28-e656-46c9-b8b5-465edf0dffa3"), new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(68), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), "Admin", new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(81), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39") }
+                    { new Guid("9401df5e-51c2-42ca-a08d-7878fc8a447e"), new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(833), new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"), "Admin", new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(848), new Guid("994fb179-7e63-4f69-b84a-492ac1d48008") },
+                    { new Guid("ad8064ec-cc84-4767-bd02-8e6251f27d21"), new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(908), new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"), "User", new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(910), new Guid("994fb179-7e63-4f69-b84a-492ac1d48008") }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "AccountCode", "CreateDate", "CreateUser", "Email", "Password", "UpdateDate", "UpdateUser", "Username" },
-                values: new object[] { new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), "", new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(133), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), "murat@ulkubilgisayar.com", "Admin", new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(134), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), "Admin" });
+                values: new object[] { new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"), "", new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(986), new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"), "murat@ulkubilgisayar.com", "Admin", new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(988), new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"), "Admin" });
 
             migrationBuilder.InsertData(
                 table: "UserRoles",
                 columns: new[] { "RoleId", "UserId", "CreateDate", "CreateUser", "Id", "UpdateDate", "UpdateUser" },
-                values: new object[] { new Guid("c226ba28-e656-46c9-b8b5-465edf0dffa3"), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(151), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"), new Guid("4666365f-014c-4fc7-87f4-4dfe96174263"), new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(151), new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39") });
+                values: new object[] { new Guid("9401df5e-51c2-42ca-a08d-7878fc8a447e"), new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"), new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(1023), new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"), new Guid("19cd1ab7-2db4-4ab2-aa8a-1fb10cd61831"), new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(1023), new Guid("994fb179-7e63-4f69-b84a-492ac1d48008") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_BankParameters_BankCardId",

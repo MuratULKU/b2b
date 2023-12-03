@@ -5,6 +5,7 @@
 @using Business.Concrete;
 @using DataAccess.Abstract;
 @using Entity;
+@attribute [Authorize(Roles = "Admin")]
 @inject IUserRepository userReposiyory
 @inject IRoleRepository roleRepository
 @inject IUserRoleRepository userRoleRepository
@@ -73,7 +74,6 @@
         if(id == Guid.Empty)
         {
             user.Id = Guid.NewGuid();
-            user.AccountCode = userManager.User.AccountCode;
             user.CreateDate = DateTime.Now;
             user.UpdateDate = DateTime.Now;
             user.CreateUser = userManager.User.Id;

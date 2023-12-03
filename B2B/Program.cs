@@ -15,6 +15,8 @@ using Microsoft.EntityFrameworkCore;
 using SanalMagaza.Business.Concrete;
 using SanalMagaza.DataAccess.Concrete;
 using _3DPayment;
+using System.Collections.ObjectModel;
+using B2B.Components.NotificationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +28,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<RepositoryContext>(options =>
 {
     options.EnableSensitiveDataLogging();
-    options.UseSqlite(builder.Configuration.GetConnectionString("sqlConnection"), b => b.MigrationsAssembly("B2B"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("sqlConnection"), b => b.MigrationsAssembly("B2B")
+
+    );  
+   
 });
 
 builder.Services
@@ -36,6 +41,8 @@ builder.Services
     })
     .AddBootstrapProviders()
     .AddFontAwesomeIcons();
+//notification service
+builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
@@ -65,6 +72,7 @@ builder.Services.AddScoped<IProductAmountRepository, ProductAmountRepository>();
 builder.Services.AddScoped<IFirmDocRepository, FirmDocRepository>();
 builder.Services.AddScoped<IDocumentNoRepository, DocumentNoRepository>();
 builder.Services.AddSingleton<PostFormService>();
+
 //back order services
 builder.Services.AddScoped<IOrderService, OrderManager>();
 builder.Services.AddSingleton<FirmParameterService>();

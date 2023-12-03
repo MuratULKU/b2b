@@ -42,17 +42,34 @@ namespace DataAccess.Concrete
            return _dbContext.Baskets.ToList();
         }
 
+        public List<Basket> GetAll(string DocNo)
+        {
+            return _dbContext.Baskets.Where(x => x.DocNo == DocNo).ToList();
+        }
+        public List<Basket> GetAllFiche(bool send)
+        {
+            return _dbContext.Baskets.Where(x=>x.Send == send).GroupBy(x => x.DocNo).
+                Select(grp => new Basket{
+                    DocNo = grp.Max(x=>x.DocNo),
+                    Amount = grp.Sum(x=>x.Amount),
+                    UserGuid = grp.Max(x=>x.UserGuid),
+                    Date_ = grp.Max(x=>x.Date_)
+                }).ToList();
+        }
+
         public Basket Insert(Basket basket)
         {
            _dbContext.Baskets.Add(basket);
+            _dbContext.SaveChanges();
             return basket;
         }
 
         public void Insert(User user, Product product, double amount, double price, double vatRate, double vatPrice, double discountRate, double discountPrize,string docNo)
         {
-            var basket = _dbContext.Baskets.Where(x=>x.ProductCode == product.Code && x.Send == false && x.UserGuid == user.Id)
-                .FirstOrDefault();
-            if(basket == null)
+            List<Basket>  baskets = _dbContext.Baskets.Where(x=>x.Send == false && x.UserGuid == user.Id)
+                .ToList();
+            Basket basket = baskets.Find(x => x.ProductCode == product.Code);
+            if ( basket == null)
             {
                 basket = new Basket();
                 basket.Id = Guid.NewGuid();
@@ -69,7 +86,8 @@ namespace DataAccess.Concrete
                 basket.UserGuid = user.Id;
                 basket.Total = basket.Amount * basket.Price;
                 basket.Date_ = DateTime.Now;
-                _dbContext.Baskets.Add(basket);
+                basket.LineNUmber = baskets.Count+1;
+                Insert(basket);
             }
             else
             {
@@ -77,9 +95,9 @@ namespace DataAccess.Concrete
                 basket.VatPrice += vatPrice;
                 basket.Total += basket.Price * basket.Amount;
                 basket.Date_ = DateTime.Now;
-                _dbContext.Baskets.Update(basket);
+                Update(basket);
             }
-            _dbContext.SaveChanges();
+        
         }
 
         public Basket Update(Basket basket)

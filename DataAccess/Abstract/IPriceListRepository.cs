@@ -16,6 +16,8 @@ namespace DataAccess.Abstract
         Task<PriceList> GetByCode(string code);
         Task<PriceList> GetByProductCode(string productCode);
         Task<PriceList> GetByProductCode(string productCode,int priorty);
+        Task<int> DeleteAll();
+
         
     }
 }

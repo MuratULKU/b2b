@@ -10,5 +10,6 @@ namespace DataAccess.Abstract
         void Update(Category category);
 
         Task<Category> GetByCode(string code);
+        Task<int> DeleteAll();
     }
 }

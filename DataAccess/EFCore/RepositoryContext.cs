@@ -5,6 +5,7 @@ namespace DataAccess.EFCore
 {
     public class RepositoryContext : DbContext
     {
+        
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
@@ -28,9 +29,10 @@ namespace DataAccess.EFCore
         {
 
         }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.UseCollation("NOCASE");
             var userId = Guid.NewGuid();
             var roleId = Guid.NewGuid();
             modelBuilder.Entity<UserRole>().HasKey(
@@ -59,6 +61,8 @@ namespace DataAccess.EFCore
             );
             modelBuilder.Entity<FirmParam>().HasKey(no=>no.Key);
             modelBuilder.Entity<DocumentNo>().HasKey(type =>type.DocType);
+            modelBuilder.Entity<Product>().Property(x => x.Name).HasColumnType("TEXT COLLATE NOCASE");
+            modelBuilder.Entity<Product>().Property(x => x.Code).HasColumnType("TEXT COLLATE NOCASE");
         }
     }
 }

@@ -2,6 +2,7 @@
     top:3px;
     background-color:rgb(245,245,245);
     margin:auto;
+    display:flex;
 }
 .icon{
     width:30px;
@@ -11,6 +12,48 @@
     vertical-align:sub;
    
 }
+.findarea {
+    display:inline-block;
+    width: 100%;
+    margin: auto;
+    vertical-align: super;
+    text-align:center;
+}
+input[type=text] {
+    
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+.findarea button
+{
+    order :1;
+}
+.findtext{
+   border-radius:10px;
+   border-color:blue;
+   height:38px;
+   width:60%;
+}
+.findbutton{
+    cursor:pointer;
+   margin-left:20px;
+}
 .icon:hover{
     cursor:pointer;
+}
+@media(min-width:641px){
+    
+    .icon {
+        display: inline-flex;
+    }
+
+}
+
+@media (max-width: 640.98px) {
+    
+    
+    .icon{
+        display:none;
+    }
 }

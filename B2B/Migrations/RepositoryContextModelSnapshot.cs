@@ -15,7 +15,9 @@ namespace B2B.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.11");
+            modelBuilder
+                .UseCollation("NOCASE")
+                .HasAnnotation("ProductVersion", "7.0.11");
 
             modelBuilder.Entity("Entity.BankCard", b =>
                 {
@@ -624,7 +626,7 @@ namespace B2B.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT COLLATE NOCASE");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("TEXT");
@@ -637,7 +639,7 @@ namespace B2B.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT COLLATE NOCASE");
 
                     b.Property<int?>("ParentRef")
                         .HasColumnType("INTEGER");
@@ -765,21 +767,21 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("c226ba28-e656-46c9-b8b5-465edf0dffa3"),
-                            CreateDate = new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(68),
-                            CreateUser = new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"),
+                            Id = new Guid("9401df5e-51c2-42ca-a08d-7878fc8a447e"),
+                            CreateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(833),
+                            CreateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
                             RoleName = "Admin",
-                            UpdateDate = new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(81),
-                            UpdateUser = new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39")
+                            UpdateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(848),
+                            UpdateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008")
                         },
                         new
                         {
-                            Id = new Guid("1e8aa23c-343f-48a8-aa6e-0a8cbf9232d6"),
-                            CreateDate = new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(99),
-                            CreateUser = new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"),
+                            Id = new Guid("ad8064ec-cc84-4767-bd02-8e6251f27d21"),
+                            CreateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(908),
+                            CreateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
                             RoleName = "User",
-                            UpdateDate = new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(100),
-                            UpdateUser = new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39")
+                            UpdateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(910),
+                            UpdateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008")
                         });
                 });
 
@@ -823,14 +825,14 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"),
+                            Id = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
                             AccountCode = "",
-                            CreateDate = new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(133),
-                            CreateUser = new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"),
+                            CreateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(986),
+                            CreateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
                             Email = "murat@ulkubilgisayar.com",
                             Password = "Admin",
-                            UpdateDate = new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(134),
-                            UpdateUser = new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"),
+                            UpdateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(988),
+                            UpdateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
                             Username = "Admin"
                         });
                 });
@@ -867,13 +869,13 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"),
-                            RoleId = new Guid("c226ba28-e656-46c9-b8b5-465edf0dffa3"),
-                            CreateDate = new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(151),
-                            CreateUser = new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39"),
-                            Id = new Guid("4666365f-014c-4fc7-87f4-4dfe96174263"),
-                            UpdateDate = new DateTime(2023, 11, 19, 15, 4, 7, 5, DateTimeKind.Local).AddTicks(151),
-                            UpdateUser = new Guid("064a3ac8-9505-4d43-8a4e-9c822cab7a39")
+                            UserId = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
+                            RoleId = new Guid("9401df5e-51c2-42ca-a08d-7878fc8a447e"),
+                            CreateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(1023),
+                            CreateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
+                            Id = new Guid("19cd1ab7-2db4-4ab2-aa8a-1fb10cd61831"),
+                            UpdateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(1023),
+                            UpdateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008")
                         });
                 });
 

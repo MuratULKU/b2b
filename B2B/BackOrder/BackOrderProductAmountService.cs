@@ -1,20 +1,21 @@
 ﻿using DataAccess.Abstract;
 using Entity;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace B2B.BackOrder
 {
     public interface IBackOrderProductAmountService
     {
-        Task<bool> isApiActiveted();
-        Task updateProducts(DateTime? date);
-
+        Task<bool> isApiActiveted(HttpClient _httpClient);
+        Task updateProducts(DateTime? date, HttpClient _httpClient);
+        Task deleteProducts();
     }
     public class BackOrderProductAmountService : IBackOrderProductAmountService
     {
         private readonly ILogger<BackOrderProductAmountService> _logger;
 
-        private HttpClient _httpClient = new HttpClient();
+       
         private readonly IServiceProvider _serviceProvider;
         private IProductAmountRepository _productAmountRepository;
         private IProductRepository _productRepository;
@@ -26,7 +27,15 @@ namespace B2B.BackOrder
 
         }
 
-        public async Task updateProducts(DateTime? date)
+        public Task deleteProducts()
+        {
+            using var scope = _serviceProvider.CreateScope();
+            _productAmountRepository = scope.ServiceProvider.GetRequiredService<IProductAmountRepository>();
+            _productAmountRepository.DeleteAll();
+            return Task.CompletedTask;
+        }
+
+        public async Task updateProducts(DateTime? date, HttpClient _httpClient)
         {
             try
             {
@@ -35,8 +44,7 @@ namespace B2B.BackOrder
                 _productAmountRepository = scope.ServiceProvider.GetRequiredService<IProductAmountRepository>();
                 _productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
                 HttpResponseMessage respone;
-                if (_httpClient.BaseAddress == null)
-                    _httpClient.BaseAddress = new Uri($"https://localhost:7079");
+                
                 if (date.HasValue)
                     respone = await _httpClient.GetAsync($"/api/productsamount/{date.Value.ToString("MM/dd/yyyy")}");
                 else
@@ -80,12 +88,10 @@ namespace B2B.BackOrder
             await Task.Delay(1);
         }
 
-        public async Task<bool> isApiActiveted()
+        public async Task<bool> isApiActiveted(HttpClient _httpClient)
         {
             try
             {
-                if (_httpClient.BaseAddress == null)
-                    _httpClient.BaseAddress = new Uri($"https://localhost:7079");
                 var respone = await _httpClient.GetAsync("/api/getallproducts");
                 if (respone.IsSuccessStatusCode)
                 {

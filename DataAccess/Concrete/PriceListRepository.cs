@@ -29,6 +29,12 @@ namespace DataAccess.Concrete
             return _dbContext.PriceLists.ToList();
         }
 
+        public async Task<int> DeleteAll()
+        {
+            _dbContext.PriceLists.ExecuteDelete();
+            return await _dbContext.SaveChangesAsync();
+        }
+
         public Task<PriceList> GetByCode(string code)
         {
             return _dbContext.PriceLists.FirstOrDefaultAsync(x=>x.Code == code);

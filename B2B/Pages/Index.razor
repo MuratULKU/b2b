@@ -1,23 +1,39 @@
 ﻿@page "/"
 @using System.Net;
-
+@using B2B.Components.Login;
+@inject NavigationManager navManager;
+@inject AuthenticationStateProvider authStateProvider
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
 
+<div style="width:50%">
+    <Carousel @bind-SelectedSlide="@selectedSlide" Crossfade>
+        <CarouselSlide Name="1">
+            <Image Source="/media/carousel/1.jpg" Text="Lights image" Display="Display.Block" Width="Width.Is100" />
+        </CarouselSlide>
+        <CarouselSlide Name="2">
+            <Image Source="/media/carousel/2.jpg" Text="Lights image" Display="Display.Block" Width="Width.Is100" />
+        </CarouselSlide>
+        <CarouselSlide Name="3">
+            <Image Source="/media/carousel/3.jpg" Text="Lights image" Display="Display.Block" Width="Width.Is100" />
+        </CarouselSlide>
+    </Carousel>
+</div>
 <AuthorizeView>
     <Authorized>
-        <SurveyPrompt Title="How is Blazor working for you?" />
+        <SurveyPrompt Title="Satış ve Tahsilat Sistemi " />
     </Authorized>
     <NotAuthorized>
         
-        Yetkisiz Kullanıcı
     </NotAuthorized>
 </AuthorizeView>
 
-Welcome to your new app.
-@code{
-   
+
+@code {
+    private string selectedSlide = "2";
+
+
+
 }
 
 

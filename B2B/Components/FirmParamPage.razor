@@ -3,7 +3,7 @@
 @using Business.Abstract;
 @using Entity
 @using System.Text;
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 @inject IFirmParamService firmParamService
 @inject IVirtualPosService virtualPosService
 <div class="container">
@@ -105,6 +105,32 @@
                         </div>
                     </div>
                 }
+                @if (firmParam.No == 22)
+                {
+                    <div class="defaultpos" style="margin-left:30px;">
+                        <div class="row my-2">
+                            <label>Veri Tabanı Yeniden Yüklenecek</label>
+                        </div>
+                        <div class="row my-2">
+                            <div class="row my-2">
+                                <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (firmParam.No == 23)
+                {
+                    <div class="defaultpos" style="margin-left:30px;">
+                        <div class="row my-2">
+                            <label>Miktar Gösterim Modu</label>
+                        </div>
+                        <div class="row my-2">
+                            <div class="row my-2">
+                                <SelectList Items="amounts" DisplayField="Name" ValueField="Mode" @bind-Selected="StateValue" />
+                            </div>
+                        </div>
+                    </div>
+                }
             }
         </div>
     </div>
@@ -118,6 +144,7 @@
     private List<VirtualPos> virtualPosList;
     private List<EvetHayır> stateList = new();
     private List<ViewMode> viewList = new();
+    private List<AmountShow> amounts = new();
     private object ParamValue
     {
         get
@@ -144,6 +171,14 @@
 
     private void Save()
     {
+        if(firmParamService.ToBoolean(22))
+        {
+            //stok toblosunu temizle
+            //fiyat Tablosunu temizle
+            //miktar tablosunu temizle
+            firmParam = firmParamList.FirstOrDefault(x => x.No == 8);
+            firmParam.Value = Encoding.UTF8.GetBytes("01.01.1980");
+        }
         firmParamService.Update(firmParam);
     }
 
@@ -154,7 +189,8 @@
         stateList.Add(new EvetHayır() { Name = "Evet", State = true });
         viewList.Add(new ViewMode(){Name="Kart Mode", Mode = 0});
         viewList.Add(new ViewMode() { Name = "Gird Mode", Mode = 1 });
-
+        amounts.Add(new AmountShow() { Name = "Sayı ile Göster", Mode = 0 });
+        amounts.Add(new AmountShow() { Name = "Simge ile Göster", Mode = 1 });
     }
     protected async override Task OnParametersSetAsync()
     {
@@ -171,5 +207,11 @@
     {
         public string Name{ get; set; }
         public int Mode{ get; set; }
+    }
+
+    public class AmountShow
+    {
+        public string Name { get; set; }
+        public int Mode { get; set; }
     }
 }

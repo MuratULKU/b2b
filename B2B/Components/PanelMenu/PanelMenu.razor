@@ -6,7 +6,7 @@
             <CascadingValue Value="DataList">
                 @foreach (var menu in DataList.Where(x => x.parent == 1))
                 {
-                    <PanelMenuItem dataModel="menu" SelectItemChange="SubCallBack">
+                    <PanelMenuItem dataModel="menu" SelectItemChange="SubCallBack" SelectedItem="SelectedItem">
 
                     </PanelMenuItem>
                 }

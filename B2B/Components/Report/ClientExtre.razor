@@ -1,0 +1,62 @@
+﻿@page "/clientextre"
+@using Business.Concrete;
+@using Newtonsoft.Json.Linq;
+@attribute [Authorize]
+@inject UserManager _userManager
+<div class="container">
+    <div>
+        @if (ClientExtreList != null && ClientExtreList.IsCompleted)
+        {
+            <DataGrid TItem="Entity.ClientFiche"
+             Data="ClientExtreList.Result"
+             ShowPager
+            >
+                <DataGridColumns>
+            <DataGridColumn Field="@nameof(Entity.ClientFiche.Date)" Caption="Tarih"/>
+            <DataGridColumn Field="@nameof(Entity.ClientFiche.TrString)" Caption="İşlem"/>
+                <DataGridColumn Field="@nameof(Entity.ClientFiche.Debit)" Caption="Borç" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                <DataGridColumn Field="@nameof(Entity.ClientFiche.Credit)" Caption="Alcak" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                <DataGridColumn Field="@nameof(Entity.ClientFiche.Balance)" Caption="Bakiye" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+            <DataGridColumn Field="@nameof(Entity.ClientFiche.LineExp)" Caption="Açıklama"/>
+
+
+        </DataGridColumns>
+            </DataGrid>
+        }
+        else
+        {
+            <label>@message</label>
+        }
+    </div>
+</div>
+@code {
+    private Task<List<Entity.ClientFiche>> ClientExtreList { get; set; }
+    private string message = "Cari Ekstresi Sunucudan Alınıyor.";
+    protected override async void OnInitialized()
+    {
+        try
+        {
+            HttpClient httpClient = new HttpClient();
+            using StreamReader openStream = new StreamReader("appsettings.json");
+            string json = openStream.ReadToEnd();
+            dynamic appsetting = JObject.Parse(json);
+            httpClient.BaseAddress = appsetting.ApiService.Url;
+            HttpResponseMessage jsondata = await httpClient.GetAsync($"/api/client/{_userManager.User.AccountCode}/01.01.2023/12.31.2023");
+            if (jsondata.IsSuccessStatusCode)
+            {
+                ClientExtreList = jsondata.Content.ReadFromJsonAsync<List<Entity.ClientFiche>>();
+                if (ClientExtreList == null)
+                    message = "Bekleyen Sipariş Bulunamadı";
+                if (ClientExtreList.IsFaulted)
+                    throw new Exception(ClientExtreList.Exception.Message);
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Sununu Cevap Vermedi Hata Hodu\n {ex.Message}";
+            StateHasChanged();
+        }
+
+    }
+}

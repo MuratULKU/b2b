@@ -3,14 +3,14 @@
     @foreach (var item in Data!)
     {   
         <CascadingValue Value="item" Name="Product">
-            <ProductCard />
+            <ProductCard CardClass="@CardClass"/>
         </CascadingValue>
     }
 
 </div>
 @code {
     [Parameter] public List<Product>? Data { get; set; }
-    
+    [Parameter] public string CardClass{ get; set; }
 
 
 }

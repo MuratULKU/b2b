@@ -1,12 +1,16 @@
 ﻿@page "/cart"
 @using B2B.Components.Confirm
+@using B2B.Components.SanalMagazaUI.InputNumber
 @using B2B.Data;
 @using Business.Abstract;
 @using Business.Concrete;
+@using DataAccess.Abstract;
 @using Entity;
 @inject IOrderService orderService
 @inject UserManager userService
-
+@inject IFirmParamService firmParamService
+@inject IProductRepository _productRepository
+@inject NavigationManager navManager
 @attribute [Authorize]
 @if (baskets != null)
 {
@@ -30,7 +34,10 @@
                         <tr>
                             <td>Görsel</td>
                             <td>@item.ProductName</td>
-                            <td class="text-right">@item.Amount.ToString("N2")</td>
+                            <td class="text-right">
+                                <InputIntNumber @bind-Value="@item.Amount"
+                                                Change="@((e)=>change(e,item))"></InputIntNumber>
+                            </td>
                             <td class="text-right">@item.VatRate</td>
                             <td>Stok Miktarı</td>
                             <td class="text-right">@item.Price.ToString("N2")</td>
@@ -42,9 +49,9 @@
 
             <div class="row">
                 <div class="col-md-7" style="margin-top:20px;">
-                   <label>Açıklama</label>
-                   <input class="form-control" type="text">
-                    </div>
+                    <label>Açıklama</label>
+                    <input class="form-control" type="text" @bind-value="explanation">
+                </div>
                 <div class="col-md-5">
                     <table class="table">
                         <thead>
@@ -74,11 +81,11 @@
         <div>
             <div class="row">
                 <div class="col-7">
-                    <button class="btn btn-primary">Sepeti Güncelle</button>
-                    <button class="btn btn-primary">Sepeti Boşalt</button>
+                    <button class="btn btn-primary" onclick="@basketUpdate">Sepeti Güncelle</button>
+                    <button class="btn btn-primary" onclick="@BasketDelete">Sepeti Boşalt</button>
                 </div>
                 <div class="col-5" style="text-align:right;">
-                    <button class="btn btn-danger" onclick="@SendData">Siparişi Tamamla</button>
+                    <Button Color="Blazorise.Color.Success" Clicked="@SendData" Disabled="firmParamService.ToBoolean(16)">Siparişi Tamamla</Button>
                 </div>
             </div>
         </div>
@@ -88,14 +95,37 @@ else
 {
     <label>Sepet Boş</label>
 }
-<Confirm @ref="ConfirmRef" ConfirmationChanged="ConfirmDeleteBasket"></Confirm>
+
+<Confirm @ref="ConfirmRef" ConfirmationChanged="ConfirmDeleteBasket" />
+
+
 @code {
     private List<Basket> baskets { get; set; }
     private Basket selectedBasket;
     private Confirm ConfirmRef;
+    private string explanation;
+    private double amount { get; set; }
+
+    protected override Task OnParametersSetAsync()
+    {
+        baskets = orderService.GetAll(userService.User).Where(x => x.Send == false).ToList();
+        foreach (var basket in baskets) //daha sonra servise taşınacak
+        {
+            Product product = _productRepository.GetByCode(basket.ProductCode).Result;
+            if (basket.Price != product.PriceLists[0].Price)
+            {
+                basket.Price = product.PriceLists[0].Price;
+                basket.Total = basket.Price * basket.Amount;
+                basket.VatPrice = basket.Total * basket.VatRate / 100;
+
+            }
+        }
+        return base.OnParametersSetAsync();
+    }
+
     protected override void OnInitialized()
     {
-        baskets = orderService.GetAll(userService.User).Where(x=>x.Send == false).ToList();
+        
     }
     private void LineDelete(MouseEventArgs e)
     {
@@ -111,6 +141,30 @@ else
         ConfirmRef.Show();
     }
 
+
+    private void basketUpdate()
+    {
+
+        foreach (var basket in baskets.ToArray())
+        {
+            if (basket.Amount == 0)
+            {
+                baskets.Remove(basket);
+                orderService.DeleteProduct(basket);
+            }
+        }
+        StateHasChanged();
+    }
+
+    private void change(double e, Basket basket)
+    {
+        basket.Amount = e;
+        basket.Total = basket.Amount * basket.Price;
+        basket.VatPrice = basket.Total * basket.VatRate / 100;
+
+    }
+
+
     private void ConfirmDeleteBasket(bool confirm)
     {
         if (confirm)
@@ -120,6 +174,7 @@ else
         }
     }
 
+
     private void SendData()
     {
         foreach (var basket in baskets)
@@ -127,7 +182,7 @@ else
             basket.Send = true;
             orderService.UpdateBasket(basket);
         }
-       
+        navManager.NavigateTo("/products");
+        StateHasChanged();
     }
-
 }

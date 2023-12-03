@@ -29,11 +29,13 @@
         ShowDialog = true;
         StateHasChanged();
     }
+    [Parameter] public bool State { get; set; }
     [Parameter] public string BodyText{ get; set; }
     [Parameter] public EventCallback<bool> ConfirmationChanged { get; set; }
     protected async Task OnConfirmationChanged(bool value)
     {
         ShowDialog = false;
+        State = value;
         await ConfirmationChanged.InvokeAsync(value);
     }
 }

@@ -5,27 +5,33 @@ namespace B2B.BackOrder
 {
     public interface IBackOrderCategoryService
     {
-        Task updateCategory(DateTime? date);
+        Task updateCategory(DateTime? date, HttpClient _httpClient);
+        Task deleteCategory();
     }
     public class BackOrderCategoryService : IBackOrderCategoryService
     {
-        private HttpClient _httpClient = new HttpClient();
+        
         private readonly IServiceProvider _serviceProvider;
         public BackOrderCategoryService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
 
-
-        public async Task updateCategory(DateTime? date)
+        public Task deleteCategory()
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var _categoryRepository = scope.ServiceProvider.GetRequiredService<ICategoryRepository>();
+            var l = _categoryRepository.DeleteAll();
+            return Task.CompletedTask;
+        }
+        public async Task updateCategory(DateTime? date,HttpClient _httpClient)
         {
             try
             {
                 using var scope = _serviceProvider.CreateScope();
                 var _categoryRepository = scope.ServiceProvider.GetRequiredService<ICategoryRepository>();
                 HttpResponseMessage respone;
-                if (_httpClient.BaseAddress == null)
-                    _httpClient.BaseAddress = new Uri($"https://localhost:7079");
+                
                 if (date.HasValue)
                     respone = await _httpClient.GetAsync($"/api/categories/{date.Value.ToString("MM/dd/yyyy HH:mm")}");
                 else

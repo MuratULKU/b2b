@@ -1,53 +1,100 @@
-﻿@using Entity;
-<table class="table">
-    
-    <thead class="thead-dark">
-        <tr>
-    <th scope="col">Görsel</th>
-    <th scope="col">Ürün</th>
-    <th scope="col">Stok</th>
-    <th scope="col">Özel Fiyat</th>
-    <th scope="col">Fiyat</th>
-    <th scope="col">Perakende Fiyat</th>
-    <th scope="col"></th>
-    </tr>
-    </thead>
-    
-    <tbody>
-        @foreach (var item in Data)
-        {
-            <tr>
-                <td><img width="50px" src="@Image(item)" /></td>
-                <td>@item.Name</td>
-                <td>@Miktar1(item) @item.Unit</td>
-                <td>@Fiyat1(item)</td>
-                <td>0</td>
-                <td>
-                    0
-                </td>
-                <td>
-                    <button type="button" onclick="@(()=>AddProduct(item))">
-                        <span class="oi oi-cart" aria-hidden="true"></span>
-                    </button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+﻿@using Business.Abstract;
+@using Entity;
+@inject NotificationService notification
+@inject IFirmParamService firmParamServce
+<div class="container">
+    <table class="table center">
 
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" class="col-image">Görsel</th>
+                <th scope="col" class="col-product">Ürün</th>
+                <th scope="col" class="col-amount">Stok</th>
+                <th scope="col" class="col-price">Özel Fiyat</th>
+                <th scope="col" class="col-operation"></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Data)
+            {
+                <tr>
+                    <td class="col-image"><img width="50px" src="@Image(item)" /></td>
+                    <td class="col-product">
+                        <p class="one-line center">@item.Name</p>
+                        @if (item.ProducerCode != string.Empty)
+                        {
+                            <span class="hidden">Üretici Kodu @item.ProducerCode</span>
+                        }
+                        @if (item.StGrupCode != string.Empty)
+                        {
+                            <span class="hidden ml-2">Grup Kodu @item.StGrupCode</span>
+                        }
+                        @if (item.SpeCode != string.Empty)
+                        {
+                            <span class="hidden ml-2">Özel Kod1 @item.SpeCode</span>
+                        }
+                        @if (item.SpeCode2 != string.Empty)
+                        {
+                            <span class="hidden ml-2">Özel Kod2 @item.SpeCode2</span>
+                        }
+                        @if (item.SpeCode3 != string.Empty)
+                        {
+                            <span class="hidden ml-2">Özel Kod3 @item.SpeCode3</span>
+                        }
+                        @if (item.SpeCode4 != string.Empty)
+                        {
+                            <span class="hidden ml-2">Özel Kod4 @item.SpeCode4</span>
+                        }
+                        @if (item.SpeCode5 != string.Empty)
+                        {
+                            <span class="hidden ml-2">Özel Kod5 @item.SpeCode5</span>
+                        }
+                    </td>
+                    <td class="col-amount">@((MarkupString)Miktar1(item))</td>
+                    <td class="col-price text-right">@Fiyat1(item)</td>
+
+                    <td class="col-operation">
+                        <button type="button" onclick="@(()=>AddProduct(item))">
+                            <span class="oi oi-cart shop-image" aria-hidden="true"></span>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 @code {
     [Parameter] public List<Product> Data { get; set; }
 
     [CascadingParameter]
     public ProductsMain? mainparent { get; set; }
 
-    private string Miktar1(Product t)
+    private string Miktar1(Product product)
     {
-        return t.ProductAmounts.Count > 0 ? t.ProductAmounts[0].OnHand.ToString() : string.Empty;
+        if (firmParamServce.ToInteger(23) == 1)
+        {
+            string returnText = "";
+            double level = Convert.ToDouble(firmParamServce.ToInteger(24));
+            if (product.ProductAmounts.Count > 0)
+            {
+                if (product.ProductAmounts[0].OnHand == level)
+                    returnText = $"<i class ='fa fa-circle' style='color:red'></i>";
+                else if (product.ProductAmounts[0].OnHand <= level)
+                    returnText = $"<i class ='fa fa-circle' style='color:yellow'></i>";
+                else if (product.ProductAmounts[0].OnHand >= level)
+                    returnText = $"<i class ='fa fa-circle' style='color:green'></i>";
+            }
+            else
+                returnText = $"<i class ='fa fa-circle' style='color:red'></i>";
+            return returnText;
+        }
+        else
+            return product.ProductAmounts.Count > 0 ? product.ProductAmounts[0].OnHand.ToString() + " " + product.Unit : string.Empty;
     }
     private string Fiyat1(Product t)
     {
-        return t.ProductAmounts.Count > 0 ? t.PriceLists[0].Price.ToString() : string.Empty;
+        return t.PriceLists.Count > 0 ? t.PriceLists[0].Price.ToString("N2") : string.Empty;
     }
 
     private string Image(Product t)
@@ -63,6 +110,19 @@
 
     private void AddProduct(Product product)
     {
-        mainparent?.AddOrder(product,1,product.PriceLists[0].Price);
+        try
+        {
+            if (product.PriceLists.Count > 0)
+                mainparent?.AddOrder(product, 1, product.PriceLists[0].Price);
+            else
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Ürün Boş Sepete Eklenenmedi \n Fiyat 0 Olamaz", Duration = 5000 });
+
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+
     }
 }

@@ -11,11 +11,13 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace DataAccess.EFCore
 {
     public static class ApplicationBuilderExtention
     {
+
         public static IApplicationBuilder InitializeDatabase(this IApplicationBuilder app)
         {
             using (IServiceScope scope = app.ApplicationServices.CreateScope())
@@ -167,6 +169,55 @@ namespace DataAccess.EFCore
                     No = 18,
                     Key = "SyncTime",
                     Value = Encoding.UTF8.GetBytes("5")
+                });
+                dataContext.FirmParams.Add(new FirmParam
+                {
+                    Id = Guid.NewGuid(),
+                    No = 19,
+                    Key = "Phone1",
+                    Value = Encoding.UTF8.GetBytes("0352 221 36 76")
+                });
+                dataContext.FirmParams.Add(new FirmParam
+                {
+                    Id = Guid.NewGuid(),
+                    No = 20,
+                    Key = "Phone2",
+                    Value = Encoding.UTF8.GetBytes("0352 231 83 83")
+                });
+                dataContext.FirmParams.Add(new FirmParam
+                {
+                    Id = Guid.NewGuid(),
+                    No = 21,
+                    Key = "Mappath",
+                    Value = Encoding.UTF8.GetBytes("https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3112.6729993258527!2d35.485860074704455!3d38.72531597176134!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x152b1367dc345b17%3A0x657995ad0d27d9f9!2zw5xsxLfDvCB5YXrEsWzEsW0gYmlsZ2lzYXlhciBsdGQuIMWedGku!5e0!3m2!1str!2str!4v1701262406643!5m2!1str!2str")
+                });
+                dataContext.FirmParams.Add(new FirmParam
+                {
+                    Id = Guid.NewGuid(),
+                    No = 22,
+                    Key = "ResetSync",
+                    Value = Encoding.UTF8.GetBytes("0")
+                });
+                dataContext.FirmParams.Add(new FirmParam
+                {
+                    Id = Guid.NewGuid(),
+                    No = 23,
+                    Key = "StockAmountShow",
+                    Value = Encoding.UTF8.GetBytes("1")
+                });
+                dataContext.FirmParams.Add(new FirmParam
+                {
+                    Id = Guid.NewGuid(),
+                    No = 24,
+                    Key = "StockWarningAmount",
+                    Value = Encoding.UTF8.GetBytes("5")
+                });
+                dataContext.FirmParams.Add(new FirmParam
+                {
+                    Id = Guid.NewGuid(),
+                    No = 25,
+                    Key = "ProductPageCount",
+                    Value = Encoding.UTF8.GetBytes("10")
                 });
             }
             if (!dataContext.CardBrands.Any())

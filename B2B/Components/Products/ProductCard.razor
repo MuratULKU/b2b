@@ -1,19 +1,22 @@
-﻿@using Entity;
-<div class="col-md-4 my-3">
+﻿@using Business.Abstract;
+@using Entity;
+@inject NotificationService notification
+@inject IFirmParamService firmParamServce
+<div class="@CardClass">
     <div class="card" style="width:18 rem; height:25 rem;">
-        <div style="height:200px;">
-        <img src="@Image(product)" class="card-img-top" alt="..." style="background-size:cover" />
+        <div style="height:200px">
+            <img src="@Image(product)" class="card-img-top" alt="..." style="background-size:cover" />
         </div>
         <div class="card-body">
-            <h5 class="card-title"><label>Stok Durumu : </label>@Miktar1(product)</h5>
-            <p class="card-text">@product.Name</p>
+            <h5 class="card-title"><label style="margin-right:5px;">Stok Durumu : </label>@((MarkupString)Miktar1(product))</h5>
+            <p class="card-text two-line">@product.Name</p>
             <div class="row">
                 <div class="col-8">
-                    <p class="card-text">@Fiyat1(product)</p>
+                    <p class="card-text text-right ml-3">@Fiyat1(product)</p>
                 </div>
                 <div class="col-4">
-                    <button type="button" onclick="@AddProduct">
-                        <span class="oi oi-cart" aria-hidden="true"></span>
+                    <button type="button" onclick="@AddProduct" title="Sepete Ekle">
+                        <span class="oi oi-cart shop-image" aria-hidden="true"></span>
                     </button>
                 </div>
             </div>
@@ -28,18 +31,43 @@
     [CascadingParameter]
     public ProductsMain? mainparent { get; set; } //üst class referans
 
+    [Parameter]
+    [EditorRequired]
+    public string CardClass { get; set; }
+
     private void AddProduct()
     {
-        mainparent?.AddOrder(product!,1,product.PriceLists[0].Price);
+        if (product.PriceLists.Count > 0)
+            mainparent?.AddOrder(product!, 1, product.PriceLists[0].Price);
+        else
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Ürün Boş Sepete Eklenenmedi \n Fiyat 0 Olamaz", Duration = 5000 });
     }
 
     private string Fiyat1(Product t)
     {
-        return t.ProductAmounts.Count > 0 ? t.PriceLists[0].Price.ToString() : string.Empty;
+        return t.PriceLists.Count > 0 ? t.PriceLists[0].Price.ToString("N2") : string.Empty;
     }
-    private string Miktar1(Product t)
+    private string Miktar1(Product product)
     {
-        return t.ProductAmounts.Count > 0 ? t.ProductAmounts[0].OnHand.ToString() : string.Empty;
+        if (firmParamServce.ToInteger(23) == 1)
+        {
+            string returnText = "";
+            double level = firmParamServce.ToInteger(24);
+            if (product.ProductAmounts.Count > 0)
+            {
+                if (product.ProductAmounts[0].OnHand == level)
+                    returnText = $"<i class ='fa fa-circle' style='color:red'></i>";
+                else if (product.ProductAmounts[0].OnHand <= level)
+                    returnText = $"<i class ='fa fa-circle' style='color:yellow'></i>";
+                else if (product.ProductAmounts[0].OnHand >= level)
+                    returnText = $"<i class ='fa fa-circle' style='color:green'></i>";
+            }
+            else
+                returnText = $"<i class ='fa fa-circle' style='color:red'></i>";
+            return returnText;
+        }
+        else
+            return product.ProductAmounts.Count > 0 ? product.ProductAmounts[0].OnHand.ToString() +" "+product.Unit : string.Empty;
     }
 
     private string Image(Product t)

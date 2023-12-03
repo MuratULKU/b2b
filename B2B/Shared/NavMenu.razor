@@ -1,4 +1,5 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">B2B</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -15,77 +16,117 @@
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
+        <AuthorizeView Roles="Admin, User">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="products">
+                    <span class="oi oi-plus" aria-hidden="true"></span> Ürünler
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="payment">
+                    <span class="oi oi-credit-card" aria-hidden="true"></span> Ödeme
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="cart">
+                    <span class="oi oi-cart" aria-hidden="true"></span> Sepet
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.Third)">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Raporlar
+                </NavLink>
+                @if (navSubmenu == NavSubmenu.Third)
+                {
+                    <div class="menu" @onclick="ToggleNavMenu">
+                        <div class="px-3">
+                            <NavLink class="nav-link darkcolor" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="report/1">
+                                <span class="oi oi-plus" aria-hidden="true"></span> Bekleyen Siparişler
+                            </NavLink>
+                        </div>
+                        <div class="px-3">
+                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="report/4">
+                                <span class="oi oi-credit-card" aria-hidden="true"></span> Onaylı Siparişler
+                            </NavLink>
+                        </div>
+                        <div class="px-3">
+                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="clientextre">
+                                <span class="oi oi-credit-card" aria-hidden="true"></span>Cari Hesap Extresi
+                            </NavLink>
+                        </div>
+                        <div class="px-3">
+                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="virtualposparameter">
+                                <span class="oi oi-credit-card" aria-hidden="true"></span>Kredi Kartı Logları
+                            </NavLink>
+                        </div>
+                    </div>
+
+                }
+
+            </div>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.First)">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Banka
+                </NavLink>
+                @if (navSubmenu == NavSubmenu.First)
+                {
+                    <div class="menu" @onclick="ToggleNavMenu">
+                        <div class="px-3">
+                            <NavLink class="nav-link darkcolor" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="bank">
+                                <span class="oi oi-plus" aria-hidden="true"></span> Banka Tanımları
+                            </NavLink>
+                        </div>
+                        <div class="px-3">
+                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="creditcard">
+                                <span class="oi oi-credit-card" aria-hidden="true"></span> Kredi Kartı Tanımları
+                            </NavLink>
+                        </div>
+                        <div class="px-3">
+                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="virtualpos">
+                                <span class="oi oi-credit-card" aria-hidden="true"></span>Sanal Pos Tanımları
+                            </NavLink>
+                        </div>
+                        <div class="px-3">
+                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="virtualposparameter">
+                                <span class="oi oi-credit-card" aria-hidden="true"></span>Sanal Parametre Tanımları
+                            </NavLink>
+                        </div>
+                    </div>
+                }
+
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.Second)">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Yönetim
+                </NavLink>
+                @if (navSubmenu == NavSubmenu.Second)
+                {
+                    <div class="menu">
+                        <div class="px-3">
+                            <NavLink class="nav-link darkcolor" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="userlist">
+                                <span class="oi oi-plus" aria-hidden="true"></span> Kullanıcı Tanımları
+                            </NavLink>
+                        </div>
+                        <div class="px-3">
+                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="firmparam">
+                                <span class="oi oi-credit-card" aria-hidden="true"></span> Firma Parametreleri
+                            </NavLink>
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        </AuthorizeView>
+
         <div class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="products">
-                <span class="oi oi-plus" aria-hidden="true"></span> Ürünler
+            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="iletisim">
+                <span class="oi oi-envelope-closed" aria-hidden="true"></span> İletişim
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="payment">
-                <span class="oi oi-credit-card" aria-hidden="true"></span> Ödeme
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="cart">
-                <span class="oi oi-cart" aria-hidden="true"></span> Sepet
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.First)">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Banka
-            </NavLink>
-            @if (navSubmenu == NavSubmenu.First)
-            {
-                <div class="menu" @onclick="ToggleNavMenu">
-                    <div class="px-3">
-                        <NavLink class="nav-link darkcolor" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="bank">
-                            <span class="oi oi-plus" aria-hidden="true"></span> Banka Tanımları
-                        </NavLink>
-                    </div>
-                    <div class="px-3">
-                        <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="creditcard">
-                            <span class="oi oi-credit-card" aria-hidden="true"></span> Kredi Kartı Tanımları
-                        </NavLink>
-                    </div>
-                    <div class="px-3">
-                        <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="virtualpos">
-                            <span class="oi oi-credit-card" aria-hidden="true"></span>Sanal Pos Tanımları
-                        </NavLink>
-                    </div>
-                    <div class="px-3">
-                        <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="virtualposparameter">
-                            <span class="oi oi-credit-card" aria-hidden="true"></span>Sanal Parametre Tanımları
-                        </NavLink>
-                    </div>
-                </div>
-            }
-
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.Second)">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Yönetim
-            </NavLink>
-            @if (navSubmenu == NavSubmenu.Second)
-            {
-                <div class="menu">
-                    <div class="px-3">
-                        <NavLink class="nav-link darkcolor" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="userlist">
-                            <span class="oi oi-plus" aria-hidden="true"></span> Kullanıcı Tanımları
-                        </NavLink>
-                    </div>
-                    <div class="px-3">
-                        <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="firmparam">
-                            <span class="oi oi-credit-card" aria-hidden="true"></span> Firma Parametreleri
-                        </NavLink>
-                    </div>
-                    
-                </div>
-            }
-
-        </div>
-
-
-
     </nav>
 </div>
 
@@ -95,7 +136,8 @@
     {
         None,
         First,
-        Second
+        Second,
+        Third
     }
 
     private NavSubmenu navSubmenu = NavSubmenu.None;
@@ -103,10 +145,10 @@
     private void ToggleNavMenu(NavSubmenu? submenu = null)
     {
         navSubmenu = submenu ?? navSubmenu;
-    
+
     }
 
-    
+
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -117,5 +159,5 @@
 
     }
 
-    
+
 }

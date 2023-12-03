@@ -1,6 +1,7 @@
 ﻿using DataAccess.Abstract;
 using DataAccess.EFCore;
 using Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Concrete
 {
@@ -28,6 +29,11 @@ namespace DataAccess.Concrete
             return _dbContext.Categories.FirstOrDefault(x => x.Code == code);
         }
 
+        public async Task<int> DeleteAll()
+        {
+            _dbContext.Categories.ExecuteDelete();
+            return await _dbContext.SaveChangesAsync();
+        }
         public void Insert(Category category)
         {
             _dbContext.Categories.Add(category);

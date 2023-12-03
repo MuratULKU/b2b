@@ -16,6 +16,8 @@ namespace Business.Abstract
         void UpdateBasket(Basket basket);
         List<Basket> GetAll(User user);
         List<Basket> GetAll(Guid userId);
+        List<Basket> GetAll(string DocNo);
         List<Basket> GetAllBasket();
+        List<Basket> GetAllFiche(bool send);
     }
 }

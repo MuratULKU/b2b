@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using B2B.Components.NotificationService
+@inherits LayoutComponentBase
 
 <PageTitle>B2B</PageTitle>
 
@@ -6,9 +7,10 @@
    <div class="sidebar">
         <NavMenu />
     </div>
-
+    <MNotification></MNotification>
     <main>
         <article class="content px-4">
+         
             @Body
         </article>
     </main>

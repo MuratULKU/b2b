@@ -12,6 +12,6 @@ namespace DataAccess.Abstract
         void Insert(FirmDoc doc);
         void Update(FirmDoc doc);
         void Delete(FirmDoc doc);
-
+        Task<int> DeleteAll();
     }
 }

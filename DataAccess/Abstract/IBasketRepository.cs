@@ -11,6 +11,8 @@ namespace DataAccess.Abstract
     {
         List<Basket> GetAll();
         List<Basket> GetAll(Guid UserGuid);
+        List<Basket> GetAll(string DocNo);
+        List<Basket> GetAllFiche(bool send);
         Basket Insert(Basket basket);
         Basket Update(Basket basket);
         Basket Delete(Basket basket);

@@ -40,6 +40,11 @@ namespace Business.Concrete
             return _basketRepository.GetAll(userId).Where(x=>x.Send == true).ToList();
         }
 
+        public List<Basket> GetAllFiche(bool send)
+        {
+            return _basketRepository.GetAllFiche(send);
+        }
+
         public void DeleteProduct(Basket basket)
         {
             _basketRepository.Delete(basket);
@@ -58,6 +63,11 @@ namespace Business.Concrete
         public List<Basket> GetAllBasket()
         {
            return _basketRepository.GetAll().Where(x=>x.Send == true).ToList();
+        }
+
+        public List<Basket> GetAll(string DocNo)
+        {
+            return _basketRepository.GetAll(DocNo);
         }
     }
 }

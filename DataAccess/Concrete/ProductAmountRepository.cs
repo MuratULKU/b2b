@@ -24,6 +24,12 @@ namespace DataAccess.Concrete
                 .ToList();
         }
 
+        public async Task<int> DeleteAll()
+        {
+            _dbContext.ProductAmounts.ExecuteDelete();
+            return await _dbContext.SaveChangesAsync();
+        }
+
         public async Task<ProductAmount> GetByLogicalref(int logicalref)
         {
             return await _dbContext.ProductAmounts.FirstOrDefaultAsync(x => x.StockRef == logicalref);

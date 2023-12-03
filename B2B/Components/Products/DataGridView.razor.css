@@ -1,0 +1,61 @@
+﻿*{
+    font-family:sans-serif;
+    font-size:small;
+}
+
+button:active {
+    background-color: blue;
+}
+
+button:active + .shop-image{
+    color:red;
+    background-color:yellow;
+}
+
+button {
+    background-color: transparent;
+    border: none;
+}
+
+.shop-image {
+    color: blue;
+    font-family: 'Icons' !important;
+}
+.card-img-top {
+    min-height:40px;
+    max-height: 40px;
+    object-fit: scale-down;
+}
+
+.one-line {
+    line-height: 1.5em;
+    height: 1.5m;
+    overflow: hidden;
+}
+.col-image{
+    width:50px;
+}
+.col-product{
+    width:auto;
+}
+.col-amount{
+    width:75px;
+}
+.col-price{
+    width:75px;
+}
+.col-operation{
+    width:50px;
+}
+
+@media(min-width:641px) {
+    .hidden{
+        display:table-cell;
+    }
+}
+
+@media (max-width: 640.98px) {
+    .hidden{
+        display:none;
+    }
+}

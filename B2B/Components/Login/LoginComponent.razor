@@ -11,7 +11,7 @@
 @inject IUserRepository userRepository
 @inject UserManager _userManager
 
-<div class="popup">
+<div class="popup" style="z-index:1;">
    <AuthorizeView>
        <Authorized>
             <div class="nav-item px-3">
@@ -49,7 +49,7 @@
                         <span>Kullanıcı Şifresi</span>
                     </div>
                     <div class="col-4">
-                        <input name="Password" @bind="model.Password" />
+                        <input  type="password"name="Password" @bind="model.Password" />
                     </div>
                 </div>
             </div>

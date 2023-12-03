@@ -1,24 +1,32 @@
 ﻿using DataAccess.Abstract;
+using DataAccess.Concrete;
 using Entity;
 
 namespace B2B.BackOrder
 {
     public interface IBackOrderPriceListService
     {
-    void updatePrice(DateTime? date);
+        Task updatePrice(DateTime? date, HttpClient _httpClient);
+        Task deletePrice();
 
     }
     public class BackOrderPriceListService : IBackOrderPriceListService
     {
-        private HttpClient _httpClient = new HttpClient();
+
         private readonly IServiceProvider _serviceProvider;
 
         public BackOrderPriceListService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
-
-        public async void updatePrice(DateTime? date)
+        public Task deletePrice()
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var _priceListRepository = scope.ServiceProvider.GetRequiredService<IPriceListRepository>();
+            _priceListRepository.DeleteAll();
+            return Task.CompletedTask;
+        }
+        public async Task updatePrice(DateTime? date, HttpClient _httpClient)
         {
             try
             {
@@ -26,8 +34,7 @@ namespace B2B.BackOrder
                 var _priceListRepository = scope.ServiceProvider.GetRequiredService<IPriceListRepository>();
                 var _productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
                 HttpResponseMessage respone;
-                if (_httpClient.BaseAddress == null)
-                    _httpClient.BaseAddress = new Uri($"https://localhost:7079");
+
                 if (date.HasValue)
                     respone = await _httpClient.GetAsync($"/api/pricelist/{date.Value.ToString("MM/dd/yyyy HH:mm")}");
                 else
@@ -76,6 +83,7 @@ namespace B2B.BackOrder
 
 
             }
+            await Task.Delay(1);
         }
     }
 }

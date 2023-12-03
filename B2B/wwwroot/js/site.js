@@ -22,8 +22,11 @@
     form.submit();
 }
 
-
 window.Ulku = {
+    getDimensions: function () {
+        var wtd = window.innerWidth;
+        return wtd;
+    },
     mask: function (id, mask, pattern, characterPattern) {
         var el = document.getElementById(id);
         if (el) {

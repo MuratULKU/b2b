@@ -1,5 +1,5 @@
 ﻿@page "/userlist"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 
 @using DataAccess.Abstract;
 @using DataAccess.Concrete;

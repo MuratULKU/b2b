@@ -1,6 +1,7 @@
 ﻿using B2B.Data;
 using Business.Concrete;
 using DataAccess.Abstract;
+using Newtonsoft.Json.Linq;
 using System.Text;
 
 namespace B2B.BackOrder
@@ -32,21 +33,36 @@ namespace B2B.BackOrder
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-
-
+            HttpClient _httpClient = new HttpClient();
+            using StreamReader openStream = new StreamReader("appsettings.json");
+            string json = openStream.ReadToEnd();
+            dynamic appsetting = JObject.Parse(json);
+            _httpClient.BaseAddress = appsetting.ApiService.Url;
             while (!stoppingToken.IsCancellationRequested)
             {
-                DateTime? lastUpdateDate = Convert.ToDateTime( Encoding.UTF8.GetString(((byte[])_firmParameterService.Get(8))));
+                DateTime? lastUpdateDate = Convert.ToDateTime(Encoding.UTF8.GetString(((byte[])_firmParameterService.Get(8))));
                 DateTime updatedate = DateTime.Now;
-                await _categoryService.updateCategory(lastUpdateDate);
-                await _productService.updateProducts(lastUpdateDate);
-                _priceListRepository.updatePrice(lastUpdateDate);
-                _productAmountRepository.updateProducts(lastUpdateDate);
-                _backOrderOder.SentData();
+
+                if (Encoding.UTF8.GetString(((byte[])_firmParameterService.Get(22))) == "True")
+                {
+                    await _priceListRepository.deletePrice();
+                    await _productAmountRepository.deleteProducts();
+                    if (_categoryService.deleteCategory().IsCompleted)
+                        await _productService.deleteProducts();
+                    lastUpdateDate = null;
+                }
+                await _categoryService.updateCategory(lastUpdateDate, _httpClient);
+                await _productService.updateProducts(lastUpdateDate, _httpClient);
+
+                await _priceListRepository.updatePrice(lastUpdateDate, _httpClient);
+                await _productAmountRepository.updateProducts(lastUpdateDate, _httpClient);
+
+                _backOrderOder.SentData(_httpClient);
                 _firmParameterService.Set(8, updatedate);
+                _firmParameterService.Set(22, "False");
                 var time = Convert.ToInt32(Encoding.UTF8.GetString((byte[])_firmParameterService.Get(18)));
 
-                await Task.Delay(60000*time, stoppingToken); 
+                await Task.Delay(60000 * time, stoppingToken);
             }
         }
     }

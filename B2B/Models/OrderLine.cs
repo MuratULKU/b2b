@@ -18,7 +18,6 @@ namespace Entity
         public DateTime Date_ { get; set; }
         public double Amount { get; set; }
         public double Price { get; set; }
-        
         public double Total { get; set; }
         public double Discper { get; set; }
         public double Distdisc { get; set; }
@@ -27,8 +26,9 @@ namespace Entity
         public double VatMatrah{ get; set; }
         public double UomRef{ get; set; }
         public double UsRef{ get; set; }
-
-        
+        public string Unit { get; set; }
+        public string Code { get; set; }
+        public string Name { get; set; }
 
 
     }

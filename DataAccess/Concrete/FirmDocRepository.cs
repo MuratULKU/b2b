@@ -1,10 +1,12 @@
 ﻿using DataAccess.Abstract;
 using DataAccess.EFCore;
 using Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DataAccess.Concrete
@@ -22,6 +24,12 @@ namespace DataAccess.Concrete
         {
             _dataContext.FirmDocs.Remove(doc);
             _dataContext.SaveChanges();
+        }
+
+        public Task<int> DeleteAll()
+        {
+            _dataContext.FirmDocs.ExecuteDelete();
+            return _dataContext.SaveChangesAsync();
         }
 
         public void Insert(FirmDoc doc)

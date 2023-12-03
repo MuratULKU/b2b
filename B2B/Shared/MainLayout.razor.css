@@ -42,7 +42,9 @@ main {
 
     .top-row a, .top-row .btn-link {
         margin-left: 0;
+        height:7rem;
     }
+    
 }
 
 @media (min-width: 641px) {
@@ -52,7 +54,6 @@ main {
 
     .sidebar {
         width: 100%;
-        height: 120px;
         position: relative;
         top: 0;
     }

@@ -20,43 +20,85 @@ namespace DataAccess.Concrete
         public List<Product> GetAll()
         {
             return _dbContext.Products
-                .Include(x=>x.ProductAmounts)
-                .Include(x=>x.PriceLists)
+                .Include(x => x.PriceLists)
+                .Include(x => x.ProductAmounts)
                 .ToList();
         }
 
         public List<Product> GetAll(int currentPage, int pageSize)
         {
             return _dbContext.Products
-                .Include(x=>x.ProductAmounts)
-                .Include(x => x.PriceLists  )
+                .Include(x => x.PriceLists)
+                .Include(x => x.ProductAmounts)
                 .Skip((currentPage - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
         }
 
-        public List<Product> GetAll(ProductRequestParameter parameter)
+        public List<Product> GetAll(string Filtre, int CategoryId,int CurrentPage, int PageSize)
         {
+            Filtre = Filtre ?? "*";
             return
-                parameter.CategoryId == 0
+                CategoryId == 0
                  ? _dbContext.Products
-                 .Include(x=>x.ProductAmounts)
-                 .Include(x=>x.PriceLists)
-                 .Include(x=>x.firmDocs)
-                .Skip((parameter.CurrentPage - 1) * parameter.PageSize)
-                .Take(parameter.PageSize)
-                .ToList()
-                : _dbContext.Products.Include(x => x.ProductAmounts) .Include(x => x.PriceLists )
-                .Skip((parameter.CurrentPage - 1) * parameter.PageSize)
-                .Take(parameter.PageSize)
-                .Where(x => x.ParentRef == parameter.CategoryId)
-                .ToList();
+                 .Include(x => x.PriceLists)
+                 .Include(x => x.ProductAmounts)
+                 .Include(x => x.firmDocs)
+                 .Where(x => EF.Functions.Like(x.Name, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.Name, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.Code, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.Code, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.ProducerCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.ProducerCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.StGrupCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.StGrupCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode2, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode2, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode3, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode3, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode4, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode4, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode5, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode5, $"%{Filtre.ToUpper()}%")
+                             )
+                 .Skip((CurrentPage - 1) * PageSize)
+                 .Take(PageSize)
+                 .ToList()
+                : _dbContext.Products
+                 .Include(x => x.PriceLists)
+                 .Include(x => x.ProductAmounts)
+                 .Include(x => x.firmDocs)
+                 .Where(x => (x.ParentRef == CategoryId) && (EF.Functions.Like(x.Name, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.Name, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.Code, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.Code, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.ProducerCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.ProducerCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.StGrupCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.StGrupCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode2, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode2, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode3, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode3, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode4, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode4, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode5, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode5, $"%{Filtre.ToUpper()}%"))
+                             )
+                 .Skip((CurrentPage - 1) * PageSize)
+                 .Take(PageSize)
+                 .ToList();
         }
 
         public async Task<Product> GetByCode(string code)
         {
             return await _dbContext.Products
-                .Include(x=>x.firmDocs)
+                .Include(x => x.firmDocs)
+                .Include(x => x.PriceLists)
                 .FirstOrDefaultAsync(x => x.Code == code);
         }
 
@@ -70,11 +112,69 @@ namespace DataAccess.Concrete
             _dbContext.Products.Add(product);
             _dbContext.SaveChanges();
         }
-
-        public int TotalCount()
+        public async Task<int> DeleteAll()
         {
-            var c = _dbContext.Products.Count();
-            return c;
+            _dbContext.Products.ExecuteDelete();
+            return await _dbContext.SaveChangesAsync();
+        }
+        public int TotalCount(string Filtre, int CategoryId, int CurrentPage, int PageSize)
+        {
+            try
+            {
+                Filtre = Filtre ?? string.Empty;
+                return
+                CategoryId == 0
+                 ? _dbContext.Products
+                 .Where(x => EF.Functions.Like(x.Name, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.Name, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.Code, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.Code, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.ProducerCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.ProducerCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.StGrupCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.StGrupCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode2, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode2, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode3, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode3, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode4, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode4, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode5, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode5, $"%{Filtre.ToUpper()}%")
+                             )
+                 .Count()
+                : _dbContext.Products
+                 .Where(x => (x.ParentRef == CategoryId) && (EF.Functions.Like(x.Name, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.Name, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.Code, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.Code, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.ProducerCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.ProducerCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.StGrupCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.StGrupCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode2, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode2, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode3, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode3, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode4, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode4, $"%{Filtre.ToUpper()}%") |
+                             EF.Functions.Like(x.SpeCode5, $"%{Filtre.ToLower()}%") |
+                             EF.Functions.Like(x.SpeCode5, $"%{Filtre.ToUpper()}%"))
+                             )
+                 .Count();
+
+            }
+            catch (Exception)
+            {
+
+                return 1;
+            }
+            
+            
         }
 
         public void Update(Product product)

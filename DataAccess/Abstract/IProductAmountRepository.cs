@@ -9,5 +9,6 @@ namespace DataAccess.Abstract
         void Insert(ProductAmount product);
         void Update(ProductAmount product);
         Task<ProductAmount> GetByLogicalref(int logicalref);
+        Task<int> DeleteAll();
     }
 }

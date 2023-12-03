@@ -7,7 +7,7 @@
 @using DataAccess.Abstract;
 @using Entity;
 @using System.Text;
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 @inject IBankCardRepository bankCardRepository
 @inject IVirtualPosService virtualPosService
 @inject FirmParameterService param

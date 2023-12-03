@@ -1,0 +1,17 @@
+﻿.ulku-notification {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    min-width: 20rem;
+    background-color: yellow;
+}
+
+.ulku-dismis {
+    position: relative;
+    float: right;
+    right: +10px;
+}
+
+.ulku-title {
+    font-weight: bold;
+}

@@ -20,11 +20,11 @@ namespace B2B.BackOrder
 {
     public interface IBackOrderOder
     {
-        void SentData();
+        void SentData(HttpClient _httpClient);
     }
     public class BackOrderOrder : IBackOrderOder
     {
-        private HttpClient _httpClient = new HttpClient();
+        
         private readonly IServiceProvider _serviceProvider;
 
         public BackOrderOrder(IServiceProvider serviceProvider)
@@ -33,7 +33,7 @@ namespace B2B.BackOrder
         }
 
 
-        public async void SentData()
+        public async void SentData(HttpClient _httpClient)
         {
             //cart tablosundan gönderilecek satırları seç order numarasına göre grupla
             //sipariş gönder sonarında doğruluğu sorgula 
@@ -43,68 +43,72 @@ namespace B2B.BackOrder
                 var _basketRepository = scope.ServiceProvider.GetRequiredService<IOrderService>();
                 var _productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
                 var _userManager = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-                List<Guid> totaluserlist = _basketRepository.GetAllBasket().Select(x => x.UserGuid).Distinct().ToList();
-                //kullanıcıya göre siparişleri grupla
-                //document no ya göre grouplama yapacağız sepete yazarken document no
-                //alanı kullanılacak 1 tabloda en son noyu tuttalım diğer kullanıcılar için 
-                foreach (var user in totaluserlist)
+                var _basketFiche = _basketRepository.GetAllFiche(true);
+                foreach (var basket in _basketFiche)
                 {
-                    User _user = _userManager.GetUser(user).Result;
-                    List<Basket> baskets = _basketRepository.GetAll(user);
                     var orderFiche = new Entity.Order()
                     {
                         LogicalRef = 0,
-                        ClientCode = _user.AccountCode,
+                        ClientCode = _userManager.GetUser(basket.UserGuid).Result.AccountCode,
                         TrCode = 1,
                         FicheNo = "1",
-                       
+                        Docode = basket.DocNo,
                         Lines = new(),
                     };
-                    foreach (var basket in baskets)
+                    var basketLines = _basketRepository.GetAll(orderFiche.Docode);
+                    foreach (var ordline in basketLines)
                     {
                         orderFiche.Docode = basket.DocNo;
                         orderFiche.Date_ = basket.Date_;
-                        orderFiche.TotalDiscounted += basket.DiscountPrice;
-                        orderFiche.TotalVat += basket.VatPrice;
-                        orderFiche.Total += basket.Total;
-                        orderFiche.GrossTotal += basket.Total;
-                        var _product = _productRepository.GetByCode(basket.ProductCode).Result;
+                        orderFiche.TotalDiscounted += ordline.DiscountPrice;
+                        orderFiche.TotalVat += ordline.VatPrice;
+                        orderFiche.Total += ordline.Total;
+                        orderFiche.GrossTotal += ordline.Total;
+                        var _product = _productRepository.GetByCode(ordline.ProductCode).Result;
                         orderFiche.Lines.Add(
                             new Entity.OrderLine()
                             {
                                 Logicalref = 0,
                                 StockRef = _product.LogicalRef,
                                 OrdFicheRef = 0,
-                                ClientRef =0,
+                                ClientRef = 0,
                                 LineType = 0,
                                 LineNo = 0,
                                 TrCode = 1,
-                                Date_= basket.Date_,
-                                Total = basket.Total,
-                                Price = basket.Price,
-                                Amount = basket.Amount,
-                                Vat = basket.VatRate,
-                                VatMatrah = basket.Total,
-                                VatAmnt = basket.VatPrice,
+                                Date_ = ordline.Date_,
+                                Total = ordline.Total,
+                                Price = ordline.Price,
+                                Amount = ordline.Amount,
+                                Vat = ordline.VatRate,
+                                VatMatrah = ordline.Total,
+                                VatAmnt = ordline.VatPrice,
                                 Discper = 0,
                                 Distdisc = 0,
                                 UomRef = 0,
-                                UsRef=0
+                                UsRef = 0,
+                                Unit = _product.Unit,
+                                Code = _product.Code,
+                                Name = _product.Name
+                                
                             }
-                            ) ;
-
-                        if (_httpClient.BaseAddress == null)
-                            _httpClient.BaseAddress = new Uri($"https://localhost:7079");
-                        _httpClient.DefaultRequestHeaders.Clear();
-                        _httpClient.DefaultRequestHeaders.Accept.Add(
-        new MediaTypeWithQualityHeaderValue("application/json"));
-                        StringContent content = new StringContent(JsonConvert.SerializeObject(orderFiche), Encoding.UTF8, "application/json");            
-                        var httpResponseMessage =
-                               await _httpClient.PostAsync($"api/Order", content);
-                        var response = await httpResponseMessage.Content.ReadAsStringAsync();
-                        httpResponseMessage.EnsureSuccessStatusCode();
+                            );
                     }
 
+
+                   
+                    _httpClient.DefaultRequestHeaders.Clear();
+                    _httpClient.DefaultRequestHeaders.Accept.Add(
+    new MediaTypeWithQualityHeaderValue("application/json"));
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(orderFiche), Encoding.UTF8, "application/json");
+                    var httpResponseMessage =
+                           await _httpClient.PostAsync($"api/Order", content);
+                    var response = await httpResponseMessage.Content.ReadAsStringAsync();
+                    httpResponseMessage.EnsureSuccessStatusCode();
+                    var sendedBasket = _basketRepository.GetAll(orderFiche.Docode);
+                    foreach (Basket sended in sendedBasket)
+                    {
+                        _basketRepository.DeleteProduct(sended);
+                    }
                 }
 
 
@@ -113,7 +117,7 @@ namespace B2B.BackOrder
             catch (Exception)
             {
 
-                throw;
+               //
             }
 
         }

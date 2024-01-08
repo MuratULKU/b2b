@@ -53,6 +53,8 @@ window.Ulku = {
     },
 }
 
+    },
+    currency: function (element, decimalPlaces) {
 
 
 window.iframe = {

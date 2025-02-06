@@ -1,4 +1,5 @@
-﻿using Entity;
+﻿using Core.Abstract;
+using Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,18 @@ namespace Business.Abstract
 {
     public interface IOrderService
     {
-        List<Basket> Basket { get; set; }
-        void AddProduct(User user, Product product, double amount, double price, string docNo);
-        void DeleteProduct(Basket basket);
-        void DeleteBasket(Guid guid);
-        void UpdateBasket(Basket basket);
-        List<Basket> GetAll(User user);
-        List<Basket> GetAll(Guid userId);
-        List<Basket> GetAll(string DocNo);
-        List<Basket> GetAllBasket();
-        List<Basket> GetAllFiche(bool send);
+        Task Save(OrdFiche ordFiche);
+
+        Task DeleteOrderFiche(OrdFiche ordFiche);
+        Task DeleteLine(OrdLine ordLine);
+        Task<int> GetOrderFicheCount(int trCode);
+        Task<int> GetOrderFicheCount(Guid firmId,int trCode);
+        Task<List<OrdFiche>> GetOrderFiche(int trCode, int CurrentPage, int PageSize);
+        Task<List<OrdFiche>> GetOrderFiche(Guid FirmId,int trCode, int CurrentPage, int PageSize);
+        Task<List<OrdFiche>> GetOrderFiche(int trCode, byte send);
+        Task<OrdFiche> GetOrderFiche(int send,Guid userId);
+        Task<OrdFiche> GetOrderFiche(Guid id);
+        Task<OrdFiche> GetOrderFiche(int id);
+
     }
 }

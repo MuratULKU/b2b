@@ -26,13 +26,13 @@ namespace _3DPayment.Providers
         {
             try
             {
-                string mbrId = request.BankParameters["mbrId"];//Mağaza numarası
-                string merchantId = request.BankParameters["merchantId"];//Mağaza numarası
-                string merchantPass = request.BankParameters["merchantPass"];//api kullanıcı şifresi
-                string userCode = request.BankParameters["userCode"];//
-                string userPass = request.BankParameters["userPass"];//Mağaza anahtarı
-                string txnType = request.BankParameters["txnType"];//İşlem tipi
-                string secureType = request.BankParameters["secureType"];
+                string mbrId = request.VirtualPosParameters["mbrId"];//Mağaza numarası
+                string merchantId = request.VirtualPosParameters["merchantId"];//Mağaza numarası
+                string merchantPass = request.VirtualPosParameters["merchantPass"];//api kullanıcı şifresi
+                string userCode = request.VirtualPosParameters["userCode"];//
+                string userPass = request.VirtualPosParameters["userPass"];//Mağaza anahtarı
+                string txnType = request.VirtualPosParameters["txnType"];//İşlem tipi
+                string secureType = request.VirtualPosParameters["secureType"];
                 string totalAmount = request.TotalAmount.ToString(new CultureInfo("en-US"));
                 string random = DateTime.Now.Ticks.ToString();
 
@@ -73,7 +73,7 @@ namespace _3DPayment.Providers
                 var hashData = GetSHA1(hashBuilder.ToString());
                 parameters.Add("Hash", hashData);//hash data
 
-                return Task.FromResult(PaymentGatewayResult.Successed(parameters, request.BankParameters["gatewayUrl"]));
+                return Task.FromResult(PaymentGatewayResult.Successed(parameters, request.VirtualPosParameters["gatewayUrl"]));
             }
             catch (Exception ex)
             {
@@ -112,7 +112,8 @@ namespace _3DPayment.Providers
             var txnStatus = form["TxnStatus"];
             if (txnStatus.Equals("N"))
             {
-                return Task.FromResult(VerifyGatewayResult.Failed($"{"Banka Hata Mesajı"} - {form["ErrMsg"]}", form["TxnResult"]));
+                string errorMsg = form["ErrMsg"] == string.Empty ? form["BankInternalResponseMessage"] : form["ErrMsg"];
+                return Task.FromResult(VerifyGatewayResult.Failed($"{"Banka Hata Mesajı"} - {errorMsg}", form["TxnResult"]));
             }
 
             int.TryParse("1", out int taksitSayisi);

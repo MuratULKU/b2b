@@ -1,20 +1,12 @@
-﻿using Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Core.Abstract;
+using Entity;
+using System.Linq.Expressions;
+
 
 namespace DataAccess.Abstract
 {
-    public interface ICreditCardRepository
+    public interface ICreditCardRepository:IRepository<CreditCard>
     {
-        List<CreditCard> GetAll();
-        List<CreditCard> GetBankCreditCard(Guid bankid);
-        CreditCard Get(Guid id);
-        Task<CreditCard> Get(Guid bankId, int brandCode);
-        CreditCard CreateCreditCard(CreditCard creditCard);
-        CreditCard UpdateCreditCard(CreditCard creditCard);
-        CreditCard DeleteCreditCard(CreditCard creditCard);
+        public Task<CreditCard> GetCreditCardAsync(Guid id, Expression<Func<CreditCard, object>>[] includes);
     }
 }

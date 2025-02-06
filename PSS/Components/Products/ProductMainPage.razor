@@ -1,0 +1,22 @@
+﻿@page "/search"
+@using Business.Abstract
+@using Business.SingletonServices
+@using CoreUI.Components.Base
+@using CoreUI.Components.Pagenation
+@using CoreUI.Components.PanelMenu
+@using Entity
+@inject FirmParameter firmParamService
+<div class="container">
+    <div class="col-2">
+        <PanelMenu SelectItemChange="changedCategory" />
+    </div>
+    <div class="col-10">
+
+        <CardViewPage TItem="Product" Data="pdata.Results" />
+
+        <Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="pdata.PageSize" RowCount="pdata.RowCount" OnPageSizeChanged="pageSizeOnchanged" />
+    </div>
+
+</div>
+
+

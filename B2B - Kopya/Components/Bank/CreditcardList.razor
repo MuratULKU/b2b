@@ -1,0 +1,160 @@
+﻿@page "/creditcard"
+
+@using Business.Abstract;
+@using Entity;
+@using B2B.Components.SelectList
+@using static B2B.Components.FirmParameter.FirmParamPage;
+@attribute [Authorize(Roles = "Admin")]
+@inject ICreditCardService creditCardRepository
+@inject IBankCardService bankCardRepository
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <DataGrid @ref="dataGridRef"
+                      TItem="CreditCard"
+                      Data="@creditCardList"
+                      @bind-SelectedRow="selectCreditCard"
+                                Editable
+                                Responsive
+                                ShowPager
+                      CommandMode="DataGridCommandMode.ButtonRow"
+                      PageSize="10">
+
+                <DataGridColumns>
+                    <DataGridCommandColumn />
+                    <DataGridColumn Width="150px;" Field="@nameof(CreditCard.Bank.Name)" Caption="Banka Adı">
+                        <DisplayTemplate>
+                            @{
+                                var name = (context as CreditCard).Bank?.Name;
+                                @name
+                            }
+                        </DisplayTemplate>
+                    </DataGridColumn>
+
+                    <DataGridColumn Field="@nameof(CreditCard.Name)" Caption="Kredi Kartı" Sortable="true" />
+
+                </DataGridColumns>
+
+            </DataGrid>
+
+        </div>
+        <div class="col-6">
+            @if (selectCreditCard is not null)
+            {
+                <div class="credit-card">
+                    <div class="row">
+                        <div class="col-7">
+                            <label>Adı</label>
+                        </div>
+                        <div class="col-5">
+                            <input class="form-control" @bind-value="selectCreditCard.Name">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-7">
+                            <label>Banka Adı</label>
+                        </div>
+                        <div class="col-5">
+                            <SelectList TItem="BankCard" Items="bankCards" Selected="selectCreditCard.BankCardId" DisplayField="Name" ValueField="Id" SelectedChanged="(e)=>selectedBankCardId = new Guid(e.ToString())" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-7">
+                            <label>Sistem Adı</label>
+                        </div>
+                        <div class="col-5">
+                            <SelectList TItem="CardBrand" Items="brandCards" Selected="selectCreditCard.CardBrandId" DisplayField="Name" ValueField="Id" SelectedChanged="(e)=>selectedBrandId = new Guid(e.ToString())" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-7">
+                            <label>Aktif mi</label>
+                        </div>
+                        <div class="col-5">
+                            <SelectList TItem="EvetHayır" Items="stateList" Selected="isActive" DisplayField="Name" ValueField="State" SelectedChanged="(e)=>isActive = e.ToString()" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-7">
+                            <label>Şirket Kartı mı</label>
+                        </div>
+                        <div class="col-5">
+                            <SelectList TItem="EvetHayır" Items="stateList" Selected="isBusiness" DisplayField="Name" ValueField="State" SelectedChanged="(e)=>isBusiness= e.ToString()" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-7">
+                            <Button class="btn-secondary" onclick="@newCreditCard">Yeni</Button>
+                        </div>
+                        <div class="col-5">
+                            <button class="btn-primary" onclick="@creditCardSave">Kaydet</button>
+                        </div>
+                    </div>
+                </div>
+            }
+            <hr />
+            <CardPrefix/>
+          @*  @if (selectCreditCard != null)
+            {
+                <DataGrid TItem="CreditCardPrefix" Data="selectCreditCard.Prefixes" ShowPager PageSize="5">
+                    <DataGridColumns>
+                        <DataGridColumn Field="@nameof(CreditCardPrefix.Prefix)" Caption="Prefix" Sortable="true" />
+                        <DataGridColumn Field="@nameof(CreditCardPrefix.Business)" Caption="Business" Sortable="true" />
+                        <DataGridColumn Field="@nameof(CreditCardPrefix.isInstallment)" Caption="Taksit" Sortable="true" />
+                    </DataGridColumns>
+                </DataGrid>
+            }*@
+        </div>
+    </div>
+</div>
+
+@code {
+    private DataGrid<CreditCard> dataGridRef;
+    private List<CreditCard> creditCardList;
+    private CreditCard selectCreditCard;
+    private CreditCardInstallment selectedInstallment;
+    private List<BankCard> bankCards;
+    private List<CardBrand> brandCards;
+    //private BankCard selectedBankCard { get; set; }
+    private Guid selectedBankCardId { get; set; }
+    private Guid selectedBrandId { get; set; }
+    private List<EvetHayır> stateList = new();
+    private string isBusiness;
+    private string isActive;
+
+    private void newCreditCard()
+    {
+        selectCreditCard = new();    
+    }
+
+    private void creditCardSave()
+    {
+        if (selectedBankCardId != Guid.Empty)
+            selectCreditCard.BankCardId = selectedBankCardId;
+        if (selectedBrandId != Guid.Empty)
+            selectCreditCard.CardBrandId = selectedBrandId;
+
+        selectCreditCard.isBusiness= Convert.ToBoolean(isBusiness);
+        selectCreditCard.Active = Convert.ToBoolean(isActive);
+        creditCardRepository.UpdateCreditCard(selectCreditCard);
+    }
+
+    protected async override void OnInitialized()
+    {
+        creditCardList = creditCardRepository.GetAll().Result.Data;
+        bankCards = await bankCardRepository.GetAllBank() ;
+        brandCards = await bankCardRepository.GetCardBrand();
+        stateList.Add(new EvetHayır() { Name = "Hayır", State = false });
+        stateList.Add(new EvetHayır() { Name = "Evet", State = true });
+      
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if(!firstRender)
+        {
+            isActive = selectCreditCard.Active.ToString();
+            isBusiness = selectCreditCard.isBusiness.ToString();
+        }
+    }
+}

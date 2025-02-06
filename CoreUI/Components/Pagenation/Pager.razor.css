@@ -1,0 +1,11 @@
+﻿@media only screen and (max-width: 500px) {
+.page-item{
+    display:none;
+}
+.first{
+    display:none;
+}
+.lastend{
+    display:none;
+}
+}

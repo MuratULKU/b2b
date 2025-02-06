@@ -1,0 +1,99 @@
+﻿@page "/userlist"
+@attribute [Authorize(Roles = "Admin")]
+
+@using B2B.Components.Confirm
+@using Business.Abstract
+@using DataAccess.Abstract;
+@using DataAccess.Concrete;
+@using Entity;
+@using Microsoft.EntityFrameworkCore;
+
+@inject IUserRoleService userRepository
+@inject IUserService userAccount
+@inject NavigationManager navManager
+@inject NotificationService notification
+<div class="container">
+    <div class="findarea">
+        <form @onsubmit="Search">
+            <input class="findtext" type="text" placeholder="Arama" id="filter" name="filter" @bind-value="@Filter" />
+            <button class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit">
+                Ara
+            </button>
+        </form>
+    </div>
+    <DataGrid TItem="Entity.User"
+              Data="userList"
+              TotalItems="@totalUser"
+              PageSize="10"
+                ShowPager
+                Responsive
+    @bind-SelectedRow="@selectedUser">
+
+        <DataGridColumns>
+            <DataGridColumn Field="@nameof(Entity.User.Username)" Caption="Kullanıcı Adı" />
+            <DataGridColumn Field="@nameof(Entity.User.Email)" Caption="Mail" />
+            <DataGridColumn Field="@nameof(Entity.User.AccountCode)" Caption="Muhasebe Kodu" />
+
+
+        </DataGridColumns>
+        <ButtonRowTemplate>
+            <Button Color="Color.Success" Clicked="@(()=>navManager.NavigateTo("/user"))">Yeni</Button>
+            <Button Color="Color.Primary" Disabled="(selectedUser is null)" Clicked="@(()=>navManager.NavigateTo($"/user/{selectedUser.Id}"))">Değiştir</Button>
+            <Button Color="Color.Danger" Disabled="(selectedUser is null)" Clicked="@DeleteUser">Sil</Button>
+        </ButtonRowTemplate>
+    </DataGrid>
+</div>
+<Confirm @ref="confirm" />
+@code {
+    private List<Entity.User> userList;
+    private int totalUser;
+    private Entity.User? selectedUser;
+    private string Filter;
+    private Confirm confirm;
+    private void Search()
+    {
+        userList = userAccount.GetUsers(Filter).Result.Data;
+    }
+
+    private async void DeleteUser()
+    {
+        var onay = await confirm.ShowAsync("Silme Onay", $"{selectedUser.Username} kullanıcı silinecektir Onaylıyor musunuz.");
+        if(onay)
+        {
+            await userAccount.DeleteUser(selectedUser);
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Hata", Detail = "Kayıt Silindi", Duration = 5000 });
+        }
+        userList = await userAccount.GetAllUser();
+        StateHasChanged();
+    }
+
+    protected  async override void OnInitialized()
+    {
+        base.OnInitialized();
+        userList =  await userAccount.GetAllUser();
+        selectedUser = userList.FirstOrDefault();
+        List<UserRole> userRole = userRepository.GetAll(selectedUser.Id).Result.Data;
+    }
+    private async Task OnReadData(DataGridReadDataEventArgs<Entity.User> e)
+    {
+        if (!e.CancellationToken.IsCancellationRequested)
+        {
+            List<Entity.User> response = null;
+            if (e.ReadDataMode is DataGridReadDataMode.Virtualize)
+                response = (userList).Skip(e.VirtualizeOffset).Take(e.VirtualizeCount).ToList();
+            else if (e.ReadDataMode is DataGridReadDataMode.Paging)
+                response = (userList).Skip((e.Page - 1) * e.PageSize).Take(e.PageSize).ToList();
+            else
+                throw new Exception("Unhandled ReadDataMode");
+
+            if (!e.CancellationToken.IsCancellationRequested)
+            {
+                totalUser = (userList).Count;
+                userList = new List<Entity.User>(response); 
+            }
+        }
+
+    }
+
+
+}

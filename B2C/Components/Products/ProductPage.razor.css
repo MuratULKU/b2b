@@ -1,0 +1,10 @@
+﻿.imgholder{
+    width:30%;
+}
+.product-detail{
+    width:40%;
+}
+.product{
+    display:flex;
+    margin-bottom:100px;
+}

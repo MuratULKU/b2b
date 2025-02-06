@@ -1,0 +1,54 @@
+﻿@if (ShowDialog)
+{
+    <div class="modal fade show d-block" id="Confirm" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title title" id="exampleModalLabel">@title</h5>
+                    <button type="button" class="close" aria-label="Close" onclick="@(() => OnConfirmationChanged(false))">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @BodyText
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="@(() => OnConfirmationChanged(false))">Vazgeç</button>
+                    <button type="button" class="btn btn-primary" onclick="@(() => OnConfirmationChanged(true))">Tamam</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool ShowDialog { get; set; } = false;
+    private TaskCompletionSource<bool>? taskCompletionSource;
+    private string title = "Onay";
+    [Parameter] public string BodyText { get; set; } = "";
+
+    // Gösterme metodu
+    public Task<bool> ShowAsync(string title, string message)
+    {
+        this.title = title;
+        this.BodyText = message;
+        return ShowAsync();
+    }
+
+    // Genel gösterme metodu
+    public Task<bool> ShowAsync()
+    {
+        taskCompletionSource = new TaskCompletionSource<bool>();
+        ShowDialog = true;
+        StateHasChanged(); // Render işlemi tetikleniyor
+        return taskCompletionSource.Task; // Task döndürüyoruz
+    }
+
+    // Onay durumunu değiştiren metod
+    private  void OnConfirmationChanged(bool isConfirmed)
+    {
+        ShowDialog = false;
+        StateHasChanged(); // Render işlemi tetikleniyor
+        taskCompletionSource?.SetResult(isConfirmed); // Task'ı sonlandırıyoruz
+    }
+}

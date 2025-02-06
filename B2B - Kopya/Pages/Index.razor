@@ -1,0 +1,44 @@
+﻿@page "/"
+@using System.Net;
+@using B2B.Components.Login;
+@attribute [Authorize]
+@inject NavigationManager navManager;
+@inject AuthenticationStateProvider authStateProvider
+@inject IHttpContextAccessor httpContextAccessor
+<PageTitle>Index</PageTitle>
+
+@*Remote Ip Adress : @httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+Local Ip Adress  : @httpContextAccessor.HttpContext.Connection?.LocalIpAddress.ToString();*@
+
+<div style="width:50%">
+@*    <Carousel @bind-SelectedSlide="@selectedSlide" Crossfade>
+        <CarouselSlide Name="1">
+            <Image Source="/media/carousel/1.jpg" Text="Lights image" Display="Display.Block" Width="Width.Is100" />
+        </CarouselSlide>
+        <CarouselSlide Name="2">
+            <Image Source="/media/carousel/2.jpg" Text="Lights image" Display="Display.Block" Width="Width.Is100" />
+        </CarouselSlide>
+        <CarouselSlide Name="3">
+            <Image Source="/media/carousel/3.jpg" Text="Lights image" Display="Display.Block" Width="Width.Is100" />
+        </CarouselSlide>
+    </Carousel>*@
+</div>
+<AuthorizeView Roles="User">
+    
+    <Authorized>
+        <SurveyPrompt Title="Satış ve Tahsilat Sistemi " />
+    </Authorized>
+  
+</AuthorizeView>
+<AuthorizeView Roles="Admin">
+    <AdminHomePage></AdminHomePage>
+</AuthorizeView>
+
+@code {
+    //private string selectedSlide = "2";
+
+
+
+}
+
+

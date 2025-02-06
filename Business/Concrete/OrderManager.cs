@@ -1,73 +1,164 @@
 ﻿using Business.Abstract;
+using Core.Abstract;
+using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
-    public class OrderManager : IOrderService
+    public class OrderManager : IOrderService,IDisposable
     {
-        public List<Basket> Basket { get; set; } = new();
+        public List<OrdFiche> Basket { get; set; } = new();
 
-        private IBasketRepository _basketRepository;
+        private readonly IUnitofWork _unitOfWork;
+       
 
-        public OrderManager(IBasketRepository basketRepository)
+        public OrderManager(IUnitofWork unitOfWork)
         {
-            _basketRepository = basketRepository;
+            _unitOfWork = unitOfWork;
         }
 
-      
-
-        public void AddProduct(User user, Product product, double amount, double price,string docNo)
+       public async Task DeleteLine(OrdLine ordLine)
         {
-            _basketRepository.Insert(user, product, amount, price, product.SellVat ?? 0, (price * product.SellVat ?? 0) / 100, 0, 0, docNo);
+            await _unitOfWork.OrdLine.Delete(ordLine);
         }
 
-        public List<Basket> GetAll(User user)
+        public async Task Save(OrdFiche ordFiche)
         {
-            if (user != null)
-            Basket= _basketRepository.GetAll(user.Id).ToList();
-            return Basket;
-            
+            try
+            {
+              if(ordFiche.Lines == null && ordFiche.Lines?.Count == 0 && ordFiche.Id != Guid.Empty)
+                 await   _unitOfWork.OrdFiche.Delete(ordFiche);
+
+                else
+                {
+                    if(ordFiche.Id == Guid.Empty)
+                    {
+                        foreach(OrdLine line in ordFiche.Lines)
+                        {
+                            line.Product = null;
+                            await _unitOfWork.OrdLine.AddAsync(line);
+                        }
+                       
+                        await _unitOfWork.OrdFiche.AddAsync(ordFiche);
+                    }
+                    else
+                    {
+                        if (ordFiche.Lines != null)
+                        {
+                            foreach (OrdLine line in ordFiche.Lines)
+                            {
+                                if (line.Id == Guid.Empty)
+                                {
+                                    line.Product = null;
+                                    await _unitOfWork.OrdLine.AddAsync(line);
+                                }
+                                else
+                                    await _unitOfWork.OrdLine.UpdateAsync(line);
+                            }
+                        }
+                        await _unitOfWork.OrdFiche.UpdateAsync(ordFiche);
+                    }
+                }
+              await  _unitOfWork.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                // await _unitOfWork.RollbackTransactionAsync(dbContextTransaction);
+                throw new Exception(ex.Message, ex);
+            }
+
         }
 
-        public List<Basket> GetAll(Guid userId)
+        public async Task<int> GetOrderFicheCount(int trCode)
         {
-            return _basketRepository.GetAll(userId).Where(x=>x.Send == true).ToList();
+            return await _unitOfWork.OrdFiche.RowCount(x=>x.TrCode == trCode);
         }
 
-        public List<Basket> GetAllFiche(bool send)
+        public async Task<int> GetOrderFicheCount(Guid firmId,int trCode)
         {
-            return _basketRepository.GetAllFiche(send);
+            return await _unitOfWork.OrdFiche.RowCount(x => x.TrCode == trCode && x.CompanyId == firmId);
         }
 
-        public void DeleteProduct(Basket basket)
+        public async Task<List<OrdFiche>> GetOrderFiche(int trCode, int CurrentPage, int PageSize)
         {
-            _basketRepository.Delete(basket);
-            
+            var result = await _unitOfWork.OrdFiche
+                .GetOrderFiche(trCode,CurrentPage:CurrentPage,PageSize:PageSize );
+
+            return result;
         }
 
-        public void DeleteBasket(Guid guid)
+        public async Task<List<OrdFiche>> GetOrderFiche(int trCode)
         {
-            _basketRepository.Delete(guid);
+            var result = await _unitOfWork.OrdFiche.Find(x => x.TrCode == trCode);
+            return result.Data;
         }
 
-        public void UpdateBasket(Basket basket) {
-            _basketRepository.Update(basket);
+        public async Task<OrdFiche> GetOrderFiche(short send, Guid userId)
+        {
+            var result = await _unitOfWork.OrdFiche.SingleOrDefaultAsync(
+                x => x.Send == send && x.UserId == userId,
+                x => x.Include(x => x.Lines)  // Include the Lines collection
+                      .ThenInclude(line => line.Product).AsNoTracking()  // Then include the Product for each Line
+);
+
+            return result;
         }
 
-        public List<Basket> GetAllBasket()
+        public async Task<OrdFiche> GetOrderFiche(Guid id)
         {
-           return _basketRepository.GetAll().Where(x=>x.Send == true).ToList();
+            var result = await _unitOfWork.OrdFiche.SingleOrDefaultAsync(
+                x => x.Id == id,
+                x => x.Include(x => x.Lines)  // Include the Lines collection
+                      .ThenInclude(line => line.Product).AsNoTracking()  // Then include the Product for each Line
+);
+
+            return result;
         }
 
-        public List<Basket> GetAll(string DocNo)
+        public void Dispose()
         {
-            return _basketRepository.GetAll(DocNo);
+            _unitOfWork?.Dispose();
+        }
+
+        public async Task<List<OrdFiche>> GetOrderFiche(int trCode, byte send)
+        {
+            var result = await _unitOfWork.OrdFiche.Find(x => x.TrCode == trCode && x.Send == send,includes: x=>x.Include(x=>x.Lines));
+            return result.Data;
+        }
+
+        public async Task DeleteOrderFiche(OrdFiche ordFiche)
+        {
+           await _unitOfWork.OrdFiche.Delete(ordFiche);
+        }
+
+        public async Task<OrdFiche> GetOrderFiche(int send, Guid userId)
+        {
+           var result = await _unitOfWork.OrdFiche.SingleOrDefaultAsync(x => x.Send == send && x.UserId == userId,x=>x.Include(x=>x.Lines).ThenInclude(x=>x.Product));
+            return result;
+        }
+
+        public async Task<List<OrdFiche>> GetOrderFiche(Guid FirmId, int trCode, int CurrentPage, int PageSize)
+        {
+            var result = await _unitOfWork.OrdFiche
+                  .GetOrderFiche(FirmId,trCode,  CurrentPage, PageSize);
+
+            return result;
+        }
+
+        Task<OrdFiche> IOrderService.GetOrderFiche(int id)
+        {
+           return _unitOfWork.OrdFiche.GetOrderFiche(id);
         }
     }
 }

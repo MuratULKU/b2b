@@ -1,0 +1,41 @@
+.page {
+   
+    
+}
+
+header {
+    max-width:100%;
+    background-color: rgba(116,253,5, 0.5);
+    width: 100%;
+    top: 0;
+}
+
+
+
+main {
+    max-width:100%;
+   
+   
+}
+main.row{
+    max-width:100%;
+}
+
+footer {
+    margin-top:15px;
+    max-width: 100%;
+    background-color: #e5e7eb;
+    position: relative;
+    bottom: 0px;
+}
+
+
+
+@media (max-width: 640.98px) {
+  
+}
+
+@media (min-width: 641px) {
+   
+    
+}

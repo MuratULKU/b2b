@@ -1,0 +1,19 @@
+﻿@using B2B.Components.NotificationService
+@inherits LayoutComponentBase
+
+<PageTitle>B2B</PageTitle>
+
+<div class="page">
+   <div class="sidebar">
+        <NavMenu />
+    </div>
+    <MNotification/>
+    <Preload/>
+    <MModal IsServiceModal="true"/>
+    <main>
+        <article class="content px-4">
+         
+            @Body
+        </article>
+    </main>
+</div>

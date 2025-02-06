@@ -1,61 +1,75 @@
-﻿*{
-    font-family:sans-serif;
-    font-size:small;
+﻿* {
+    margin-inline-end: 5px;
 }
 
-button:active {
-    background-color: blue;
+/* Default styles for larger screens */
+.col-image {
+    width: 75px;
 }
 
-button:active + .shop-image{
-    color:red;
-    background-color:yellow;
+.code {
+    width: 100px;
 }
 
-button {
-    background-color: transparent;
+.col-product {
+    width: 400px;
+}
+
+.col-amount {
+    width: 50px;
+}
+
+.col-price {
+    width: 150px;
+    text-align: right;
+}
+
+.col-operation {
+    width: 150px;
+}
+
+.col-amount-input {
+    width: 50px;
+    text-align: right;
+}
+
+.shop-image-button {
+    padding: 5px 15px;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+    color: #fff;
+    background-color: #04AA6D;
     border: none;
+    border-radius: 15px;
 }
 
-.shop-image {
-    color: blue;
-    font-family: 'Icons' !important;
-}
-.card-img-top {
-    min-height:40px;
-    max-height: 40px;
-    object-fit: scale-down;
-}
-
-.one-line {
-    line-height: 1.5em;
-    height: 1.5m;
-    overflow: hidden;
-}
-.col-image{
-    width:50px;
-}
-.col-product{
-    width:auto;
-}
-.col-amount{
-    width:75px;
-}
-.col-price{
-    width:75px;
-}
-.col-operation{
-    width:50px;
-}
-
-@media(min-width:641px) {
-    .hidden{
-        display:table-cell;
+    .shop-image-button:active {
+        background-color: #3e8e41;
+        transform: translateY(4px);
     }
-}
 
-@media (max-width: 640.98px) {
-    .hidden{
-        display:none;
+/* Responsive design for mobile (max-width: 768px) */
+@media screen and (max-width: 768px) {
+    .col-image,
+    .code {
+        display: none; /* Hide these columns on smaller screens */
+    }
+
+    .col-product {
+        width: auto; /* Adjust width for remaining visible columns */
+    }
+
+    .col-price,
+    .col-operation,
+    .col-amount {
+        width: auto;
+        text-align: left; /* Align text for better readability */
+    }
+
+    .shop-image-button {
+        padding: 10px; /* Adjust padding for mobile */
+        font-size: 14px; /* Smaller font for better fit */
+        width:50px;
     }
 }

@@ -1,11 +1,10 @@
-﻿using Entity;
+﻿using Core.Abstract;
+using Entity;
 
 namespace DataAccess.Abstract
 {
-    public interface IRoleRepository
+    public interface IRoleRepository:IRepository<Role>
     {
-        List<Role> GetAllRole();
-        
-
+      
     }
 }

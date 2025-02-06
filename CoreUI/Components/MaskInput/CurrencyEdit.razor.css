@@ -1,0 +1,21 @@
+﻿.currency{
+    display:flex;
+    margin:auto;
+}
+.simge {
+    margin: auto;
+    display: inline-block;
+}
+input {
+    margin:auto;
+    position:relative;
+    width: 100%;
+    border: none;
+    text-align: end;
+    
+    display:flex;
+}
+
+    input:focus {
+        outline: none;
+    }

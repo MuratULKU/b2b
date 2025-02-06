@@ -1,0 +1,27 @@
+﻿*{
+    font-family:sans-serif;
+    font-size:small;
+}
+.fiyat{
+    font-weight:700;
+}
+
+.card-img-top{
+    max-height:200px;
+    object-fit:scale-down;
+}
+.two-line{
+    min-height:4em;
+    line-height:2em;
+    overflow:hidden;
+}
+.shop-image-button{
+    opacity:0.7;
+}
+.shop-image-button:hover{
+    opacity:1;
+}
+.amount{
+    display:inline-flex;
+    margin:2px;
+}

@@ -46,7 +46,7 @@ namespace _3DPayment
         };
 
         private readonly IServiceProvider _serviceProvider;
-        private readonly IHttpClientFactory _httpClientFactory;
+        //private readonly IHttpClientFactory _httpClientFactory;
 
         public PaymentProviderFactory(IServiceProvider serviceProvider)
         {

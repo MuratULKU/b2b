@@ -1,0 +1,29 @@
+﻿@typeparam TElement
+@using B2B.Data;
+@using Business.Abstract;
+@using Entity;
+@using static B2B.Data.InstallmentViewModel;
+@inject ICreditCardPrefixService creditCardService
+@inject IBankCardService bankCardService
+@if(Elements == null)
+{
+    if(NullTeplate == null)
+    {
+        <text>Loading...</text>
+    }
+    else
+    {
+        @NullTeplate
+        
+    }
+}
+else
+{
+  @ChidContent   
+}
+@code {
+
+    [Parameter] public List<TElement> Elements { get; set; }
+    [Parameter] public RenderFragment ChidContent { get; set; }
+    [Parameter] public RenderFragment NullTeplate{ get; set; }
+}

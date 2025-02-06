@@ -1,0 +1,59 @@
+﻿<div class="number-int">
+    <button class="down" onclick="@down">-</button>
+    <input class="form-control number-text" type="tel" pattern="[0-9]" placeholder="1" min="@MinValue" value="@Value" @onchange="@change" id="@GetId"/>
+    <button class="up" onclick="@up">+</button>
+</div>
+
+@code {
+    public string UniqueID { get; set; }
+
+
+    [Parameter] public double MinValue { get; set; } = 1;
+    [Parameter] public double Value { get; set; }
+    [Parameter]
+    public EventCallback<double> Change { get; set; }
+    [Parameter]
+    public EventCallback<double> ValueChanged { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> Attributes { get; set; }
+    protected string GetId()
+    {
+        if (Attributes != null && Attributes.TryGetValue("id", out var id) && !string.IsNullOrEmpty(Convert.ToString(@id)))
+        {
+            return $"{@id}";
+        }
+
+        return UniqueID;
+    }
+
+    protected override void OnInitialized()
+    {
+        UniqueID = Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("/", "-").Replace("+", "-").Substring(0, 10);
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
+    private async void change(ChangeEventArgs args)
+    {
+        Value = Convert.ToDouble(args.Value);
+        await Change.InvokeAsync(Value);
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    private void down()
+    {
+        if (MinValue <= Value)
+        {
+            Value -= 1;
+            Change.InvokeAsync(Value);
+        }
+    }
+    private void up()
+    {
+        Value +=1;
+        Change.InvokeAsync(Value);
+    }
+}

@@ -1,0 +1,49 @@
+﻿@page "/info"
+@using Business.Abstract
+@inject IFirmParamService firmParamService
+<h3 class="justify-content-center">Ön Bilgilendirme Formu</h3>
+<h3>1 Konu</h3>
+<p>İş bu ön bilgi formunun konusu ÜLKÜ Yazılım Bilgisayar Ltd. Şti. Satıcı sıfatıyla sipairiş veren ve ödeme yapan Müşteriye Satış Yaptığını
+    ürünlerin, hizmetlerin ve ödeme bilgilerinin ilgili 6502 sayılı Tüketicilerin korunması kanunun ve bu kanuna dayalı olarak çıkartılan mesafeli 
+    sözleşmeler yönetmeliği hükümleri gereğince ticari ve mesleki olmayan amaçla hareket eden gerçek veya tüzel kişilğine haiz müşteri bilgilendirmesidir.
+</p>
+<h3>2 Satıcı Bilgileri</h3>
+<p>@firmParamService.ToString(1)
+@firmParamService.ToString(2)
+@firmParamService.ToString(3)
+<br>
+@firmParamService.ToString(4) / @firmParamService.ToString(5)
+<br>
+<br>
+@firmParamService.ToString(19)
+@firmParamService.ToString(20)
+    <br></p>
+<h3>3 Sözleşme Konusu Hizmet ve Ödeme Bilgileri</h3>
+<p>3.1 Müşteri aldığı ürünlerin marka model satış fiyatı ve mikatrını internet sitesinden erişebildiği ve okuyup bilgi sahibi olduğunu kabul, beyan ve taahüt eder. </p>
+<p>3.2 Listelelen fiyatlar ürünlerin satış fiyatıdır. İlan edelien fiyatlar güncelleme yapılıncaya kadar geçerlidir. Ürün fiyatları sipariş aşamasında güncellenir. Onaylanlanmış sipariş ekranında ki fiyatlar ürünün güncel fiyatlarıdır.</p>
+<p>3.3 Ürünlerin tüm fiyatları ürünler sayfasında listelenmekdeir.</p>
+<p>3.4 Ürünlerin ödeme şekli ve planı peşindir. Taksit kampanyaları ödeme sayfasında ayrıca belirtilmiştir.</p>
+<p>3.5 Sipariş tarihi ödemenin yapıldığı tarih veya siparişin kesinleştiği tarihdir.</p>
+<p>3.6 Ürünlerin nakliye ve taşıma ücretleri müşteriye aittir.</p>
+<h3>4 Genel Hükümler</h3>
+<p>4.1 Müşteri internet sitesinde sözleşme konusu olan ürünlerin temel niteliklerini , satış fiyatı, teslim şekli, ödeme seçenekleri ilişkin</p>
+    ön bilgileri okuyup bilgi sahibi olduğu elektironik ortamda gerekli teyidi verdiğini beyan ve taahhüt eder.
+<p>4.2 Satıcı firma ürünlerin tesliminin imkansız hala gelensi durumunda müşteriye bildireceğini ve tahsil ettiği toplam tutarı müşteri hesabına iade edeceğini kabul ve taahüüt eder.</p>
+<p>4.3 Müşteri ödmeyi elektronik ortamda doğruladığını Ön bilgilendirme formunun elektronik ortamda kabul ettiğini ödemenin herhalgi bir şekilde iptal edilmesi durumunda ödeme işlemi hesaplardan çıkartılacağını kabul ve beyan eder.
+</p>
+<h3>5 Fatura Bilgileri</h3>
+<p>Müşterinin kayıtlı ünvan ve adresine düzenlenen faturlar ilgili kanaldan müşteriye ulaştırılır.</p>
+<h3>6 Cayma Hakkı</h3>
+<p>6.1 Müşteri ürünleri sevk işleminden iptal edebilir. Ödediği tutar var ise tamamı müşteriye ödeme yöntemiyle iade edilir. </p>
+<p>6.2 Ürünler sevk edilmiş ise Normal iade prosödürü uygulanır.</p>
+<h3>7 Delil Anlaşması ve Yetkili Mahkeme</h3>
+<p>Bu formdan veya uygulamasından doğabilecek her türlü uyuşmazlığın çözümününde KAYSERİ mahkemeleri yekkilir.</p>
+<h3>8 Diğer Hükümler</h3>
+<p>8.1 Müşteri iş bu form ile ön bilgilendirme  formunda yazılı tüm koşullları ve açıklamaları okuduğunu satışa konu olan tüm ürün ve hizmetlerin nitelikelrini
+    satış fiyatını ödeme şekli ile ilgili tüm önbilgileri ve cayma hakkı konusunda önceden bilgi sahibi olduğunu bu internet sitesinden elektornik ortamda gördüğünüve 
+    tüm bunlara elektonik ortamda onay verek kabul ettiğini beyan eder.
+</p>
+<p>İş bu 8 maddeden oluşan ön bilgilendirme formu taraflar arasında elektronik ortamda onay verilerek devreye girmiştir. </p>
+@code {
+
+}

@@ -1,4 +1,6 @@
 ﻿using Business.Abstract;
+using Core.Abstract;
+using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
 using System;
@@ -11,55 +13,46 @@ namespace Business.Concrete
 {
     public class BankCardManager:IBankCardService
     {
-        private readonly IBankCardRepository bankCardRepository;
-        public BankCardManager(IBankCardRepository bankCardRepository)
+        private readonly IUnitofWork _unitOfWork;
+
+        public BankCardManager(IUnitofWork unitOfWork)
         {
-            this.bankCardRepository = bankCardRepository;
+            this._unitOfWork = unitOfWork;
         }
 
-        public BankCard CreateBank(BankCard bankCard)
+        public async Task<IResult> CreateBank(BankCard bankCard)
         {
-            bankCardRepository.CreateBank(bankCard);
-
-            return bankCard;
+           var result = await _unitOfWork.BankCards.AddAsync(bankCard);
+            if (result.Status == ResultStatus.Success)
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Başarılı");
+            return new Result(ResultStatus.Error, "Kayıt İşlemi Hatalı");
         }
 
-        public void DeleteBank(BankCard bankCard)
+        public async Task<IResult> DeleteBank(BankCard bankCard)
         {
-            bankCardRepository.DeleteBank(bankCard);
+            return await _unitOfWork.BankCards.Delete(bankCard);
         }
 
-        public List<BankCard> GetAllBank()
+        public async Task<List<BankCard>> GetAllBank()
         {
-            return bankCardRepository.GetAllBank();
+            var result = await _unitOfWork.BankCards.GetAllAsync();
+            return result.Data;
         }
 
-        public Task<BankCard> GetBank(Guid id)
+        public async Task<IDataResult<BankCard>> GetBank(Guid id)
         {
-            return bankCardRepository.GetBank(id);
+            return await _unitOfWork.BankCards.GetByIdAsync(id);
         }
 
-        public Task<BankCard> GetBankbyCode(int Code)
+        public async Task<BankCard> GetBankbyCode(int Code)
         {
-            return bankCardRepository.GetBankbyCode(Code);
-        }
-        public Task<List<BankParameter>> GetBankParameters(Guid bankId)
-        {
-            return bankCardRepository.GetBankParameters(bankId);
+            var result = await _unitOfWork.BankCards.SingleOrDefaultAsync(x=>x.BankCode == Code);
+            return result.Data;
         }
 
-        public Task<CreditCard> GetCreditCardByPrefix(string prefix, bool includeInstallments = false)
+        public async Task UpdateBank(BankCard bankCard)
         {
-            return bankCardRepository.GetCreditCardByPrefix(prefix, includeInstallments);
+           await _unitOfWork.BankCards.UpdateAsync(bankCard);
         }
-
-      
-
-        public BankCard UpdateBank(BankCard bankCard)
-        {
-            bankCardRepository.UpdateBank(bankCard);
-            return bankCard;
-        }
-
     }
 }

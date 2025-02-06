@@ -1,0 +1,54 @@
+﻿@inject ICharAsgnRepository _charAsgnRepository
+@inherits UlkuComponentBase
+@using B2B.Components.Utilities;
+@using B2B.Data;
+@using DataAccess.Abstract;
+@using Entity;
+@if (charCode != null)
+{
+    <div class="filter-panel" style="@StyleNames">
+        <div class="filter-name">
+            @charCode.Name
+        </div>
+        <div class="filter-opinion">
+            @foreach (CharVal charVal in charCode.CharVals)
+            {
+                filterModel = new() {Name = charVal.Name, Value = charVal.Code, Checked = false,CharCodeId = charCode.Id, CharValId = charVal.Id };
+                var amount = ProductAmount(filterModel.Value);
+                if (amount > 0 )
+                {
+                    <PanelFilterItem  filterModel="filterModel" ChangeState="StateChange" Amount="amount"/>
+                }
+                else
+                {
+   
+
+                }
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [EditorRequired]
+    [Parameter] public CharCode charCode { get; set; }
+    public FilterModel filterModel;
+    private bool show = true;
+    private string classname;
+    [Parameter] public EventCallback<FilterModel> StateChange {get;set;}
+
+    private int ProductAmount(string charValCode)
+    {
+        return _charAsgnRepository.Amount(charValCode).Result;
+    }
+
+    protected override void BuildStyles(CssStyleBuilder builder)
+    {
+        builder.Append("display:block", show);
+        builder.Append("display:none", !show);
+        base.BuildStyles(builder);
+    }
+
+   
+
+}

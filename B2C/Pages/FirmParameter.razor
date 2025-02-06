@@ -1,0 +1,357 @@
+﻿@page "/firmparam"
+
+@using Business.Abstract;
+@using CoreUI.Components.DataGrid
+@using CoreUI.Components.SelectList
+@using Entity
+@using System.Text;
+@using System.Reflection
+@attribute [Authorize(Roles = "Admin")]
+@inject FirmParamService firmParamService
+@inject IVirtualPosService virtualPosService
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <DataGrid TItem="FirmParam"
+                      Items="firmParamList"
+                      SelectedItemChanged="changedGrid"
+                      TotalCount="firmParamList.Count()"
+                      Pager="true"
+                      Virtualize="true">
+
+                <Columns>
+                    <Column Width="50" TextAlign="TextAlignmet.Right" Caption="No" TItem="FirmParam" Field="@nameof(FirmParam.No)" IsSortable SortDirection="SortDirection.Desc" />
+                    <Column Width="200" Caption="Anahtar" TItem="FirmParam" Field="@nameof(FirmParam.Key)" IsSortable />
+                    <Column Width="200" Caption="Değer" TItem="FirmParam" Field="@nameof(FirmParam.Value)">
+                        <CellTemplate>
+                            @Encoding.UTF8.GetString(context.Item.Value)
+                        </CellTemplate>
+                    </Column>
+
+                </Columns>
+
+            </DataGrid>
+
+        </div>
+        <div class="col-sm-6">
+            @if (firmParam != null)
+            {
+                @switch (firmParam.No)
+                {
+                    case 10:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Banka Kodu</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList  TItem="VirtualPos" Items="virtualPosList" DisplayField="Name" ValueField="Id" @bind-Selected="ParamValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 13:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>SSL Modu</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 16:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Bakım Modu</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 17:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Ürün Sayfası Gösterim Modu</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="viewList" DisplayField="Name" ValueField="Mode" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 22:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Veri Tabanı Yeniden Yüklenecek</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 23:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Miktar Gösterim Modu</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="amounts" DisplayField="Name" ValueField="Mode" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 26:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Risk Takibi</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 27:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Resimler Yeniden Yüklenecek</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 28:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Üretici Kodu Gösterilsin mi</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 29:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Grup Kodu Gösterilsin mi</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 30:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Özel Kod Gösterilsin mi</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 31:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Özel Kod2 Gösterilsin mi</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 32:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Özel Kod3 Gösterilsin mi</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 33:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Özel Kod4 Gösterilsin mi</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    case 34:
+                        {
+                            <div class="defaultpos" style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>Özel Kod5 Gösterilsin mi</label>
+                                </div>
+                                <div class="row my-2">
+                                    <div class="row my-2">
+                                        <SelectList Items="stateList" DisplayField="Name" ValueField="State" @bind-Selected="StateValue" />
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+                        }
+                    default:
+                        {
+                            <div style="margin-left:30px;">
+                                <div class="row my-2">
+                                    <label>@firmParam.Key</label>
+                                </div>
+                                <div class="row my-2">
+                                    <input @ref="inputParam" class="form-control" type="text" value="@Encoding.UTF8.GetString((byte[])firmParam.Value)" @oninput="@ValueChange" />
+                                </div>
+                            </div>
+                            break;
+                        }
+                }
+            }
+
+            <div style="text-align:right">
+                <button class="btn btn-primary;" onclick="@Save">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private DataGrid<FirmParam> dataGridRef;
+    private List<FirmParam> firmParamList;
+    private FirmParam firmParam;
+    private ElementReference inputParam;
+    private List<VirtualPos> virtualPosList;
+    private List<EvetHayır> stateList = new();
+    private List<ViewMode> viewList = new();
+    private List<AmountShow> amounts = new();
+
+    private void changedGrid(FirmParam item)
+    {
+        firmParam = item;
+    }
+
+    private object ParamValue
+    {
+        get
+        {
+            return Encoding.UTF8.GetString((byte[])firmParam.Value);
+        }
+        set
+        {
+            firmParam.Value = Encoding.UTF8.GetBytes(value.ToString());
+        }
+
+    }
+
+    private object StateValue
+    {
+        get { return Encoding.UTF8.GetString((byte[])firmParam.Value); }
+        set { firmParam.Value = Encoding.UTF8.GetBytes(value.ToString()); }
+    }
+
+    private void ValueChange(ChangeEventArgs value)
+    {
+
+        firmParam.Value = Encoding.UTF8.GetBytes(value.Value.ToString());
+    }
+
+    private void Save()
+    {
+        if (firmParamService.ToBoolean(22))
+        {
+            firmParam = firmParamList.FirstOrDefault(x => x.No == 8);
+            firmParam.Value = Encoding.UTF8.GetBytes("01.01.1980");
+        }
+        firmParamService.Update(firmParam);
+    }
+
+    protected async override void OnInitialized()
+    {
+        firmParamList = firmParamService.GetAll().Result;
+        stateList.Add(new EvetHayır() { Name = "Hayır", State = false });
+        stateList.Add(new EvetHayır() { Name = "Evet", State = true });
+        viewList.Add(new ViewMode() { Name = "Kart Mode", Mode = 0 });
+        viewList.Add(new ViewMode() { Name = "Gird Mode", Mode = 1 });
+        amounts.Add(new AmountShow() { Name = "Sayı ile Göster", Mode = 0 });
+        amounts.Add(new AmountShow() { Name = "Simge ile Göster", Mode = 1 });
+    }
+    protected async override Task OnParametersSetAsync()
+    {
+         virtualPosList = await virtualPosService.GetVirtualListsAsync();
+    }
+
+
+
+    public class EvetHayır
+    {
+        public string Name { get; set; }
+        public bool State { get; set; }
+    }
+
+    public class ViewMode
+    {
+        public string Name { get; set; }
+        public int Mode { get; set; }
+    }
+
+    public class AmountShow
+    {
+        public string Name { get; set; }
+        public int Mode { get; set; }
+    }
+}

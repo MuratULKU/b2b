@@ -1,20 +1,9 @@
 ﻿using _3DPayment.Request;
 using _3DPayment.Results;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Net.Http.Headers;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Net.NetworkInformation;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.RegularExpressions;
-using System.Text.Unicode;
-using System.Threading.Tasks;
 using System.Xml;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -27,13 +16,14 @@ namespace _3DPayment.Providers
         public PosnetPaymentProvider(IHttpClientFactory httpClientFactory)
         {
             client = httpClientFactory.CreateClient();
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
 
         public async Task<PaymentGatewayResult> ThreeDGatewayRequest(PaymentGatewayRequest request)
         {
-            string merchantId = request.BankParameters["merchantId"];
-            string terminalId = request.BankParameters["terminalId"];
-            string posnetId = request.BankParameters["posnetId"];
+            string merchantId = request.VirtualPosParameters["merchantId"];
+            string terminalId = request.VirtualPosParameters["terminalId"];
+            string posnetId = request.VirtualPosParameters["posnetId"];
 
             try
             {
@@ -60,16 +50,15 @@ namespace _3DPayment.Providers
 
                 var httpParameters = new Dictionary<string, string>();
                 httpParameters.Add("xmldata", requestXml);
-
-                var response = await client.PostAsync(request.BankParameters["verifyUrl"], new FormUrlEncodedContent(httpParameters));
-                Stream responseContent = await response.Content.ReadAsStreamAsync();
-                StreamReader responseStream = new StreamReader(responseContent,Encoding.UTF8);
-                string responseXml = responseStream.ReadToEnd();
+               
+                var response = await client.PostAsync(request.VirtualPosParameters["verifyUrl"], new FormUrlEncodedContent(httpParameters));
+                byte[] responseContent = await response.Content.ReadAsByteArrayAsync();
+                string content = Encoding.GetEncoding("ISO-8859-9").GetString(responseContent);
+            
                 
                 var xmlDocument = new XmlDocument();
-                xmlDocument.LoadXml(responseXml);
+                xmlDocument.LoadXml(content);
 
-              
                 if (xmlDocument.SelectSingleNode("posnetResponse/approved") == null ||
                     xmlDocument.SelectSingleNode("posnetResponse/approved").InnerText != "1")
                 {
@@ -102,7 +91,7 @@ namespace _3DPayment.Providers
                 parameters.Add("openANewWindow", "0");//POST edilecek formun yeni bir sayfaya mı yoksa mevcut sayfayı mı yönlendirileceği
                 parameters.Add("useJokerVadaa", "1");//yapıkredi kartlarında vadaa kullanılabilirse izin verir
 
-                return PaymentGatewayResult.Successed(parameters, request.BankParameters["gatewayUrl"]);
+                return PaymentGatewayResult.Successed(parameters, request.VirtualPosParameters["gatewayUrl"]);
             }
             catch (Exception ex)
             {
@@ -125,11 +114,9 @@ namespace _3DPayment.Providers
             var merchantId = request.BankParameters["merchantId"];
             var terminalId = request.BankParameters["terminalId"];
 
-            //test için eklene veriler
-            //gatewayRequest.OrderNumber = form["Xid"];
-            //terminalId = "67005551";
+            
             var TotalAmount = (gatewayRequest.TotalAmount * 100m).ToString("0.##", new CultureInfo("en-US"));
-            //merchantId = "6706598320";
+           
             string firstHash = HASH(request.BankParameters["encKey"]+';'+terminalId);
             string MAC = HASH(gatewayRequest.OrderNumber.Replace("-","").Substring(0,20) + ';'+ TotalAmount + ';'+ CurrencyCodes[gatewayRequest.CurrencyIsoCode] + ';'+merchantId+';'+firstHash);
             string requestXml = $@"<?xml version=""1.0"" encoding=""iso-8859-9""?>
@@ -148,21 +135,21 @@ namespace _3DPayment.Providers
             httpParameters.Add("xmldata", requestXml);
 
             var response = await client.PostAsync(request.BankParameters["verifyUrl"], new FormUrlEncodedContent(httpParameters));
-            Stream responseContent = await response.Content.ReadAsStreamAsync();
-            StreamReader responseStream = new StreamReader(responseContent,Encoding.UTF8);
-            string responseXml = responseStream.ReadToEnd();
+            byte[] responseContent = await response.Content.ReadAsByteArrayAsync();
+            string content = Encoding.GetEncoding("ISO-8859-9").GetString(responseContent);
+
 
             var xmlDocument = new XmlDocument();
-            xmlDocument.LoadXml(responseXml);
+            xmlDocument.LoadXml(content);
 
             //todo mdstatus bilgisini burda kontrol edelim
-            if (xmlDocument.SelectSingleNode("posnetResponse/approved") == null ||
-                xmlDocument.SelectSingleNode("posnetResponse/approved").InnerText != "1"
+            if (xmlDocument.SelectSingleNode("posnetResponse/oosResolveMerchantDataResponse/mdStatus") == null ||
+                xmlDocument.SelectSingleNode("posnetResponse/oosResolveMerchantDataResponse/mdStatus").InnerText != "1"
                )
             {
-                string errorMessage = "3D doğrulama başarısız.";
-                if (xmlDocument.SelectSingleNode("posnetResponse/respText") != null)
-                    errorMessage = xmlDocument.SelectSingleNode("posnetResponse/respText").InnerText;
+                string errorMessage = "3D doğrulama başarısız. ";
+                if (xmlDocument.SelectSingleNode("posnetResponse/oosResolveMerchantDataResponse/mdErrorMessage") != null)
+                    errorMessage += xmlDocument.SelectSingleNode("posnetResponse/oosResolveMerchantDataResponse/mdErrorMessage").InnerText;
 
                 return VerifyGatewayResult.Failed(errorMessage, form["ApprovedCode"],
                     xmlDocument.SelectSingleNode("posnetResponse/approved").InnerText);
@@ -190,12 +177,12 @@ namespace _3DPayment.Providers
             httpParameters.Add("xmldata", requestXml);
 
             response = await client.PostAsync(request.BankParameters["verifyUrl"], new FormUrlEncodedContent(httpParameters));
-            responseContent = await response.Content.ReadAsStreamAsync();
-            responseStream = new StreamReader(responseContent, Encoding.UTF8);
-            responseXml = responseStream.ReadToEnd();
+            responseContent = await response.Content.ReadAsByteArrayAsync();
+            content = Encoding.GetEncoding("ISO-8859-9").GetString(responseContent);
 
-            xmlDocument = new XmlDocument();
-            xmlDocument.LoadXml(responseXml);
+
+          
+            xmlDocument.LoadXml(content);
             if (xmlDocument.SelectSingleNode("posnetResponse/approved") == null ||
                 xmlDocument.SelectSingleNode("posnetResponse/approved").InnerText != "1")
             {
@@ -213,7 +200,7 @@ namespace _3DPayment.Providers
 
                 int.TryParse(xmlDocument.SelectSingleNode("posnetResponse/instInfo/inst1").InnerText, out int instalmentNumber);
 
-            return VerifyGatewayResult.Successed(form["hostlogkey"], $"{form["hostlogkey"]}-{form["uthCode"]}", "",
+            return VerifyGatewayResult.Successed(xmlDocument.SelectSingleNode("posnetResponse/hostlogkey").InnerText, xmlDocument.SelectSingleNode("posnetResponse/authCode").InnerText, "",
                 instalmentNumber, 0,
                 xmlDocument.SelectSingleNode("posnetResponse/respText")?.InnerText,
                 form["ApprovedCode"]);
@@ -231,7 +218,7 @@ namespace _3DPayment.Providers
                                          <tid>{terminalId}</tid>
                                          <reverse>
                                              <transaction>sale</transaction>
-                                             <hostLogKey>{request.ReferenceNumber.Split('-').First().Trim()}</hostLogKey>");
+                                             <hostLogKey>{request.ReferenceNumber}</hostLogKey>");
 
             //taksitli işlemde 6 haneli auth kodu isteniyor
             if (request.Installment > 1)
@@ -279,7 +266,7 @@ namespace _3DPayment.Providers
                                             <return>
                                                 <amount>{amount}</amount>
                                                 <currencyCode>{CurrencyCodes[request.CurrencyIsoCode]}</currencyCode>
-                                                <hostLogKey>{request.ReferenceNumber.Split('-').First().Trim()}</hostLogKey>
+                                                <hostLogKey>{request.TransactionId}</hostLogKey>
                                             </return>
                                         </posnetRequest>";
 
@@ -316,18 +303,19 @@ namespace _3DPayment.Providers
                                             <mid>{merchantId}</mid>
                                             <tid>{terminalId}</tid>
                                             <agreement>
-                                                <orderID>TDSC{request.OrderNumber}</orderID>
+                                                <orderID>TDS_{request.OrderNumber.Replace("-", "").Substring(0, 20)}</orderID>
                                             </agreement>
                                         </posnetRequest>";
 
             var httpParameters = new Dictionary<string, string>();
             httpParameters.Add("xmldata", requestXml);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             var response = await client.PostAsync(request.BankParameters["verifyUrl"], new FormUrlEncodedContent(httpParameters));
-            string responseContent = await response.Content.ReadAsStringAsync();
-
+            byte[] responseContent = await response.Content.ReadAsByteArrayAsync();
+            string content = Encoding.GetEncoding("ISO-8859-9").GetString(responseContent);
             var xmlDocument = new XmlDocument();
-            xmlDocument.LoadXml(responseContent);
+            xmlDocument.LoadXml(content);
 
             string bankMessage = xmlDocument.SelectSingleNode("posnetResponse/respText")?.InnerText;
             string responseCode = xmlDocument.SelectSingleNode("posnetResponse/respCode")?.InnerText;
@@ -349,15 +337,16 @@ namespace _3DPayment.Providers
 
                 return PaymentDetailResult.FailedResult(errorMessage: bankMessage, errorCode: responseCode);
             }
-
+            bankMessage = "Approved";
             string transactionId = xmlDocument.SelectSingleNode("posnetResponse/transactions/transaction/hostLogKey")?.InnerText;
             string referenceNumber = xmlDocument.SelectSingleNode("posnetResponse/transactions/transaction/hostLogKey")?.InnerText;
             string authCode = xmlDocument.SelectSingleNode("posnetResponse/transactions/transaction/authCode")?.InnerText;
             string cardPrefix = xmlDocument.SelectSingleNode("posnetResponse/transactions/transaction/ccno")?.InnerText;
+            string paidDate = xmlDocument.SelectSingleNode("posnetResponse/transactions/transaction/tranDate")?.InnerText;
             int.TryParse(cardPrefix, out int cardPrefixValue);
 
             var refNumber = $"{referenceNumber}-{authCode}";
-            return PaymentDetailResult.PaidResult(transactionId, refNumber, cardPrefixValue.ToString(), bankMessage: bankMessage, responseCode: responseCode);
+            return PaymentDetailResult.PaidResult(transactionId, authCode, cardPrefix, bankMessage: bankMessage,paiddate:paidDate ,responseCode: responseCode,cardnumber:cardPrefix);
         }
 
 

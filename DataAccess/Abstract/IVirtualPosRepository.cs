@@ -1,21 +1,12 @@
-﻿using Entity;
+﻿using Core.Abstract;
 using Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
+
 
 namespace DataAccess.Abstract
 {
-    public interface IVirtualPosRepository
+    public interface IVirtualPosRepository:IRepository<VirtualPos>
     {
-        List<VirtualPos> GetAll();
-        VirtualPos Get(Guid id);
-        VirtualPos GetByBankCode(int id, bool isBusiness);
-        List<VirtualPos> GetByBrandCode(int brandCode);
-        VirtualPos Create(VirtualPos virtualPos);
-        VirtualPos Update(VirtualPos virtualPos);
-        VirtualPos Delete(VirtualPos virtualPos);
+      public Task<VirtualPos> GetVirtualPosAsync(Guid id, Expression<Func<VirtualPos, object>>[]includes);
     }
 }

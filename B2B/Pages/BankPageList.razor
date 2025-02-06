@@ -1,0 +1,22 @@
+﻿@page "/bank"
+@using Business.Abstract
+@using Business.Concrete
+@using CoreUI.Components.DataGrid
+@using Entity
+@inject IBankCardService BankCardService
+<div class="container">
+    <DataGrid TItem="BankCard" Items="BankCardList">
+        <Columns>
+            <Column Caption="Banka Kodu" Field="@nameof(BankCard.BankCode)" />
+            <Column Caption="Banka Adı" Field="@nameof(BankCard.Name)"/>
+        </Columns>
+    </DataGrid>
+</div>
+
+@code {
+    private List<BankCard> BankCardList { get; set; }
+    protected override async void OnInitialized()
+    {
+        BankCardList =await BankCardService.GetAllBank();
+    }
+}

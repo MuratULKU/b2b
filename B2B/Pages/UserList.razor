@@ -1,0 +1,39 @@
+﻿@page "/userlist"
+
+@using Business.Abstract
+@using CoreUI.Components.DataGrid
+@using Entity
+@inject IUserService UserManager
+@attribute [Authorize(Roles = "Admin")]
+<div class="container">
+    <DataGrid TItem="User"
+              Items="userList"
+              Virtualize
+              SelectedItemChanged="selectedItemChandeg"
+              Pager>
+        <Columns>
+            <Column Caption="User Name" Field="@nameof(User.Username)" />
+            <Column Caption="Mail Adresi" Field="@nameof(User.Email)" />
+            <Column Caption="Şifre" Field="@nameof(User.Password)" />
+            @*   <Column Caption="Muhasebe Kodu" Field="@nameof(User.AccountCode)" /> *@
+        </Columns>
+        <ButtonRowTemplate>
+
+            <a class="btn btn-primary" href="/user">Ekle</a>
+            <a class="btn btn-secondary" href="/user?id=@user?.Id" disabled>Değiştir</a>
+        </ButtonRowTemplate>
+    </DataGrid>
+</div>
+@code {
+    private List<User> userList;
+    private User user;
+    protected async override void OnInitialized()
+    {
+        userList = await UserManager.GetAllUser();
+    }
+
+    private void selectedItemChandeg(User user)
+    {
+        this.user = user;
+    }
+}

@@ -1,0 +1,114 @@
+﻿@using B2B.Components.Login;
+@using Business.Abstract;
+@using Entity;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+
+@inject NotificationService notification
+@inject NavigationManager navManager
+@inject ProtectedSessionStorage ProtectedSessionStore
+
+
+<table class="table center">
+
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col" class="col-image">Görsel</th>
+            <th scope="col" class="code">Kodu</th>
+            <th scope="col" class="col-product">Açıklama</th>
+            <th scope="col" class="col-amount">Stok</th>
+            <th scope="col" class="col-price">Özel Fiyat</th>
+            <th scope="col" class="col-price">KDVli Fiyat</th>
+            <th scope="col" class="col-operation">Sip. Miktar</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Data)
+        {
+            <tr>
+                <td class="col-image" @onclick="()=>trClick(item.Code)"><img width="50px" src="@item.ToImage()" /></td>
+                <td class="code" @onclick="()=>trClick(item.Code)" style="cursor:pointer">@item.Code</td>
+                <td class="col-product">
+                    @item.Name
+                    @if ((bool)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "ShowProducerCode").Value && item.ProducerCode != string.Empty)
+                    {
+                        <p class="hidden">Üretici Kodu : @item.ProducerCode</p>
+                    }
+                    @if ((bool)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "ShowGroupCode").Value && item.StGrupCode != string.Empty)
+                    {
+                        <p class="hidden ml-2">Grup Kodu : @item.StGrupCode</p>
+                    }
+                    @if ((bool)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "ShowSpeCode").Value && item.SpeCode != string.Empty)
+                    {
+                        <p class="hidden ml-2">Özel Kod1 : @item.SpeCode</p>
+                    }
+                    @if ((bool)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "ShowSpeCode2").Value && item.SpeCode2 != string.Empty)
+                    {
+                        <p class="hidden ml-2">Özel Kod3 : @item.SpeCode2</p>
+                    }
+                    @if ((bool)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "ShowSpeCode3").Value && item.SpeCode3 != string.Empty)
+                    {
+                        <p class="hidden ml-2">Özel Kod3 : @item.SpeCode3</p>
+                    }
+                    @if ((bool)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "ShowSpeCode4").Value && item.SpeCode4 != string.Empty)
+                    {
+                        <p class="hidden ml-2">Özel Kod4 : @item.SpeCode4</p>
+                    }
+                    @if ((bool)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "ShowSpeCode5").Value && item.SpeCode5 != string.Empty)
+                    {
+                        <p class="hidden ml-2">Özel Kod5 : @item.SpeCode5</p>
+                    }
+                </td>
+
+                <td class="col-amount">@((MarkupString)item.ToMiktar1((int)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "StockAmountShow").Value, (int)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "StockWarningAmount").Value))</td>
+                <td class="col-price text-right">@item.ToFiyat1(mainparent.Discount)</td>
+                <td class="col-price text-right">@item.ToFiyat2(mainparent.Discount)</td>
+                <td class="col-operation">
+                    <div>
+                        <input type="number" value="@item.OrderAmount" @oninput="@((e)=>item.OrderAmount = Convert.ToDouble(e.Value))" />
+                        <button class="shop-image-button" type="button" onclick="@(()=>{AddProduct(item);item.OrderAmount = 1;})">
+                            <span class="oi oi-cart shop-image" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public List<Product> Data { get; set; }
+
+    [CascadingParameter]
+    public ProductsMain? mainparent { get; set; }
+
+    private ElementReference inputNumber;
+
+    public void AddProduct(Product product)
+    {
+        try
+        {
+            if (product.PriceLists.Count > 0)
+            {
+                double price = product.PriceLists[0].IncVat == 1 ? product.PriceLists[0].Price / (1 + ((double)product.SellVat / 100)) : product.PriceLists[0].Price;
+                mainparent?.AddOrder(product, product.OrderAmount, price);
+               
+            }
+            else
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Ürün Boş Sepete Eklenenmedi \n Fiyat 0 Olamaz", Duration = 5000 });
+
+        }
+        catch (Exception ex)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message, Duration = 5000 });
+        }
+
+    }
+    
+    private void trClick(string code)
+    {
+        ProtectedSessionStore.SetAsync("SearchText", mainparent.Filter);
+        ProtectedSessionStore.SetAsync("CurrentPage", mainparent.CurrentPage);
+        navManager.NavigateTo($"/product?code={code}", true);
+    }
+}

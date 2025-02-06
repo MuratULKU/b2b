@@ -1,0 +1,500 @@
+﻿@using B2C.Data
+@using Business.Abstract;
+@using Business.Concrete;
+@using Core.Abstract
+
+@using CoreUI.Components.DataGrid
+@using CoreUI.Components.MaskInput
+@using CoreUI.Components.NotificationService
+@using CoreUI.Data
+@using Entity;
+@using System.Text.Json;
+@using System.Text;
+@using _3DPayment.Results;
+@using static System.Net.Mime.MediaTypeNames;
+
+@using static B2C.Data.InstallmentViewModel;
+@inject IJSRuntime JS
+@inject ICreditCardService creditCardService
+@inject IBankCardService bankCardService
+@inject ICardBrandService brandCardService
+@inject ICreditCardPrefixService creditCardPrefixService
+@inject IVirtualPosService virtualPosService
+@inject UserManager userManager
+@inject HttpClient httpClient
+@inject NavigationManager navManager
+@inject NotificationService notification
+@inject IOrderService orderService
+@inject FirmParameterService firmParam
+<div class="row">
+    <div class="col-5">
+        <div class="main">
+            <div class="credit-card-box">
+                <div class="flip @cardFace">
+                    <div class="front">
+                        <img src="./media/map.png" class="image-map" />
+                        <img src="./media/chip.png" class="image-chip" />
+
+                        <div class="bank-logo">
+                            <label>@creditCard?.Bank?.Name</label>
+                        </div>
+                        <div class="bank-program">
+                            <label>@creditCard?.CardBrand?.Name</label>
+                        </div>
+                        <div class="card-holder">
+                            <div>@cardHolderName</div>
+                        </div>
+                        <div class="card-number">
+                            <div>@cardNumber</div>
+                        </div>
+                        <div class="card-expdate">
+                            <div>@expiryDate</div>
+                        </div>
+                        <div class="card-type" id="ccsingle">
+                        </div>
+
+                    </div>
+                    <div class="back">
+                        <div class="strip"></div>
+                        <div class="card-band">
+                            <div class="card-ccv">
+                                <label>Cvv</label>
+                                <div>@Ccv2Code</div>
+                            </div>
+                        </div>
+                        <div class="card-number">
+                            <div>@cardNumber</div>
+                        </div>
+                        <div class="card-expdate">
+                            <div>@expiryDate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <form id="paymentform">
+                <fieldset>
+                    <label for="total">Tutar*</label>
+                    <div class="input-container">
+                        <CurrencyEdit id="totalInput" Disabled="currencyDisable" CharacterPattern="[0-9]" TValue="decimal" Value="Total" ValueChanged="TotalChange" DecimalPlaces="2"></CurrencyEdit>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <label for="cardnumber">Kart Numarası*</label>
+                    <div class="input-container">
+                        <MaskInput class="form-control" id="cardnumber" Mask="**** **** **** ****" CharacterPattern="[0-9]" Placeholder="0000 0000 0000 0000"
+                                   TValue="string" Value="cardNumber" ValueChanged="CardNumberChanged" onblur="@checkKKNo" />
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <label for="CardHolderName">Ad Soyad*</label>
+                    <div class="input-container">
+                        <input id="CardHolderName" name="CardHolderName" class="form-control" type="text" @bind="cardHolderName" @bind:event="oninput" />
+                    </div>
+                </fieldset>
+                <fieldset class="row">
+                    <div class="col-6">
+                        <label for="expdate">Son Kullanma Tarihi</label>
+                        <div class="card-date">
+                            <MaskInput class="form-control" id="expdate" Mask="**/**" CharacterPattern="[0-9]" Placeholder="00/00"
+                                       @bind-value="@expiryDate" TValue="string" />
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="ccv2">CVV2</label>
+                        <div class="card-ccv2">
+                            <MaskInput class="form-control" id="ccv2" Mask="***" CharacterPattern="[0-9]" Placeholder="000"
+                                       @bind-value="@Ccv2Code" onfocus="@onfocus" onblur="@onblur" TValue="string" /> 
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <label for="CardHolderName">Açıklama</label>
+                    <div class="input-container">
+                        <input class="form-control" type="text" id="explanation" @bind-value="explanation" />
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <div class="col-7">
+        <div class="paymentplan">
+            <PaymentPlanPage TElement="InstallmentRate" Elements="installmentViewModel">
+                <ChidContent>
+                  <DataGrid TItem="InstallmentRate"
+                      Items="installmentViewModel"
+                  SelectedItemChanged="itemChanged">
+                      <Columns>
+                          <Column TItem="InstallmentRate" Caption="Banka Adı" Field="@nameof(InstallmentRate.BankName)" />
+                          <Column TItem="InstallmentRate" Caption="Taksit" Field="@nameof(InstallmentRate.Text)" />
+                          <Column TItem="InstallmentRate" Caption="Taksit Tutarı" Field="@nameof(InstallmentRate.Amount)" />
+                          <Column TItem="InstallmentRate" Caption="Toplam" Field="@nameof(InstallmentRate.TotalAmount)" />
+                          
+                      </Columns>
+                  </DataGrid>
+                </ChidContent>
+            </PaymentPlanPage>
+        </div>
+        <div class="paymentconfirm">
+            <input id="confirm1" type="checkbox" />
+            <label for="confirm1"> <a href="/acikriza">Açık Rıza Metini</a> Okudum Onayladım.</label><br>
+            <input id="confirm2" type="checkbox" />
+            <label for="confirm2"> <a href="/info">Bilgilendirme Formunu</a> Okudum Onayladım.</label><br>
+            <button id="btn-payment" disabled="@btndisabled" class="btn btn-primary" onclick="@payment">Öde</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+@code {
+
+
+    // [CascadingParameter]
+    // public Dictionary<string, object> ShowParameter { get; set; }
+    //private DataGrid<InstallmentViewModel.InstallmentRate> installmentGrid;
+    public List<InstallmentRate> installmentViewModel = new();
+    public InstallmentViewModel.InstallmentRate selectInstallment { get; set; }=default!;
+    public OrdFiche ordFiche { get; set; } = default!;
+    private string cardHolderName = "";
+    private string cardNumber = "";
+    private string expiryDate = "";
+    private string Ccv2Code = "";
+    private string cardFace = "";
+    private string explanation = "";
+    private CreditCardPrefix creditCardPrefix = default!;
+    public CreditCard creditCard = default!;
+    private bool currencyDisable { get; set; } = false;
+    public decimal Total;
+    private VirtualPos vPos = default!;
+    private bool btndisabled;
+    [Parameter] public Guid OrderId { get; set; }
+
+    protected async override void OnInitialized()
+    {
+        if (OrderId != Guid.Empty)
+        {
+            ordFiche = await orderService.GetOrderFiche(OrderId);
+            TotalChange(Convert.ToDecimal(ordFiche.Total));
+            currencyDisable = true;
+        }
+        else
+        {
+            OrderId = Guid.NewGuid();
+        }
+        if (OrderId == Guid.Empty)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Sipariş Numarası Oluşturlamadı.", Duration = 5000 });
+            btndisabled = false;
+        }
+    }
+
+    private void itemChanged(InstallmentRate item)
+    {
+        selectInstallment = item;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+
+
+    }
+
+    private bool checkPaymentForm()
+    {
+        int totalError = 0;
+        if (Total < 1)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Tuar 0 dan büyük olmalı.", Duration = 5000 });
+            Task.Delay(10+totalError);
+            totalError += 1;
+        }
+        if (cardNumber.Length != 19)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Kart No 16 Karakter Olmalı", Duration = 5000 });
+            Task.Delay(10 + totalError);
+            totalError += 1;
+        }
+        if (cardHolderName.Length < 3)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Kart Sahibi Adı En Az 3 Karakter Olmalı.", Duration = 5000 });
+            Task.Delay(10 + totalError);
+            totalError += 1;
+        }
+        if (expiryDate.Length < 5)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Son Kullanma Tarihi Hatalı", Duration = 5000 });
+            Task.Delay(10 + totalError);
+            totalError += 1;
+        }
+        if (Ccv2Code.Length != 3)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Güvenlik No 3 Krakter Olmalı", Duration = 5000 });
+            Task.Delay(10 + totalError);
+            totalError += 1;
+        }
+        if (totalError == 0)
+            return true;
+        return false;
+    }
+
+
+    private void checkKKNo(FocusEventArgs e)
+    {
+        if (cardNumber.Replace(" ", string.Empty).Length == 16)
+        {
+            var ccNumber = cardNumber.Replace(" ", string.Empty);
+
+            int sum = 0;
+            for (int i = 0; i < 16; i++)
+            {
+                int no = Convert.ToInt32(ccNumber[i].ToString());
+                if (i % 2 == 0)
+                {
+                    no = no * 2;
+                    if (no.ToString().Length == 2)
+                        no = Convert.ToInt32(no.ToString().Substring(0, 1)) + Convert.ToInt32(no.ToString().Substring(1, 1));
+                }
+                sum += no;
+            }
+            if (sum % 10 == 0)
+            {
+
+                return;
+            }
+        }
+        if (cardNumber.Length != 0)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Kredi Kartı Numarası Hatalı.", Duration = 5000 });
+        }
+    }
+
+
+
+    private async void LoadInstalment()
+    {
+        installmentViewModel.Clear();
+        if (vPos != null && vPos.BankCardId == creditCard.BankCardId && vPos.SinglePayment)
+        {
+            installmentViewModel.Add(
+           new()
+               {
+                   Text = "Tek Çekim",
+                   Amount = Total.ToString("N2") + " TL",
+                   AmountValue = Total,
+                   TotalAmount = Total.ToString("N2") + " TL",
+                   TotalAmountValue = Total,
+                   VirtualPos = vPos,
+                   BankName = vPos.BankCard.Name
+               });
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(firmParam.ToString(10)))
+            {
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
+                return;
+            }
+
+            VirtualPos cPos  = await virtualPosService.GetVirtualPosAsync(Guid.Parse(firmParam.ToString(10)));
+            if (cPos != null)
+            {
+                installmentViewModel.Add(
+           new()
+               {
+                   Text = "Tek Çekim",
+                   Amount = Total.ToString("N2") + " TL",
+                   AmountValue = Total,
+                   TotalAmount = Total.ToString("N2") + " TL",
+                   TotalAmountValue = Total,
+                   VirtualPos = cPos,
+                   BankName = cPos.BankCard.Name
+               });
+            }
+            else
+            {
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
+            }
+        }
+
+        if (creditCard != null && vPos != null)
+        {
+            foreach (var installment in creditCard.Installments)
+            {
+
+                decimal installmentAmount = Total;
+                decimal installmentTotalAmount = installmentAmount;
+
+                if (installment.InstallmentRate > 0)
+                {
+                    installmentTotalAmount = Math.Round(Total + ((Total * installment.InstallmentRate) / 100), 2, MidpointRounding.AwayFromZero);
+                }
+
+                installmentAmount = Math.Round(installmentTotalAmount / installment.Installment, 2, MidpointRounding.AwayFromZero);
+
+                installmentViewModel.Add(new InstallmentViewModel.InstallmentRate
+                    {
+                        Text = $"{installment.Installment} Taksit",
+                        Installment = installment.Installment,
+                        Rate = installment.InstallmentRate,
+                        Amount = installmentAmount.ToString("N2") + " TL",
+                        AmountValue = installmentAmount,
+                        TotalAmount = installmentTotalAmount.ToString("N2") + " TL",
+                        TotalAmountValue = installmentTotalAmount,
+                        VirtualPos = vPos,
+                        BankName = vPos.BankCard.Name
+                    });
+
+            }
+        }
+        // installmentGrid.Reload();
+    }
+
+    private async void CardNumberChanged(string e)
+    {
+        cardNumber = e;
+        if (e.Length == 1)
+        {
+            // switch (e.Substring(0, 1))
+            // {
+            //     case "3":
+            //         await JS.InvokeVoidAsync("Ulku.loadicon", "amex");
+            //         break;
+            //     case "4":
+            //         await JS.InvokeVoidAsync("Ulku.loadicon", "visa");
+            //         break;
+            //     case "5":
+            //         await JS.InvokeVoidAsync("Ulku.loadicon", "mastercard");
+            //         break;
+            //     case "9":
+            //         await JS.InvokeVoidAsync("Ulku.loadicon", "troy");
+            //         break;
+            // }
+
+        }
+        if (e.Length > 6)
+        {
+
+
+            vPos = null;
+            creditCard = null;
+            creditCardPrefix = null;
+
+            CreditCardPrefix dataResultPrefix = await creditCardPrefixService.GetByPrefix(e.Replace(" ", string.Empty).Substring(0, 6));
+            if (dataResultPrefix == null)
+            {
+                if (e.Length > 8)
+                    dataResultPrefix = await creditCardPrefixService.GetByPrefix(e.Replace(" ", string.Empty).Substring(0, 8));
+            }
+            if (dataResultPrefix != null)
+            {
+                creditCardPrefix = dataResultPrefix;
+                creditCard = await creditCardService.GetCreditCardByPrefix(creditCardPrefix.Prefix.ToString(), true);
+                vPos = await virtualPosService.GetByBrandId(creditCard.CardBrandId);
+
+            }
+            LoadInstalment();
+        }
+
+
+    }
+
+
+
+    private void TotalChange(decimal value)
+    {
+        if (Total.Equals(value))
+            return;
+        Total = value;
+        LoadInstalment();
+
+
+    }
+
+    private async void payment()
+    {
+        try
+        {
+            btndisabled = false;
+            if (OrderId == Guid.Empty)
+            {
+                OrderId = Guid.NewGuid();
+            }
+            if (!checkPaymentForm())
+                return;
+            if (selectInstallment != null)
+            {
+                PaymentViewModel paymentViewModel = new PaymentViewModel()
+                    {
+                        VirtualPosId = selectInstallment.VirtualPos.Id,
+                        CardHolderName = cardHolderName,
+                        CardNumber = cardNumber.Replace(" ", string.Empty),
+                        ExpireMonth = Convert.ToInt32(expiryDate.Substring(0, 2)),
+                        ExpireYear = Convert.ToInt32(expiryDate.Substring(3, 2)),
+                        CvvCode = Ccv2Code,
+                        CardType = "5",
+                        Installment = selectInstallment.Installment,
+                        TotalAmount = selectInstallment.TotalAmountValue,
+                        OrderId = OrderId,
+                        // UserId = user.Id,
+                        Explanation = explanation
+
+                    };
+
+
+                httpClient.DefaultRequestHeaders.Clear();
+                if (httpClient.BaseAddress == null)
+                    httpClient.BaseAddress = new Uri(navManager.BaseUri);
+
+                var viewModelJson = new StringContent(
+             JsonSerializer.Serialize(paymentViewModel),
+             Encoding.UTF8,
+             Application.Json);
+                using var httpResponseMessage =
+                       await httpClient.PostAsync(@"/Payment/Index", viewModelJson);
+
+
+                httpResponseMessage.EnsureSuccessStatusCode();
+
+                var result = await httpResponseMessage.Content.ReadAsStringAsync();
+                returnModel resultMessage = JsonSerializer.Deserialize<returnModel>(result);
+                string iframesrc = resultMessage.gatewayUrl;
+                await JS.InvokeVoidAsync("iframe.ac", resultMessage);
+                await JS.InvokeAsync<VerifyGatewayResult>("iframe.kapat", "/Payment/Completed/");
+                //navManager.NavigateTo($"/payment/confirm/{t.message}");
+            }
+            else
+            {
+                throw new Exception("Ödeme Planı Seçilmemiş.");
+            }
+        }
+        catch (Exception ex)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message, Duration = 5000 });
+        }
+        finally
+        {
+            btndisabled = true;
+        }
+
+    }
+
+    protected void onfocus()
+    {
+        cardFace = "back";
+    }
+
+    protected void onblur()
+    {
+        cardFace = "";
+       
+    }
+
+    public class returnModel
+    {
+        public string gatewayUrl { get; set; }
+        public string message { get; set; }
+
+    }
+
+}

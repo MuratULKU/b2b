@@ -1,0 +1,113 @@
+﻿@page "/report/{state:int}"
+@using Business.Abstract
+@using CoreUI.Components.DataGrid
+@using CoreUI.Components.NotificationService
+@using Entity
+@using Core.Enum
+@inject IOrderService orderService
+@inject IUserIdentityProcessor userIdentity
+@inject ICompanyService companyService
+@inject NotificationService notification
+@attribute [Authorize]
+<div class="container">
+    <DataGrid TItem="OrdFiche" Items="ordFiches" Pager TotalCount="@TotalCount" SelectedPageChange="SelecetedPageChanged" 
+        RowCount="rowPerPage" SelectedItemChanged="ChangedSelecetedItem" RowsPerPage="RowPerPageChanged" >
+        <Columns>
+            <Column Caption="Tarih" Field="@nameof(OrdFiche.Date_)" />
+            <Column Caption="FişNo" Field="@nameof(OrdFiche.Docode)" />
+            <Column Caption="Ara Toplam" Field="@nameof(OrdFiche.GrossTotal)" TextAlign="TextAlignmet.Right" />
+            <Column Caption="Vergi" Field="@nameof(OrdFiche.TotalVat)" TextAlign="TextAlignmet.Right" />
+            <Column Caption="Toplam" Field="@nameof(OrdFiche.Total)" TextAlign="TextAlignmet.Right" />
+            <Column Caption="Durum">
+                <CellTemplate>
+                    @((OrderState)context.Item.Send)
+                </CellTemplate>
+            </Column> 
+            
+        </Columns>
+        <DetailRowTemplate>
+            @{
+                var detail = ordLines;
+                <DataGrid TItem="OrdLine" Items="ordLines">
+                    <Columns>
+                        <Column Caption="Stok Kodu">
+                            <CellTemplate>
+                                @context.Item.Product.Code
+                            </CellTemplate>
+                        </Column>
+                        <Column Caption="Adı">
+                            <CellTemplate>
+                                @context.Item.Product.Name
+                            </CellTemplate>
+                        </Column>
+                        <Column Caption="Miktar" TextAlign="TextAlignmet.Right">
+                            <CellTemplate>
+                                @context.Item.Amount.ToString("N2")
+                            </CellTemplate>
+                        </Column>
+                        <Column Caption="Fiyat" TextAlign="TextAlignmet.Right">
+                            <CellTemplate>
+                                @context.Item.Price.ToString("N2")
+                            </CellTemplate>
+                        </Column>
+                        <Column Caption="Tutar" TextAlign="TextAlignmet.Right">
+                            <CellTemplate>
+                                @context.Item.Total.ToString("N2")
+                            </CellTemplate>
+                        </Column>
+                    </Columns>
+                  <FooterTemplate>
+                    <td></td>
+                    <td></td>
+                    <td>Toplam</td>
+                    <td></td>
+                    <td class="text-end">@ordLines.Sum(x=>x.Total).ToString("N2")</td>
+                  </FooterTemplate>
+                </DataGrid>
+            }
+
+        </DetailRowTemplate>
+        
+    </DataGrid>
+</div>
+@code {
+    private List<OrdFiche> ordFiches { get; set; } = default!;
+    private List<OrdLine> ordLines { get; set; } = default!;
+    private int TotalCount { get; set; }
+    private int rowPerPage { get; set; } = 10;
+    [Parameter]
+    public int state { get; set; }
+    protected async override Task OnInitializedAsync()
+    {
+       
+
+    }
+
+    protected async override void OnParametersSet()
+    {
+        Guid userId = await userIdentity.GetCurrentUserId();
+        if (userId == Guid.Empty)
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Sipariş Numarası Oluşturlamadı.", Duration = 5000 });
+        Company company = await companyService.GetByUserId(userId);
+        TotalCount = await orderService.GetOrderFicheCount(company.Id, state);
+        SelecetedPageChanged(0);
+    }
+    private async void SelecetedPageChanged(int page)
+    {
+        Guid userId = await userIdentity.GetCurrentUserId();
+        Company company = await companyService.GetByUserId(userId);
+        ordFiches = await orderService.GetOrderFiche(company.Id,state, page, rowPerPage);
+        //StateHasChanged();
+        await InvokeAsync(StateHasChanged); // UI yeniden yüklemeye zorla
+    }
+    private void RowPerPageChanged(int pageSize)
+    {
+        rowPerPage = pageSize;
+        SelecetedPageChanged(0);
+    }
+    private void ChangedSelecetedItem(OrdFiche ordFiche)
+    {
+        ordLines = ordFiche.Lines;
+        StateHasChanged();
+    }
+}

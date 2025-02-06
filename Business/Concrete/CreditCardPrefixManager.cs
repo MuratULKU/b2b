@@ -1,56 +1,68 @@
 ﻿using Business.Abstract;
+using Business.Validaton;
+using Core.Abstract;
+using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SanalMagaza.Business.Concrete
 {
     public class CreditCardPrefixManager : ICreditCardPrefixService
     {
-        private readonly ICreditCardPrefixRepository _creditCardPrefixRepository;
+        private readonly IUnitofWork _unitOfWork;
 
-        public CreditCardPrefixManager(ICreditCardPrefixRepository creditCardPrefixRepository)
+        public CreditCardPrefixManager(IUnitofWork unitOfWork)
         {
-            _creditCardPrefixRepository = creditCardPrefixRepository;
+            _unitOfWork = unitOfWork;
         }
 
-        public CreditCardPrefix Create(CreditCardPrefix creditCardPrefix)
+        public Task<IResult> Create(CreditCardPrefix creditCardPrefix)
         {
-            return _creditCardPrefixRepository.Create(creditCardPrefix);
+            return _unitOfWork.CreditCardPrefixs.AddAsync(creditCardPrefix);
         }
 
-        public CreditCardPrefix Delete(CreditCardPrefix creditCardPrefix)
+        public Task<IResult> Delete(CreditCardPrefix creditCardPrefix)
         {
-            return _creditCardPrefixRepository.Delete(creditCardPrefix);
+            return _unitOfWork.CreditCardPrefixs.Delete(creditCardPrefix);
         }
 
-        public CreditCardPrefix Get(Guid id)
+        public async Task<CreditCardPrefix> Get(Guid id)
         {
-            return _creditCardPrefixRepository.Get(id);
+            var result = await _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x => x.Id == id);
+           return result.Data;
         }
 
-        public CreditCardPrefix GetByPrefix(string prefix)
+        public async Task<CreditCardPrefix> GetByPrefix(string prefix)
         {
-            return _creditCardPrefixRepository.GetByPrefix(prefix);
+            var result = await _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x => x.Prefix == prefix); 
+            return result.Data;
         }
 
-        public List<CreditCardPrefix> GetAll()
+        public async Task<IList<CreditCardPrefix>> GetAll()
         {
-            return _creditCardPrefixRepository.GetAll();
+            var result = await _unitOfWork.CreditCardPrefixs.GetAllAsync();
+            return result.Data;
         }
 
-        public CreditCardPrefix Update(CreditCardPrefix creditCardPrefix)
+        public async Task<IResult> Update(CreditCardPrefix creditCardPrefix)
         {
-            return _creditCardPrefixRepository.Update(creditCardPrefix);
+            var result = _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x=>x.Prefix ==  creditCardPrefix.Prefix);
+            if (result != null)
+            {
+                var list = creditCardPrefix.Validation();
+                if (list.Count > 0)
+                    return new Result(ResultStatus.Error, String.Join(", ", list.ToArray()));
+                return await _unitOfWork.CreditCardPrefixs.UpdateAsync(creditCardPrefix);
+            }
+            return new Result(ResultStatus.Error, $"{creditCardPrefix.Prefix} Kodulu Kayıt Daha Önce Eklenmiş Ara Butonu ile İlgili Kayıda Ulaşabilirsiniz.");
         }
 
-        public List<CreditCardPrefix> GetBankList(int BankCode)
+        public async Task<List<CreditCardPrefix>> GetBankList(Guid BankId)
         {
-            return _creditCardPrefixRepository.GetBankList(BankCode);
+            var result = await _unitOfWork.CreditCardPrefixs.Find(x=> x.CreditCardId == BankId);  
+            return result.Data;
         }
+
+
     }
 }

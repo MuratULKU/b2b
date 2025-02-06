@@ -1,0 +1,67 @@
+﻿@if (Visible)
+{
+    var classes = GetMessageCssClasses();
+    <div class="shadow-lg toast_container">
+        <div class="toast_icon @classes.Item1">
+           
+        </div>
+        <div class="toast_info">
+            <div style="display:flex">
+            <div class="toast_title">
+                @Message.Summary
+            </div>
+            <div class="toast_close" onclick="@(()=>Close())"></div>
+            </div>
+            <div class="toast_description">
+                @Message.Detail
+            </div>
+        </div>
+        <div class="toast_progress @classes.Item2"></div>
+        
+    </div>
+    
+}
+@code {
+    Tuple<string, string> GetMessageCssClasses()
+    {
+        if (Message.Severity == NotificationSeverity.Error)
+        {
+            return new Tuple<string, string>("error", "red");
+        }
+        else if (Message.Severity == NotificationSeverity.Info)
+        {
+            return new Tuple<string, string>("info", "green");
+        }
+        else if (Message.Severity == NotificationSeverity.Success)
+        {
+            return new Tuple<string, string>("rz-growl-message-success", "rzi-check");
+        }
+        else if (Message.Severity == NotificationSeverity.Warning)
+        {
+            return new Tuple<string, string>("rz-growl-message-warn", "rzi-exclamation-triangle");
+        }
+
+        return new Tuple<string, string>("", "");
+    }
+
+    [Inject] private NotificationService Service { get; set; }
+
+    public bool Visible { get; set; } = true;
+
+    [Parameter]
+    public NotificationMessage Message { get; set; }
+
+    [Parameter]
+    public string Style { get; set; }
+
+    public void Close()
+    {
+        Service.Messages.Remove(Message);
+        Task.Delay(0).ContinueWith(r => { Visible = false; });
+    }
+
+    protected override void OnInitialized()
+    {
+        Task.Delay(Message.Duration ?? 3000).ContinueWith(_ => Close());
+    }
+}

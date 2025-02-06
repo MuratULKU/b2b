@@ -1,0 +1,77 @@
+﻿@using B2B.Components.SanalMagazaUI.InputNumber
+@using Business.Abstract;
+@using Entity;
+@using B2B.Components.MaskInput;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@inject NotificationService notification
+@inject ProtectedSessionStorage ProtectedSessionStore
+@inject NavigationManager navManager
+@attribute [Authorize]
+
+<div class="@CardClass">
+    <div class="card" style="width:18 rem; height:25 rem;">
+        <div style="height:200px;cursor:pointer" @onclick="()=>trClick(product.Code)">
+            <img src="@product.ToImage()" class="card-img-top" alt="..." style="background-size:cover" />
+        </div>
+        <div class="card-body">
+            <h5 class="card-title"><label style="margin-right:5px;">Stok Durumu : </label>@((MarkupString)product.ToMiktar1((int)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "StockAmountShow").Value, (int)mainparent.ShowParameter.FirstOrDefault(x => x.Key == "StockWarningAmount").Value))</h5>
+            <p class="card-text one-line">@product.Code </p>
+            <p class="card-text two-line">@product.Name</p>
+            <div class="row">
+                <div class="col-6">
+                    <p class="card-text text-right ml-3 fiyat">@product.ToFiyat2(mainparent.Discount)</p>
+                </div>
+                <div class="col-6">
+                    <div class="amount">
+                       <InputIntNumber @bind-Value="Amount" Change="@((e)=>Change(e))"></InputIntNumber>
+                       <button class="shop-image-button" type="button" onclick="@AddProduct" title="Sepete Ekle">
+                        <span class="oi oi-cart shop-image" aria-hidden="true"></span>
+                        </button>
+                     </div>
+                     
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter(Name = "Product")]
+    private Product? product { get; set; }
+
+    [CascadingParameter]
+    public ProductsMain? mainparent { get; set; } //üst class referans
+
+    [Parameter]
+    [EditorRequired]
+    public string CardClass { get; set; }
+    private double Amount { get; set; } = 1;
+    private void Change(double e)
+    {
+        Amount = e;
+    }
+    private void AddProduct()
+    {
+        if (product.PriceLists.Count > 0)
+        {
+            double price = product.PriceLists[0].IncVat == 1 ? product.PriceLists[0].Price / (1 + ((double)product.SellVat / 100)) : product.PriceLists[0].Price;
+            mainparent?.AddOrder(product!, Amount, price);
+        }
+        else
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Ürün Boş Sepete Eklenenmedi \n Fiyat 0 Olamaz", Duration = 5000 });
+    }
+
+    protected override void OnInitialized()
+    {
+       
+        base.OnInitialized();
+    }
+
+    private void trClick(string code)
+    {
+        // geri dönüş için searchtext değeri yazacağız aysnısı data gridde de olacak
+        ProtectedSessionStore.SetAsync("SearchText", mainparent.Filter);
+        ProtectedSessionStore.SetAsync("CurrentPage", mainparent.CurrentPage);
+        navManager.NavigateTo($"/product?code={code}", true);
+    }
+}

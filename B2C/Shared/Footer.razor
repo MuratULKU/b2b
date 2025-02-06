@@ -1,0 +1,19 @@
+﻿@using B2C.Data
+@using CoreUI.Data
+@inject FirmParameterService FirmParam
+
+<span>@FirmParam.ToString(1)</span> <br />
+<span>@FirmParam.ToString(19)</span>
+<br />
+<br />
+
+<label>@FirmParam.ToString(2)</label>
+<br />
+<label>@FirmParam.ToString(3)</label>
+<br />
+<label>@FirmParam.ToString(4) / @FirmParam.ToString(5)</label>
+<br />
+
+@code {
+
+}

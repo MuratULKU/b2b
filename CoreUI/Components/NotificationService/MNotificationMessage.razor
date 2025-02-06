@@ -1,0 +1,53 @@
+﻿@if (Visible)
+{
+    var classes = GetMessageCssClasses();
+    <div class="toast_container">
+        <div class="toast_icon @classes.Item1">
+            <!-- Optional Icon Content -->
+        </div>
+        <div class="toast_info">
+            <div style="display: flex; align-items: center;">
+                <div class="toast_title">
+                    @Message.Summary
+                </div>
+                <div class="toast_close" onclick="@(() => Close())"></div>
+            </div>
+            <div class="toast_description">
+                @Message.Detail
+            </div>
+        </div>
+        <!-- Toast progress bar -->
+        <div class="toast_progress @classes.Item2"></div>
+    </div>
+}
+@code {
+    Tuple<string, string> GetMessageCssClasses()
+    {
+        return Message.Severity switch
+        {
+            NotificationSeverity.Error => new Tuple<string, string>("error", "red"),
+            NotificationSeverity.Info => new Tuple<string, string>("info", "blue"),
+            NotificationSeverity.Success => new Tuple<string, string>("success", "green"),
+            NotificationSeverity.Warning => new Tuple<string, string>("warn", "yellow"),
+            _ => new Tuple<string, string>("", "")
+        };
+    }
+
+    [Inject] private NotificationService Service { get; set; }
+
+    public bool Visible { get; set; } = true;
+
+    [Parameter] public NotificationMessage Message { get; set; }
+    [Parameter] public string Style { get; set; }
+
+    public void Close()
+    {
+        Service.Messages.Remove(Message);
+        Task.Delay(0).ContinueWith(_ => Visible = false);
+    }
+
+    protected override void OnInitialized()
+    {
+        Task.Delay(Message.Duration ?? 3000).ContinueWith(_ => Close());
+    }
+}

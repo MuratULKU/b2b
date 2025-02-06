@@ -1,4 +1,5 @@
-﻿using Entity;
+﻿using Core.Abstract;
+using Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,11 @@ namespace Business.Abstract
     {
         List<CreditCardInstallment> GetAll();
         CreditCardInstallment Get(Guid id);
+        List<CreditCardInstallment> GeyBankId(Guid id);
+        List<CreditCardInstallment> GeyCreditId(Guid id);
+
         CreditCardInstallment Create(CreditCardInstallment creditCardInstallment);
-        CreditCardInstallment Update(CreditCardInstallment creditCardInstallment);
+        IResult Update(CreditCardInstallment creditCardInstallment);
         CreditCardInstallment Delete(CreditCardInstallment creditCardInstallment);
     }
 }

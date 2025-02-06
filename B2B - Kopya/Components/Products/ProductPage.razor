@@ -1,0 +1,271 @@
+﻿@page "/product"
+@using B2B.Components.Login;
+@using Business.Abstract;
+@using Business.Concrete;
+@using DataAccess.Abstract;
+@using Entity;
+@using B2B.Components.SanalMagazaUI.InputNumber
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@inject IProductRepository _productRepository
+@inject ICharAsgnRepository _charAsgnRepository;
+@inject IOrderService _orderService
+@inject UserManager _userManager
+@inject IOrdFicheRepository _order
+@inject NotificationService _notification
+@inject IDocumentNoRepository _docNoService
+
+@attribute [Authorize]
+<div class="container">
+    <div class="product-detail">
+        <div class="product-top">
+            <div class="product-header">
+                <div class="product-image">
+                    <img src="@product.ToImage()" class="card-img-top" alt="..." style="background-size:cover" />
+                </div>
+                <div class="product-info">
+                    <span style="display:block;">@product.Code </span>
+                    <span style="display:block">@product.Name</span>
+                    <div class="product-spec">
+                        <table style="border:none">
+                            <tr>
+                                <td>
+                                    Üretici Kodu:
+                                </td>
+                                <td>
+                                    @product.ProducerCode
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Grup Kod :
+                                </td>
+                                <td>
+                                    @product.StGrupCode
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Özel Kod :
+                                </td>
+                                <td>
+                                    @product.SpeCode
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Özel Kod 2:
+                                </td>
+                                <td>
+                                    @product.SpeCode2
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Özel Kod 3:
+                                </td>
+                                <td>
+                                    @product.SpeCode3
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Özel Kod 4:
+                                </td>
+                                <td>
+                                    @product.SpeCode4
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Özel Kod 5:
+                                </td>
+                                <td>
+                                    @product.SpeCode5
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                    <span>
+                        Stok Miktarı
+                        <span>
+                            @((MarkupString)product.ToMiktar1((int)ShowParameter.FirstOrDefault(x => x.Key == "StockAmountShow").Value, (int)ShowParameter.FirstOrDefault(x => x.Key == "StockWarningAmount").Value))
+                        </span>
+                    </span>
+                </div>
+
+            </div>
+            <div class="product-right">
+                <div class="product-right-price">
+                    Fiyatı :
+                    <span class="text-blue" style="display:inline-block">
+                        @product.ToFiyat1(0)
+                    </span>
+                </div>
+                <div class="product-right-price">
+                    KDVli Fiyatı :
+                    <span class="text-blue" style="display:inline-block">
+                        @product.ToFiyat2(0)
+                    </span>
+                </div>
+
+                <br />
+                <div style="margin-left:5px;display:flex;">
+                    <div style="margin:auto;margin-left:5px;">
+                        Sipariş Miktarı:
+                    </div>
+                    <div style="padding-right:15px;max-width:120px;">
+                        <InputIntNumber @bind-Value="@orderAmount"
+                                        Change="@amountChange"></InputIntNumber>
+                    </div>
+                </div>
+                <br />
+                <div style="margin-bottom:10px;margin-left:50%">
+                    @if (product.PriceLists?.Count > 0)
+                    {
+                        <button class="shop-image-button" type="button" onclick="@(()=>AddOrderPage(product,orderAmount,product.PriceLists[0].Price))" title="Sepete Ekle">
+                            <span class="oi oi-cart shop-image" aria-hidden="true"></span>
+                            Sepete Ekle
+                        </button>
+                    }
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <span style="font-size:30px">Teknik Özellikler</span>
+            <div Class="charset">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Özellik Adı</th>
+                            <th scope="col">Özellik Değeri</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (charAsgn != null)
+                        {
+
+                            foreach (var item in charAsgn)
+                            {
+                                <tr>
+                                    <td style="width:40%">@item.CharCodeName</td>
+                                    <td style="width:60%">@item.CharValName</td>
+                                </tr>
+
+                            }
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? code { get; set; }
+
+    [CascadingParameter]
+    private Dictionary<string, object> ShowParameter { get; set; }
+
+
+    private Product product;
+    private List<CharAsgn> charAsgn;
+    private double orderAmount = 1;
+
+
+
+    protected override void OnParametersSet()
+    {
+        product = _productRepository.GetByCode(code).Result;
+        charAsgn = _charAsgnRepository.GetProductById(product.Id).Result;
+    }
+    private void amountChange(double e)
+    {
+        orderAmount = e;
+    }
+    private void AddOrderPage(Product product, double amount, double price)
+    {
+        if (product != null && price != 0 && _userManager != null)
+        {
+            OrdFiche ordFiche = _orderService.GetFiche(false, _userManager.User.Id);
+            if (ordFiche == null)
+            {
+                ordFiche = new();
+                ordFiche.Lines = new();
+                ordFiche.Id = Guid.NewGuid();
+                ordFiche.Docode = _docNoService.GetDocNo(1).DocNo.ToString();
+                ordFiche.Date_ = DateTime.Now;
+                ordFiche.Send = false;
+                ordFiche.Active = true;
+                ordFiche.ClientCode = _userManager.User.AccountCode;
+                ordFiche.FicheNo = ordFiche.Docode;
+                ordFiche.UpdateDate = DateTime.Now;
+                ordFiche.CreateDate = DateTime.Now;
+                ordFiche.UpdateUser = _userManager.User.Id;
+                ordFiche.CreateUser = _userManager.User.Id;
+                ordFiche.UserId = _userManager.User.Id;
+                ordFiche.TrCode = 1;
+                ordFiche.CurrencyId = 1;
+            }
+            OrdLine ordLine = ordFiche.Lines?.FirstOrDefault(x => x.Product.Code == product.Code);
+            if (ordLine == null)
+            {
+                ordLine = new();
+                ordLine.Id = Guid.NewGuid();
+                ordLine.StockRef = product.LogicalRef;
+                ordLine.Amount = amount;
+                ordLine.Price = price;
+                ordLine.Total = amount * price;
+                short lineno;
+                short.TryParse(ordFiche.Lines?.Count.ToString(), out lineno);
+                ordLine.LineNo = (short)(lineno + (short)1);
+                ordLine.TrCode = 1;
+                ordLine.Amount = amount;
+                ordLine.UomRef = product.UomRef;
+                ordLine.UsRef = product.UsRef;
+                ordLine.AvailableStock = 0;
+                ordLine.LineType = 0;
+                ordLine.VatMatrah = ordLine.Total;
+                ordLine.Vat = product.SellVat ?? 0;
+                ordLine.VatAmnt = ordLine.VatMatrah * ordLine.Vat / 100;
+                ordLine.Unit = product.Unit;
+                ordLine.VatMatrah = ordLine.Total;
+                ordLine.CreateDate = DateTime.Now;
+                ordLine.UpdateDate = DateTime.Now;
+                ordLine.CreateUser = _userManager.User.Id;
+                ordLine.UpdateUser = _userManager.User.Id;
+                ordLine.OrdFicheId = ordFiche.Id;
+                ordLine.ProductId = product.Id;
+                ordLine.Date_ = ordFiche.Date_;
+                ordLine.CurrencyId = product.PriceLists[0].CurrencyId;
+                ordFiche.Lines.Add(ordLine);
+            }
+            else
+            {
+                ordLine.Amount += amount;
+                ordLine.Price = price;
+                ordLine.Total = ordLine.Amount * ordLine.Price;
+                ordLine.VatMatrah = ordLine.Total;
+                ordLine.VatAmnt = ordLine.VatMatrah * ordLine.Vat / 100;
+            }
+            ordFiche.GrossTotal = ordFiche.Lines.Sum(x => x.Total);
+            ordFiche.TotalVat = ordFiche.Lines.Sum(x => x.VatAmnt);
+            ordFiche.Total = ordFiche.Lines.Sum(x => x.Total + x.VatAmnt);
+            _order.Insert(ordLine);
+            _orderService.AddOrdFiche(ordFiche);
+            //_orderService.AddProduct(_userManager.User, product, amount, price, docNo);
+            _notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Ürün Sepete Eklendi", Detail = "", Duration = 5000 });
+
+        }
+        else
+        {
+            _notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Ürün Boş Sepete Eklenenmedi", Duration = 5000 });
+        }
+    }
+
+}

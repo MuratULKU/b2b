@@ -1,202 +1,105 @@
-﻿.form-container {
-    max-width: 800px;
-}
-.form-control{
-      min-width: 183px;
-    left:300px;
-}
-.expdate{
-    max-width:380px;
-    display:flex;
-}
-.cvv2{
-    max-width:60px;
-    display:flex;
-}
-.namesurname{
-    max-width:200px;
-    display:flex;
+﻿/* Genel ayarlar */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
 }
 
-
-.field-container {
-    position: relative;
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px;
 }
 
-.form-container {
-    display: grid;
-    grid-column-gap: 5px;
-    grid-template-columns: auto auto;
-    grid-template-rows: 90px 90px 90px;
-    grid-template-areas: "name name""number number""expiration security";
-    max-width: 400px;
-    padding: 10px;
-    color: #707070;
-}
-.ccicon {
-    height: 38px;
-    position: absolute;
-    right: 6px;
-    top: calc(50% - 17px);
-    width: 60px;
+.col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding: 15px;
 }
 
-.preload * {
-    -webkit-transition: none !important;
-    -moz-transition: none !important;
-    -ms-transition: none !important;
-    -o-transition: none !important;
+.payment-footer {
+    margin-top: 20px;
+    text-align: center;
 }
 
-.preload * {
-    -webkit-transition: none !important;
-    -moz-transition: none !important;
-    -ms-transition: none !important;
-    -o-transition: none !important;
-}
-
-
-#ccsingle {
-    position: absolute;
-    right: 15px;
-    top: 20px;
-}
-
-    #ccsingle svg {
-        width: 100px;
-        max-height: 60px;
+    .payment-footer a {
+        display: block;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 14px;
+        margin: 5px 0;
     }
 
+        .payment-footer a:hover {
+            text-decoration: underline;
+        }
 
-/* CHANGEABLE CARD ELEMENTS */
-.creditcard .lightcolor,
-.creditcard .darkcolor {
-    -webkit-transition: fill .5s;
-    transition: fill .5s;
+.box-body {
+    text-align: center;
 }
 
-.creditcard .lightblue {
-    fill: #03A9F4;
+    .box-body img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+
+/* Modal stilleri */
+.modal-content {
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-.creditcard .lightbluedark {
-    fill: #0288D1;
+.modal-body iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
 }
 
-.creditcard .red {
-    fill: #ef5350;
+/* Mobil uyumlu düzen */
+@media screen and (max-width: 768px) {
+    .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        padding: 10px;
+    }
+
+    .payment-footer {
+        margin-top: 15px;
+        text-align: left;
+    }
+
+        .payment-footer a {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+    .box-body img {
+        width: 180px;
+    }
+
+    .modal-body iframe {
+        height: 300px;
+    }
 }
 
-.creditcard .reddark {
-    fill: #d32f2f;
-}
+/* Küçük mobil cihazlar (telefonlar) */
+@media screen and (max-width: 480px) {
+    .payment-footer {
+        text-align: center;
+    }
 
-.creditcard .purple {
-    fill: #ab47bc;
-}
+        .payment-footer a {
+            font-size: 14px;
+            margin: 8px 0;
+        }
 
-.creditcard .purpledark {
-    fill: #7b1fa2;
-}
+    .box-body img {
+        width: 150px;
+    }
 
-.creditcard .cyan {
-    fill: #26c6da;
+    .modal-body iframe {
+        height: 250px;
+    }
 }
-
-.creditcard .cyandark {
-    fill: #0097a7;
-}
-
-.creditcard .green {
-    fill: #66bb6a;
-}
-
-.creditcard .greendark {
-    fill: #388e3c;
-}
-
-.creditcard .lime {
-    fill: #d4e157;
-}
-
-.creditcard .limedark {
-    fill: #afb42b;
-}
-
-.creditcard .yellow {
-    fill: #ffeb3b;
-}
-
-.creditcard .yellowdark {
-    fill: #f9a825;
-}
-
-.creditcard .orange {
-    fill: #ff9800;
-}
-
-.creditcard .orangedark {
-    fill: #ef6c00;
-}
-
-.creditcard .grey {
-    fill: #bdbdbd;
-}
-
-.creditcard .greydark {
-    fill: #616161;
-}
-
-/* FRONT OF CARD */
-#svgname {
-    text-transform: uppercase;
-}
-
-#cardfront .st2 {
-    fill: #FFFFFF;
-}
-
-#cardfront .st3 {
-    font-family: 'Source Code Pro', monospace;
-    font-weight: 600;
-}
-
-#cardfront .st4 {
-    font-size: 54.7817px;
-}
-
-#cardfront .st5 {
-    font-family: 'Source Code Pro', monospace;
-    font-weight: 400;
-}
-
-#cardfront .st6 {
-    font-size: 33.1112px;
-}
-
-#cardfront .st7 {
-    opacity: 0.6;
-    fill: #FFFFFF;
-}
-
-#cardfront .st8 {
-    font-size: 24px;
-}
-
-#cardfront .st9 {
-    font-size: 36.5498px;
-}
-
-#cardfront .st10 {
-    font-family: 'Source Code Pro', monospace;
-    font-weight: 300;
-}
-
-#cardfront .st11 {
-    font-size: 16.1716px;
-}
-
-#cardfront .st12 {
-    fill: #4C4C4C;
-}
-

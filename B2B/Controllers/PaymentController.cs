@@ -2,48 +2,47 @@
 using _3DPayment.Request;
 using _3DPayment.Results;
 using B2B.Data;
-using B2B.Views.Payment;
-using Blazorise;
 using Business.Abstract;
-using DataAccess.Abstract;
+using CoreUI.BackOrder;
 using Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
-using SendEMail;
 using System.Diagnostics;
 using System.Net;
-using System.Text;
 
 namespace B2B.Controllers
 {
     public class PaymentController : Controller
     {
 
-        private readonly IBankCardService _bankService;
-        private readonly IPaymentRepository _paymentService;
+        private readonly IVirtualPosService _bankService;
+        private readonly IPaymentService _paymentService;
         private readonly IHtmlHelper _htmlHelper;
         private readonly IPaymentProviderFactory _paymentProviderFactory;
         private readonly IFirmParamService _firmParamService;
-        public PaymentController(IPaymentRepository paymentService, IBankCardService bankService, IHtmlHelper htmlHelper, IPaymentProviderFactory paymentProviderFactory, IFirmParamService firmParamService)
+        private readonly ILogger<PaymentTransaction> _logger;
+        public PaymentController(IPaymentService paymentService, IVirtualPosService bankService, IHtmlHelper htmlHelper, IPaymentProviderFactory paymentProviderFactory, IFirmParamService firmParamService, ILogger<PaymentTransaction> logger)
         {
             _paymentService = paymentService;
             _bankService = bankService;
             _htmlHelper = htmlHelper;
             _paymentProviderFactory = paymentProviderFactory;
             _firmParamService = firmParamService;
+            _logger = logger;
         }
 
-     
 
-      
+
+
         [HttpPost]
         public async Task<IActionResult> Index([FromBody] PaymentViewModel model)
         {
             try
             {
                 //gateway request
+                _logger.LogCritical("Model Sipariş Numarası " + model.OrderId);
                 PaymentGatewayRequest gatewayRequest = new PaymentGatewayRequest
                 {
                     CardHolderName = model.CardHolderName,
@@ -54,7 +53,7 @@ namespace B2B.Controllers
                     CardType = model.CardType,
                     Installment = model.Installment,
                     TotalAmount = model.TotalAmount,
-                    OrderNumber = Guid.NewGuid().ToString(),
+                    OrderNumber = model.OrderId.ToString(),
                     CurrencyIsoCode = "949",
                     LanguageIsoCode = "tr",
                     CustomerIpAddress = HttpContext.Connection.RemoteIpAddress.ToString()
@@ -62,8 +61,8 @@ namespace B2B.Controllers
 
 
                 //bank parameters
-                System.Collections.Generic.List<BankParameter> bankParameters = await _bankService.GetBankParameters(model.BankId);
-                gatewayRequest.BankParameters = bankParameters.ToDictionary(key => key.Key, value => value.Value);
+                List<VirtualPosParameter> bankParameters = _bankService.GetVirtualPosParameters(model.VirtualPosId).Result.Data;
+                gatewayRequest.VirtualPosParameters = bankParameters.ToDictionary(key => key.Key, value => value.Value);
 
                 //create payment transaction
                 PaymentTransaction payment = new PaymentTransaction
@@ -71,27 +70,30 @@ namespace B2B.Controllers
                     OrderNumber = Guid.Parse(gatewayRequest.OrderNumber),
                     UserIpAddress = gatewayRequest.CustomerIpAddress,
                     UserAgent = HttpContext.Request.Headers[HeaderNames.UserAgent],
-                    BankCardId = model.BankId,
+                    VirtualPosId = model.VirtualPosId,
                     CardPrefix = gatewayRequest.CardNumber.Substring(0, 6),
                     CardHolderName = gatewayRequest.CardHolderName,
                     Installment = model.Installment,
                     TotalAmount = model.TotalAmount,
-                    BankCard = _bankService.GetBank(model.BankId).Result,
-                    ClientCode = model.ClientCode,
+                    // BankCard = _bankService.GetBank(model.BankId).Result, neden yazıldığı bilinmiyor banka tablosu
+                    UserId = model.UserId,
                     MaskedCardNumber = model.CardNumber.Substring(0, 4) + " **** **** " + model.CardNumber.Substring(model.CardNumber.Length - 4, 4),
-                    BankRequest = JsonConvert.SerializeObject(gatewayRequest)
-                };
+                    BankRequest = JsonConvert.SerializeObject(gatewayRequest),
+                    Explanation = model.Explanation,
+                    CreateUser = model.UserId,
+                    CompanyId = model.CompanyId,
 
+                };
 
                 payment.MarkAsCreated();
 
                 //insert payment transaction
-                _paymentService.Insert(payment);
+                await _paymentService.Insert(payment);
 
 
                 var responseModel = new
                 {
-                    GatewayUrl = new Uri($"{Request.GetHostUrl(false)}{Url.RouteUrl("Confirm", new { paymentId = payment.OrderNumber })}"),
+                    GatewayUrl = new Uri($"{Request.GetHostUrl(false):443}{Url.RouteUrl("Confirm", new { paymentId = payment.OrderNumber })}"),
                     Message = payment.OrderNumber,
 
                 };
@@ -102,8 +104,15 @@ namespace B2B.Controllers
             {
 
                 Debug.WriteLine(ex);
+                _logger.LogCritical(ex.Message);
+                var responseModel = new
+                {
+                    GatewayUrl = string.Empty,
+                    Message = ex.Message,
 
-                return Ok(new { errorMessage = "İşlem sırasında bir hata oluştu." });
+                };
+
+                return Ok(responseModel);
             }
         }
         [Route("payment/confirm/{paymentId?}")]
@@ -117,7 +126,7 @@ namespace B2B.Controllers
             }
 
             //get transaction by identifier
-            PaymentTransaction payment = _paymentService.GetByOrderNumber(paymentId);
+            PaymentTransaction payment = _paymentService.GetByOrderNumber(paymentId).Result.Data;
             if (payment == null)
             {
                 VerifyGatewayResult failModel = VerifyGatewayResult.Failed("Ödeme bilgisi geçersiz.");
@@ -141,11 +150,12 @@ namespace B2B.Controllers
                 bankRequest.CustomerIpAddress = "127.0.0.1";
             }
 
-            bankRequest.BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), payment.BankCard.SystemName);
+            bankRequest.BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), payment.VirtualPos.BankCard.SystemName);
             IPaymentProvider provider = _paymentProviderFactory.Create(bankRequest.BankName);
 
             //set callback url
             bankRequest.CallbackUrl = new Uri($"{Request.GetHostUrl(false)}{Url.RouteUrl("Callback", new { paymentId = payment.OrderNumber })}");
+
 
             //gateway request
             PaymentGatewayResult gatewayResult = await provider.ThreeDGatewayRequest(bankRequest);
@@ -178,14 +188,16 @@ namespace B2B.Controllers
             if (paymentId == Guid.Empty)
             {
                 VerifyGatewayResult failModel = VerifyGatewayResult.Failed("Ödeme bilgisi geçersiz.");
+                _logger.LogCritical("Ödeme bilgisi geçersiz.");
                 return View("Fail", failModel);
             }
 
             //get transaction by identifier
-            PaymentTransaction payment = _paymentService.GetByOrderNumber(paymentId);
+            PaymentTransaction payment = _paymentService.GetByOrderNumber(paymentId).Result.Data;
             if (payment == null)
             {
                 VerifyGatewayResult failModel = VerifyGatewayResult.Failed("Ödeme bilgisi geçersiz.");
+                _logger.LogCritical($"Ödeme Bilgisi Geçersiz {failModel}");
                 return View("Fail", failModel);
             }
 
@@ -193,20 +205,24 @@ namespace B2B.Controllers
             if (bankRequest == null)
             {
                 VerifyGatewayResult failModel = VerifyGatewayResult.Failed("Ödeme bilgisi geçersiz.");
+                _logger.LogCritical($"Ödeme Bilgisi Geçersiz{failModel}");
                 return View("Fail", failModel);
             }
 
             //create provider
             //todo banka bilgisi sistemden gelecek
-            bankRequest.BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), payment.BankCard.SystemName);
+            bankRequest.BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), payment.VirtualPos.BankCard.SystemName);
             IPaymentProvider provider = _paymentProviderFactory.Create(bankRequest.BankName);
             VerifyGatewayRequest verifyRequest = new VerifyGatewayRequest
             {
                 BankName = bankRequest.BankName,
-                BankParameters = bankRequest.BankParameters
+                BankParameters = bankRequest.VirtualPosParameters
             };
             //form doğrulama gidiyor
+            //3d dğrulama sonucu gelen form 
+
             VerifyGatewayResult verifyResult = await provider.VerifyGateway(verifyRequest, bankRequest, form);
+
             verifyResult.OrderNumber = bankRequest.OrderNumber;
 
             //save bank response
@@ -216,9 +232,12 @@ namespace B2B.Controllers
                 parameters = form.Keys.ToDictionary(key => key, value => form[value].ToString())
             });
 
+            if (verifyResult.CardMask != null && verifyResult.CardMask != string.Empty)
+                payment.MaskedCardNumber = verifyResult.CardMask;
             payment.TransactionNumber = verifyResult.TransactionId;
             payment.ReferenceNumber = verifyResult.ReferenceNumber;
             payment.BankResponse = verifyResult.Message;
+
 
             if (verifyResult.Installment > 1)
             {
@@ -235,28 +254,8 @@ namespace B2B.Controllers
                 //mark as paid
                 payment.MarkAsPaid(DateTime.Now);
                 payment.BankResponse = JsonConvert.SerializeObject(form);
-                _paymentService.Update(payment);
-                //send email
-                
-                EMailSender es = new EMailSender(_firmParamService);
-                var builder = new StringBuilder();
-                using (var reader = System.IO.File.OpenText("Template/KKTahsilat.cshtml"))
-                {
-                    builder.Append(reader.ReadToEnd());
-                }
-                builder.Replace("islemturu", "Mail Order Kredi Kartı Tahsilatı");
-                builder.Replace("firmaunvani", _firmParamService.ToString(1));
-                builder.Replace("islemno", payment.ReferenceNumber);
-                builder.Replace("tarih", payment.PaidDate.ToString());
-                builder.Replace("carikod", "");
-                builder.Replace("total", payment.TotalAmount.ToString());
-                builder.Replace("yaziiletutar", NUmbertoString(payment.TotalAmount));
-                builder.Replace("kkno", payment.MaskedCardNumber);
-                builder.Replace("aciklama", payment.CardHolderName);
-                builder.Replace("taksit", payment.Installment.ToString());
-                builder.Replace("bankaadi", payment.BankCard.Name);
-                await es.SendEmailAsync(_firmParamService.ToString(7), "Kredi Kartı Tahsilat Maili", builder.ToString());
-
+                await _paymentService.Update(payment);
+                //return RedirectToAction(payment.OrderNumber.ToString(), "Success");
                 return View("Success", verifyResult);
             }
 
@@ -265,15 +264,15 @@ namespace B2B.Controllers
 
             //update payment transaction
             payment.BankResponse = JsonConvert.SerializeObject(form);
-            _paymentService.Update(payment);
-
+            await _paymentService.Update(payment);
+            _logger.LogCritical($"Hatalı Ödeme", verifyRequest.ToString());
             return View("Fail", verifyResult);
         }
 
-        public async Task<IActionResult> Completed([FromRoute(Name = "id")] Guid orderNumber, [FromForm]  VerifyGatewayResult form)
+        public async Task<IActionResult> Completed([FromRoute(Name = "id")] Guid orderNumber, [FromForm] VerifyGatewayResult form)
         {
-            
-            PaymentTransaction payment = _paymentService.GetByOrderNumber(orderNumber, includeBank: true);
+
+            PaymentTransaction payment = _paymentService.GetByOrderNumber(orderNumber, includeBank: true).Result.Data;
             if (payment == null)
             {
                 return RedirectToAction("Index", "Home");
@@ -281,16 +280,17 @@ namespace B2B.Controllers
             if (form.Success)
             {
                 //mail gönderme işlemiburda yapılacak
-
+                _logger.LogCritical($"Ödeme Başarılı Sonuçlandı {form.OrderNumber} {form.ReferenceNumber} {form.ResponseCode}");
                 return RedirectToAction(payment.OrderNumber.ToString(), "Success");
             }
             else
             {
+                _logger.LogCritical($"Ödeme Hatalı Sonuçlandı {form.OrderNumber} {form.ErrorCode} {form.ErrorMessage} {form.ReferenceNumber}");
                 return RedirectToAction(payment.OrderNumber.ToString(), "Fail");
             }
         }
 
-        private string NUmbertoString(decimal tutar)
+        private string NumbertoString(decimal tutar)
         {
             string sTutar = tutar.ToString("F2").Replace('.', ',');
             string lira = sTutar.Substring(0, sTutar.IndexOf(','));
@@ -351,6 +351,4 @@ namespace B2B.Controllers
         }
 
     }
-
-
 }

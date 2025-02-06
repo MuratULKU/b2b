@@ -1,0 +1,68 @@
+﻿@page "/iletisim"
+@using Business.Abstract;
+@using Business.SingletonServices
+@using CoreUI.Components.NotificationService
+@using SendEMail;
+@inject FirmParameter firmParamService
+@inject NotificationService notification
+<div class="layout">
+    <div class="row">
+        <div class="layout-cell size-50">
+            <div class="address">
+                <h3 class="text-gray">Adres</h3>
+                @firmParamService.ToString(1)<br>
+                @firmParamService.ToString(2)
+                @firmParamService.ToString(3)<br>
+                @firmParamService.ToString(4) / @firmParamService.ToString(5)<br>
+                <br>
+                @firmParamService.ToString(19)
+                @firmParamService.ToString(20)<br>
+                <span>
+                    @firmParamService.ToString(7)
+                </span>
+
+               
+            </div>
+
+            <div class="map">
+                <iframe src="@firmParamService.ToString(21)" width="500" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+        <div class="layout-cell size-50" style="margin-top:40px">
+            <h3 class="text-gray">Mesaj Gönderin</h3>
+            <div class="u-form">
+                <div class="u-form-name">
+                    <label for="name" class="form-control form-hidden">İsim Soyisim</label>
+                    <input id="name" type="text" class="input-name" placeholder="İsim ve Soyisim" @bind-value="namesurname" />
+                </div>
+                <div class="u-form-email">
+                    <label for="email" class="form-control form-hidden">Mail Adresi</label>
+                    <input id="email" type="text" class="input-name" placeholder="Mail Adresi" @bind-value="mail" />
+                </div>
+                <div class="u-form-message">
+                    <label for="message" class="form-control form-hidden">İsim Soyisim</label>
+                    <textarea id="maessage" type="text" class="input-name" placeholder="Mesaj" rows="8" cols="50" @bind="message" @bind:event="oninput" />
+                </div>
+                <div class="u-form-submit">
+                    <button class="btn btn-primary" onclick="@SendMessage">Gönder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    private string mail;
+    private string namesurname;
+    private string message;
+    private async void SendMessage()
+    {
+
+        EMailSender es = new SendEMail.EMailSender(firmParamService.FirmParameters);
+        await es.SendEmailAsync(@firmParamService.ToString(7), "Web Sitesi Gelen Mesaj", $"{mail} {namesurname} {message}");
+        mail = "";
+        namesurname = "";
+        message = "";
+        notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Mesaj Gönderildi", Detail = "Mesajınız Başarılı Şekilde İletildi.", Duration = 5000 });
+
+    }
+}

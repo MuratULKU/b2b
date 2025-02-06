@@ -9,9 +9,8 @@ namespace Entity
 {
     public class DocumentNo
     {
-        [Key]
         public int DocType { get; set; }
-        public string Prefix { get; set; }
+        public string? Prefix { get; set; }
         public int DocNo { get; set; }
     }
 }

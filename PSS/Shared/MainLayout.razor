@@ -1,0 +1,30 @@
+﻿@using CoreUI.Components.NotificationService
+@using PSS.Components.UserPanel
+
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<div class="page">
+
+    <main>
+        <PSSMenu />
+        <MNotification />
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+
+@code {
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            // await((CustomAuthenticationStateProvider)AuthenticationStateProvider).LoadUserStateAsync();
+            // StateHasChanged();
+
+
+        }
+
+    }
+}

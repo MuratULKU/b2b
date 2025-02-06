@@ -1,0 +1,62 @@
+﻿
+@using Business.Abstract
+@using CoreUI.Data
+@inject ICategoryService categoryManager
+<style>
+    .menu li:hover ul {
+        display: block;
+    }
+</style>
+@if (DataList != null)
+{
+    <div class="menu">
+        <ul>
+               <CascadingValue Value="DataList">
+                @foreach (var menu in DataList.Where(x => x.parent == 1))
+                {
+                    <PanelMenuItem dataModel="menu" SelectItemChange="SubCallBack" SelectedItem="SelectedItem"/>
+                }
+               </CascadingValue>
+        </ul>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public List<MenuItemModel> DataList { get; set; }
+
+    [Parameter]
+    public MenuItemModel SelectedItem { get; set; } //eventcallback ile gönderilen data
+
+    [Parameter]
+    public EventCallback<MenuItemModel> SelectItemChange { get; set; } //üst copmenete haber vermek için yazıldı ama sıkıntılı
+
+    protected void SubCallBack(MenuItemModel model) //alt copmonnetten gelen tıklanan değer tekrar eşitleniyor.
+    {
+        if (model != null)
+        {
+            SelectedItem = model;
+            SelectItemChange.InvokeAsync(SelectedItem);
+        }
+    }
+    protected async override void OnInitialized()
+    {
+        DataList = await loadMenuItem(1);
+        base.OnInitialized();
+    }
+
+    private async Task<List<MenuItemModel>> loadMenuItem(int parentid)
+    {
+        List<MenuItemModel> newItem = new();
+        var d = await categoryManager.Get(parentid);
+        if (d is not null && d.Count > 0)
+        {
+            foreach (var item in d)
+            {
+                newItem.Add(new MenuItemModel { id = item.LogicalRef, menuName = item.Name, parent = item.Parent, items = await loadMenuItem(item.LogicalRef) });
+            }
+        }
+        return newItem;
+    }
+}  
+

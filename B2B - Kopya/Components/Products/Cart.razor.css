@@ -1,0 +1,52 @@
+﻿.image{
+    width:50px;
+    margin:auto;
+    vertical-align:middle;
+}
+.name{
+    width:auto;
+    margin:auto;
+    vertical-align:middle;
+}
+.stok {
+    width: 50px;
+    margin: auto;
+    vertical-align:middle;
+}
+.amount {
+    width: 100px;
+    margin: auto;
+    vertical-align:middle;
+}
+.vat {
+    width: 50px;
+    margin: auto;
+    vertical-align:middle;
+}
+.code{
+    vertical-align:middle;
+}
+.price {
+    width: 120px;
+    margin: auto;
+    vertical-align:middle;
+}
+.total {
+    width: 150px;
+    margin: auto;
+    vertical-align:middle;
+}
+button{
+    min-width:140px;
+}
+@media (max-width: 640.98px) {
+    .vat{
+        display:none;
+    }
+    .stok{
+        display:none;
+    }
+    .image{
+        display:none;
+    }
+}

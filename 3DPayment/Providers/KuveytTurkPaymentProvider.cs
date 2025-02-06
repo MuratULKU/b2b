@@ -28,14 +28,14 @@ namespace _3DPayment.Providers
                 var amount = Convert.ToInt32(request.TotalAmount * 100m).ToString();
 
                 var merchantOrderId = request.OrderNumber;
-                var merchantId = request.BankParameters["merchantId"];
-                var customerId = request.BankParameters["customerNumber"];
-                var userName = request.BankParameters["userName"];
-                var password = request.BankParameters["password"];
+                var merchantId = request.VirtualPosParameters["merchantId"];
+                var customerId = request.VirtualPosParameters["customerNumber"];
+                var userName = request.VirtualPosParameters["userName"];
+                var password = request.VirtualPosParameters["password"];
 
                 string installment = request.Installment.ToString();
                 if (request.Installment < 2)
-                    installment = string.Empty;//0 veya 1 olması durumunda taksit bilgisini boş gönderiyoruz
+                    installment = "0";//0 veya 1 olması durumunda taksit bilgisini boş gönderiyoruz
 
                 //merchantId, merchantOrderId, amount, okUrl, failUrl, userName and password
                 var hashData = CreateHash(merchantId, merchantOrderId, amount, request.CallbackUrl.ToString(), request.CallbackUrl.ToString(), userName, password);
@@ -43,19 +43,23 @@ namespace _3DPayment.Providers
                 var requestXml = $@"<KuveytTurkVPosMessage
                     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
                     xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
-                        <APIVersion>1.0.0</APIVersion>
+                        <APIVersion>TDV2.0.0</APIVersion>
                         <OkUrl>{request.CallbackUrl}</OkUrl>
                         <FailUrl>{request.CallbackUrl}</FailUrl>
                         <HashData>{hashData}</HashData>
                         <MerchantId>{merchantId}</MerchantId>
                         <CustomerId>{customerId}</CustomerId>
+                        <DeviceData>
+                          <DeviceChannel>02</DeviceChannel>
+                          <ClientIP>{request.CustomerIpAddress}</ClientIP>
+                        </DeviceData>
                         <UserName>{userName}</UserName>
                         <CardNumber>{request.CardNumber}</CardNumber>
                         <CardExpireDateYear>{string.Format("{0:00}", request.ExpireYear)}</CardExpireDateYear>
                         <CardExpireDateMonth>{string.Format("{0:00}", request.ExpireMonth)}</CardExpireDateMonth>
                         <CardCVV2>{request.CvvCode}</CardCVV2>
                         <CardHolderName>{request.CardHolderName}</CardHolderName>
-                        <CardType></CardType>
+                        <CardType>Master</CardType>
                         <BatchID>0</BatchID>
                         <TransactionType>Sale</TransactionType>
                         <InstallmentCount>{installment}</InstallmentCount>
@@ -67,7 +71,7 @@ namespace _3DPayment.Providers
                         </KuveytTurkVPosMessage>";
 
                 //send request
-                var response = await client.PostAsync(request.BankParameters["gatewayUrl"], new StringContent(requestXml, Encoding.UTF8, "text/xml"));
+                var response = await client.PostAsync(request.VirtualPosParameters["gatewayUrl"], new StringContent(requestXml, Encoding.UTF8, "text/xml"));
                 string responseContent = await response.Content.ReadAsStringAsync();
 
                 //failed
@@ -75,7 +79,7 @@ namespace _3DPayment.Providers
                     return PaymentGatewayResult.Failed("Ödeme sırasında bir hata oluştu.");
 
                 //successed
-                return PaymentGatewayResult.Successed(responseContent, request.BankParameters["gatewayUrl"]);
+                return PaymentGatewayResult.Successed(responseContent, request.VirtualPosParameters["gatewayUrl"]);
             }
             catch (Exception ex)
             {
@@ -127,22 +131,22 @@ namespace _3DPayment.Providers
             var requestXml = $@"<KuveytTurkVPosMessage
                     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
                     xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
-                        <APIVersion>1.0.0</APIVersion>
-                        <HashData>{hashData}</HashData>
-                        <MerchantId>{merchantId}</MerchantId>
-                        <CustomerId>{customerId}</CustomerId>
-                        <UserName>{userName}</UserName>
-                        <CurrencyCode>0949</CurrencyCode>
-                        <TransactionType>Sale</TransactionType>
-                        <InstallmentCount>0</InstallmentCount>
-                        <Amount>{amount}</Amount>
-                        <MerchantOrderId>{merchantOrderId}</MerchantOrderId>
-                        <TransactionSecurity>3</TransactionSecurity>
-                        <KuveytTurkVPosAdditionalData>
-                        <AdditionalData>
-                        <Key>MD</Key>
-                        <Data>{mD}</Data>
-                        </AdditionalData>
+                         <APIVersion>TDV2.0.0</APIVersion>
+                         <HashData>{hashData}</HashData>
+                         <MerchantId>{merchantId}</MerchantId>
+                         <CustomerId>{customerId}</CustomerId>
+                         <UserName>{userName}</UserName>
+                         <CurrencyCode>0949</CurrencyCode>
+                         <TransactionType>Sale</TransactionType>
+                         <InstallmentCount>0</InstallmentCount>
+                         <Amount>{amount}</Amount>
+                         <MerchantOrderId>{merchantOrderId}</MerchantOrderId>
+                         <TransactionSecurity>3</TransactionSecurity>
+                           <KuveytTurkVPosAdditionalData>
+                             <AdditionalData>
+                             <Key>MD</Key>
+                             <Data>{mD}</Data>
+                           </AdditionalData>
                         </KuveytTurkVPosAdditionalData>
                         </KuveytTurkVPosMessage>";
 
@@ -158,7 +162,7 @@ namespace _3DPayment.Providers
 
             if (model.ResponseCode == "00")
             {
-                return VerifyGatewayResult.Successed(model.OrderId.ToString(), model.OrderId.ToString(),"",
+                return VerifyGatewayResult.Successed(model.OrderId.ToString(), model.OrderId.ToString(), "",
                     0, 0, model.ResponseMessage,
                     model.ResponseCode);
             }
@@ -178,7 +182,7 @@ namespace _3DPayment.Providers
 
         public Task<PaymentDetailResult> PaymentDetailRequest(PaymentDetailRequest request)
         {
-            throw new NotImplementedException();
+            throw new Exception("Bu Alan Kuveyt Türk Kredi Kartlarında Kullanılmamakdatır.");
         }
 
         public Dictionary<string, string> TestParameters => new Dictionary<string, string>
@@ -206,7 +210,9 @@ namespace _3DPayment.Providers
             return Convert.ToBase64String(cryptoServiceProvider.ComputeHash(hashbytes));
         }
 
-        private class VPosTransactionResponseContract
+        //serileştirmek için kullanılan classlar entity e taşınacak
+
+        public class VPosTransactionResponseContract
         {
             public string ACSURL { get; set; }
             public string AuthenticationPacket { get; set; }

@@ -1,67 +1,30 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using DataAccess.Abstract;
 using DataAccess.EFCore;
+using Core.Abstract;
+using Core.Concrete;
+using System.Linq.Expressions;
 
 namespace DataAccess.Concrete
 {
-    public class CreditCardRepository : ICreditCardRepository
+    public class CreditCardRepository :Repository<CreditCard>, ICreditCardRepository
     {
-        private readonly RepositoryContext _dataContext;
+        public CreditCardRepository(RepositoryContext context)
+           : base(context)
+        { }
 
-        public CreditCardRepository(RepositoryContext dataContext)
+        public async Task<CreditCard> GetCreditCardAsync(Guid id, Expression<Func<CreditCard, object>>[] includes)
         {
-            _dataContext = dataContext;
-        }
+            IQueryable<CreditCard> query = this.dbContext.Set<CreditCard>();
 
-        public CreditCard CreateCreditCard(CreditCard creditCard)
-        {
-            _dataContext.CreditCards.Add(creditCard);
-            _dataContext.SaveChanges();
-            return creditCard;
-        }
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
 
-        public CreditCard DeleteCreditCard(CreditCard creditCard)
-        {
-            _dataContext.CreditCards.Remove(creditCard);
-            _dataContext.SaveChanges();
-            return creditCard;
-        }
-
-        public List<CreditCard> GetAll()
-        {
-            return _dataContext.CreditCards
-                .Include(x=>x.Bank)
-                .Include(x=>x.Installments)
-                .ToList();
-        }
-
-        public CreditCard Get(Guid id)
-        {
-            return _dataContext.CreditCards.FirstOrDefault(x => x.Id == id);
-        }
-
-        
-        public CreditCard UpdateCreditCard(CreditCard creditCard)
-        {
-            _dataContext.CreditCards.Update(creditCard);
-            _dataContext.SaveChanges();
-            return creditCard;
-        }
-
-        public List<CreditCard> GetBankCreditCard(Guid bankid)
-        {
-            return _dataContext.CreditCards.Where(x => x.BankCardId == bankid).ToList();
-        }
-
-        public Task<CreditCard> Get(Guid bankId, int brandCode)
-        {
-            return _dataContext.CreditCards.FirstOrDefaultAsync(x=>x.BankCardId== bankId && x.BrandCode == brandCode);
+            return await query.SingleOrDefaultAsync(x=>x.Id == id);
         }
     }
 }

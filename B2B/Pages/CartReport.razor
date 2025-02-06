@@ -1,0 +1,78 @@
+﻿@page "/cartreport"
+@using Business.Abstract
+@using CoreUI.Components.DataGrid
+@using Entity
+@inject IOrderService orderService
+<div class="container">
+    <DataGrid TItem="OrdFiche" Items="cartList" RowCount="rowCount" Pager SelectedPageChange="selectedPageChange" SelectedItemChanged="selectedItemChange">
+         <Columns>
+            <Column Caption="Tarih" Field="@nameof(OrdFiche.Date_)" />
+            <Column Caption="FişNo" Field="@nameof(OrdFiche.Docode)" />
+            <Column Caption="Ara Toplam" Field="@nameof(OrdFiche.GrossTotal)" TextAlign="TextAlignmet.Right" />
+            <Column Caption="Vergi" Field="@nameof(OrdFiche.TotalVat)" TextAlign="TextAlignmet.Right" />
+            <Column Caption="Toplam" Field="@nameof(OrdFiche.Total)" TextAlign="TextAlignmet.Right" />
+
+        </Columns>
+        <DetailRowTemplate>
+            @{
+                var detail = ordLines;
+                <DataGrid TItem="OrdLine" Items="ordLines">
+                    <Columns>
+                        <Column Caption="Stok Kodu">
+                            <CellTemplate>
+                                @context.Item.Product.Code
+                            </CellTemplate>
+                        </Column>
+                        <Column Caption="Adı">
+                            <CellTemplate>
+                                @context.Item.Product.Name
+                            </CellTemplate>
+                        </Column>
+                        <Column Caption="Miktar" TextAlign="TextAlignmet.Right">
+                            <CellTemplate>
+                                @context.Item.Amount.ToString("N2")
+                            </CellTemplate>
+                        </Column>
+                        <Column Caption="Fiyat" TextAlign="TextAlignmet.Right">
+                            <CellTemplate>
+                                @context.Item.Price.ToString("N2")
+                            </CellTemplate>
+                        </Column>
+                        <Column Caption="Tutar" TextAlign="TextAlignmet.Right">
+                            <CellTemplate>
+                                @context.Item.Total.ToString("N2")
+                            </CellTemplate>
+                        </Column>
+                    </Columns>
+                  <FooterTemplate>
+                    <td></td>
+                    <td></td>
+                    <td>Toplam</td>
+                    <td></td>
+                    <td class="text-end">@ordLines.Sum(x=>x.Total).ToString("N2")</td>
+                  </FooterTemplate>
+                </DataGrid>
+            }
+
+        </DetailRowTemplate>
+    </DataGrid>
+</div>
+@code {
+    private List<OrdFiche> cartList { get; set; }
+    private OrdFiche ordFiche { get; set; } = default!;
+    private List<OrdLine> ordLines { get; set; } = default!;
+    private int rowCount = 20;
+    protected override async void OnInitialized()
+    {
+        cartList = await orderService.GetOrderFiche(1, 0, rowCount);
+    }
+    private async void selectedPageChange(int page)
+    {
+        cartList = await orderService.GetOrderFiche(1, page, rowCount);
+    }
+    private void selectedItemChange(OrdFiche ordFiche)
+    {
+        this.ordFiche = ordFiche;
+        ordLines = ordFiche.Lines;
+    }
+}

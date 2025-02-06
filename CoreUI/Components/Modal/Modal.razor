@@ -1,0 +1,96 @@
+﻿<div class="modal @ModalClass" id="exampleModal" style="display:@ModalDisplay" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+
+        <div class="modal-content">
+            @if (isVisible)
+            {
+                if (ShowCloseButton || HeaderTeplate != null || !string.IsNullOrWhiteSpace(Title))
+                {
+                    <div class="modal-header">
+                        @if (!string.IsNullOrWhiteSpace(Title))
+                        {
+                            <h5 class="modal-title">@Title</h5>
+                        }
+                        else if (HeaderTeplate != null)
+                        {
+                            @HeaderTeplate
+                        }
+
+                        @if (ShowCloseButton)
+                        {
+                            <button type="button" class="close" onclick="@HideAsync" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        }
+
+                    </div>
+                }
+                <div class="modal-body">
+                  @if(!string.IsNullOrWhiteSpace(Message))
+                    {
+                        @Message
+                    }
+                    else if(BodyTeplate != null)
+                    {
+                        @BodyTeplate
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="@(()=>OnConfirmationChanged(false))">Vazgeç</button>
+                    <button type="button" class="btn btn-primary" onclick="@(()=>OnConfirmationChanged(true))">Kaydet</button>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private bool isVisible;
+    private string ModalDisplay => isVisible ? "block" : "none";
+    private string ModalClass = "";
+    private bool ShowBackdrop = false;
+    private TaskCompletionSource<bool>? taskCompletionSource;
+
+    [Parameter]
+    public bool ShowCloseButton { get; set; } = true;
+    [Parameter]
+    public RenderFragment HeaderTeplate { get; set; } = default!;
+    [Parameter]
+    public RenderFragment BodyTeplate { get; set; } = default!;
+    [Parameter]
+    public RenderFragment FooterTeplate { get; set; } = default!;
+
+    [Parameter]
+    public string Title { get; set; } = default!;
+    [Parameter]
+    public string Message { get; set; } = default!;
+
+    public Task<bool> Show()
+    {
+        isVisible = true;
+        ModalClass = "show";
+        ShowBackdrop = true;
+        taskCompletionSource = new TaskCompletionSource<bool>();
+        var task = taskCompletionSource.Task;
+        StateHasChanged();
+        return task;
+    }
+    public Task<bool> ShowAsync() => Show();
+
+
+
+    public async Task HideAsync()
+    {
+        isVisible = false;
+        ModalClass = "";
+        ShowBackdrop = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected async Task OnConfirmationChanged(bool value)
+    {
+        taskCompletionSource?.SetResult(value);
+        await HideAsync();
+    }
+}

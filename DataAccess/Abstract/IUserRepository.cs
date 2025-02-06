@@ -1,14 +1,10 @@
-﻿using Entity;
+﻿using Core.Abstract;
+using Entity;
 
 namespace DataAccess.Abstract
 {
-    public interface IUserRepository
+    public interface IUserRepository:IRepository<User>
     {
-        List<User> GetAllUser();
-        Task<User> GetUser(string username, string password);
-        Task<User> GetUser(Guid id);
-        User AddUser(User user);
-        User UpdateUser(User user);
-        User DeleteUser(User user);
+      
     }
 }

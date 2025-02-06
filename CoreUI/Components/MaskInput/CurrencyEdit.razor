@@ -1,0 +1,118 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+@typeparam TValue
+<div class="currency form-control">
+<input @ref="@ElementReference"
+       type="text"
+       value="@ValueString"
+@onfocus="FocusEvent"
+@onblur="FormatValue"
+@oninput="ChangeEvent"
+@onchange="ChangeEvent"
+onclick="this.select()"
+disabled="@Disabled"
+    @attributes="Attributes" />
+<label class="simge">TL
+</label>
+</div>
+@code {
+
+    [Parameter]
+    public EventCallback<TValue> ValueChanged { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> Attributes { get; set; }
+    private TValue _value;
+
+    [Parameter]
+    public TValue Value
+    {
+        get => _value;
+        set
+        {
+            if (EqualityComparer<TValue>.Default.Equals(_value, value)) return;
+            _value = value;
+            ValueChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public int DecimalPlaces { get; set; } = 2;
+
+    [Parameter]
+    public decimal? Step { get; set; }
+
+    [Parameter]
+    public string DisplayFormat { get; set; }
+
+    [Parameter]
+    public bool Disabled{ get; set; }
+
+    private string ValueString { get; set; }
+    private ElementReference ElementReference { get; set; }
+    bool ignoreParameterSet = false;
+
+    protected override void OnParametersSet()
+    {
+        if (!ignoreParameterSet)
+            FormatValue();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JSRuntime.InvokeVoidAsync("Ulku.currency", ElementReference, DecimalPlaces);
+    }
+
+    private void ChangeEvent(ChangeEventArgs e)
+    {
+        decimal decimalValue = CastToDecimal(e.Value);
+        Value = (TValue)Convert.ChangeType(decimalValue, typeof(TValue));
+        ValueChanged.InvokeAsync(Value);
+    }
+
+    private async void FocusEvent(FocusEventArgs e)
+    {
+        ignoreParameterSet = true;
+        ValueString = Value?.ToString();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void FormatValue()
+    {
+        ignoreParameterSet = false;
+        ValueString = String.Format(DisplayFormat ?? $"{{0:N{DecimalPlaces}}}", Value);
+        StateHasChanged();
+    }
+
+    private decimal CastToDecimal(object value)
+    {
+        decimal decimalValue;
+        var isDecimal = decimal.TryParse(value?.ToString(), out decimalValue);
+
+        if (isDecimal)
+        {
+            decimalValue = Math.Round(decimalValue, DecimalPlaces);
+        }
+        return decimalValue;
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Code == "ArrowDown" || e.Code == "ArrowUp")
+        {
+            var step = Step ?? (DecimalPlaces > 0 ? (decimal).25 : 1);
+            decimal decimalValue = CastToDecimal(Value);
+            if (e.Code == "ArrowDown")
+                decimalValue -= step;
+
+            if (e.Code == "ArrowUp")
+                decimalValue += step;
+
+            Value = (TValue)Convert.ChangeType(decimalValue, typeof(TValue));
+
+            await ValueChanged.InvokeAsync(Value);
+            ValueString = Value.ToString();
+        }
+    }
+}

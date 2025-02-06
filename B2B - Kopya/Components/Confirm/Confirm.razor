@@ -1,0 +1,56 @@
+﻿@if (ShowDialog)
+{
+    <div class="modal fade show d-block" id="Confirm" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title title" id="exampleModalLabel">@title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="()=>OnConfirmationChanged(false)">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @BodyText
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="()=>OnConfirmationChanged(false)">Vazgeç</button>
+                    <button type="button" class="btn btn-primary" @onclick="()=>OnConfirmationChanged(true)">Tamam</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    protected bool ShowDialog { get; set; }
+    private TaskCompletionSource<bool>? taskCompletionSource;
+    private string title = "Onay";
+    public Task<bool> Show()
+    {
+        taskCompletionSource = new TaskCompletionSource<bool>();
+        var task = taskCompletionSource.Task;
+        ShowDialog = true;
+        StateHasChanged();
+        return task;
+    }
+
+    public Task<bool> ShowAsync(string Title,string Message)
+    {
+        title = Title;
+        this.BodyText = Message;
+        return ShowAsync();
+    }
+    public Task<bool> ShowAsync() => Show();
+
+    [Parameter] public bool State { get; set; }
+    [Parameter] public string BodyText { get; set; } = "";
+
+
+    protected async Task OnConfirmationChanged(bool value)
+    {
+        ShowDialog = false;
+        State = value;
+        StateHasChanged();
+        taskCompletionSource.SetResult(value);
+    }
+}

@@ -1,0 +1,139 @@
+﻿@page "/virtualpos"
+
+@using B2C.Components.Bank
+@using Business.Abstract
+@using Business.Concrete
+
+@using CoreUI.Components.DataGrid
+@using CoreUI.Components.Modal
+@inject IVirtualPosService virtualPosService
+@inject ICreditCardInstallmentService creditCardInstallmentManager
+@inject ICreditCardService creditCardService
+@inject IUserIdentityProcessor userIdentity
+@attribute [Authorize(Roles = "Admin")]
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <VirtualPosListPage virtualPosList="virtualPosList" OnChanged="@((e)=>SelectedVirtualPosChanged(e))" />
+        </div>
+        <div class="col-6">
+            @if (selectVirtualPos != null)
+            {
+                <DataGrid TItem="CreditCard" Items="selectVirtualPos.CreditCards" SelectedItemChanged="LoadCreditCartInstalment">
+                    <Columns>
+                        <Column Caption="Kredi Kartı" Field="@nameof(CreditCard.Name)"></Column>
+                    </Columns>
+                    <NoDataTemplate>
+                        <label class="text-center">Veri Bulunamadı.</label>
+                    </NoDataTemplate>
+                    <ButtonRowTemplate>
+                        <input type="button" class="btn btn-success" value="Ekle" />
+                        <input type="button" class="btn btn-danger" value="Sil" />
+                    </ButtonRowTemplate>
+                </DataGrid>
+            }
+            @if (creditCardInstallment != null)
+            {
+                <DataGrid TItem="CreditCardInstallment" Items="creditCardInstallment" SelectedItemChanged="@((e)=>selectInstallment = e)">
+                    <Columns>
+                        <Column Caption="Taksit" Field="@nameof(CreditCardInstallment.Installment)"></Column>
+                        <Column Caption="Oran" Field="@nameof(CreditCardInstallment.InstallmentRate)"></Column>
+                    </Columns>
+                    <NoDataTemplate>
+                        <label class="text-center">Veri Bulunamadı.</label>
+                    </NoDataTemplate>
+                    <ButtonRowTemplate>
+                        <input type="button" class="btn btn-success" value="Ekle" onclick="@showInstalment" />
+                        <input type="button" class="btn btn-danger" value="Sil" />
+                    </ButtonRowTemplate>
+                </DataGrid>
+
+            }
+
+        </div>
+    </div>
+    <Modal @ref="modal">
+        <HeaderTeplate>
+            <label class="text-center">Kredi Kartı Taksit Giriş</label>
+        </HeaderTeplate>
+        <BodyTeplate>
+            <div class="col-4">
+                <label>Taksit Sayısı</label>
+            </div>
+            <div class="col-8">
+                <input @bind-value="selectInstallment.Installment" />
+            </div>
+            <div class="col-4">
+                <label>Komisyon Oranı</label>
+            </div>
+            <div class="col-8">
+                <input @bind-value="selectInstallment.InstallmentRate" />
+            </div>
+        </BodyTeplate>
+    </Modal>
+
+</div>
+
+
+@code {
+    private Modal modal;
+    private List<VirtualPos> virtualPosList { get; set; } = default!;
+    private VirtualPos selectVirtualPos { get; set; } = default!;
+    private List<CreditCardInstallment> creditCardInstallment { get; set; } = default!;
+    private CreditCardInstallment selectInstallment { get; set; }=default!;
+    private List<CreditCard> creditCardList { get; set; } = default!;
+    private CreditCard selectCreditCard { get; set; } = default!;
+    protected async override void OnInitialized()
+    {
+        virtualPosList = await virtualPosService.GetVirtualListsAsync();
+    }
+
+
+
+    private void LoadCreditCartInstalment(CreditCard creditCard)
+    {
+        creditCardInstallment = creditCardInstallmentManager.GeyCreditId(creditCard.Id);
+        selectCreditCard = creditCard;
+    }
+
+    private void SelectedVirtualPosChanged(VirtualPos virtualPos)
+    {
+        selectVirtualPos = virtualPos;
+        selectVirtualPos.CreditCards = creditCardService.GetBankCreditCard(virtualPos.CardBrandId).Result;
+    }
+
+    private async void showInstalment()
+    {
+        bool newItem;
+        if(selectInstallment == null)
+        {
+            newItem = true;
+            selectInstallment = new();
+            selectInstallment.CreditCardId = selectCreditCard.Id;
+            selectInstallment.CreateUser = await userIdentity.GetCurrentUserId();
+            selectInstallment.UpdateUser = await userIdentity.GetCurrentUserId();
+            selectInstallment.UpdateDate = DateTime.Now;
+            selectInstallment.CreateDate = DateTime.Now;
+        }
+        else
+        {
+            newItem = false;
+            selectInstallment.UpdateUser = await userIdentity.GetCurrentUserId();
+            selectInstallment.UpdateDate = DateTime.Now;
+        }
+
+        if (await modal.Show())
+        {
+            if (newItem)
+            {
+                creditCardInstallmentManager.Create(selectInstallment);
+                selectInstallment = null;
+            }
+            else
+            {
+                creditCardInstallmentManager.Update(selectInstallment);
+            }
+        }
+    }
+}
+

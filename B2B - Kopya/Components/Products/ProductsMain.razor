@@ -1,0 +1,386 @@
+﻿@page "/products"
+
+@using B2B.Components.Login;
+@using B2B.Components.NotificationService;
+@using B2B.Components.Pagination;
+@using B2B.Components.PanelMenu
+@using B2B.Components.Preload;
+@using B2B.Data;
+@using Business.Abstract;
+@using Business.Concrete;
+@using DataAccess.Abstract;
+@using DataAccess.Helpers.Product;
+@using Entity;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+
+@attribute [Authorize]
+
+
+@inject ICategoryRepository _categoriyRepository
+@inject IProductRepository _productrepository
+@inject IOrderService _orderService
+@inject ICharCodeRepository _charCodeRepository
+@inject ICharValRepository _charValRepository
+@inject ICharSetRepository _charSetRepository
+@inject UserManager _userManager
+@inject IDocumentNoRepository _docNoService
+@inject NotificationService _notification
+@inject IJSRuntime _js
+@inject ProtectedSessionStorage ProtectedSessionStore
+@inject PreloadService loadService;
+<div class="container">
+
+    @if (!(bool)ShowParameter.FirstOrDefault(x => x.Key == "ShowPage").Value)
+    {
+        <div class="topbar">
+
+            <div class="icon">
+                <svg color="@(view==0 ? "#007bee":"gray")" onclick="@ClickCardView" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="grid-2" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-grid-2 fa-lg"><path fill="currentColor" d="M224 80c0-26.5-21.5-48-48-48H80C53.5 32 32 53.5 32 80v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V80zm0 256c0-26.5-21.5-48-48-48H80c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V336zM288 80v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48H336c-26.5 0-48 21.5-48 48zM480 336c0-26.5-21.5-48-48-48H336c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48V336z" class=""></path></svg>
+            </div>
+            <div class="icon">
+                <svg color="@(view==1 ? "#007bee":"gray")" onclick="@ClickDataView" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="list-ul" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-list-ul fa-lg"><path fill="currentColor" d="M64 144a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM64 464a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm48-208a48 48 0 1 0 -96 0 48 48 0 1 0 96 0z" class=""></path></svg>
+            </div>
+
+            <div class="findarea">
+                <form @onsubmit="Enter">
+                    <input class="findtext" type="text" placeholder="Arama" id="filter" name="filter" @bind-value="@Filter" />
+                    <input type="hidden" id="category" name="category" value="@selectCategory" />
+                    <button class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit">
+                        @if (test)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+
+                        }
+                        Ara
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            @if (dataList != null && dataList.Count > 0)
+            {
+                tableClass = "main col-md-10";
+                cardClass = "col-md-4 my-2";
+                <div class="leftside col-md-2">
+                    <PanelMenu DataList="dataList" SelectItemChange="ChanegedCategory" SelectedItem="selectCategory" />
+                    @if (charCodes != null)
+                    {
+                        foreach (var item in charCodes)
+                        {
+                            <PanelFilter charCode="item" StateChange="FilterStateChange" />
+                        }
+                    }
+                </div>
+
+            }
+            else
+            {
+                tableClass = "main col-md-12";
+                cardClass = "col-md-3 my-2";
+            }
+            <div class="@tableClass">
+                @if (view == 0)
+                {
+                    <CascadingValue Value="this">
+                        <!--parametre olarak bu class ı gönderiyoruz-->
+                        <CardGridView Data="(List<Product>)pdata.Results" CardClass="@cardClass" />
+                    </CascadingValue>
+                }
+                else if (view == 1)
+                {
+                    <CascadingValue Value="this">
+                        <DataGridView Data="(List<Product>)pdata.Results" />
+                    </CascadingValue>
+                }
+                else
+                {
+                    <p>Hatalı Görünüm Parametresi</p>
+                }
+                <Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="pdata.PageSize" RowCount="pdata.RowCount" OnPageSizeChanged="pageSizeOnchanged" />
+            </div>
+        </div>
+    }
+    else
+    {
+        <label>Bakım Modunda Sipariş Verilemez</label>
+    }
+
+</div>
+
+
+@code {
+    private bool test { get; set; }
+
+    public string? Filter { get; set; }
+    public Dictionary<Guid, List<string>> PropertySet { get; set; }
+    public int CurrentPage { get; set; }
+    public int? category { get; set; }
+
+    public double Discount { get; set; }
+
+    private int view;
+    protected PagedResult<Product> pdata = new();
+    private List<MenuItemModel>? dataList;
+    private MenuItemModel selectCategory { get; set; }
+    protected List<CharCode> charCodes { get; set; }
+
+    [CascadingParameter]
+    public Dictionary<string, object> ShowParameter { get; set; }
+
+
+    private string tableClass;
+    private string cardClass;
+    private void ClickCardView()
+    {
+        view = 0;
+    }
+
+    private void ClickDataView()
+    {
+        view = 1;
+
+    }
+
+    private async Task<int> pageWitdh()
+    {
+        var result = await _js.InvokeAsync<int>("Ulku.getDimensions");
+        return result;
+    }
+
+    private void ChanegedCategory(MenuItemModel model)
+    {
+        if (model.parent == 1) // if main category one is selected, set null
+            selectCategory = null;
+        else
+            selectCategory = model;
+        PagerPageChanged(0);
+        //when the category changes, filter screen will be loaded
+        if (selectCategory != null)
+        {
+            charCodes = _charCodeRepository.Get(selectCategory.id);
+        }
+        else
+        {
+            charCodes = null;
+        }
+    }
+
+    private List<MenuItemModel> loadMenuItem(int parentid)
+    {
+        List<MenuItemModel> newItem = new();
+        var d = _categoriyRepository.Get(parentid);
+        if (d is not null && d.Count > 0)
+        {
+            foreach (var item in d)
+            {
+                newItem.Add(new MenuItemModel { id = item.LogicalRef, menuName = item.Name, parent = item.Parent, items = loadMenuItem(item.LogicalRef) });
+            }
+        }
+        return newItem;
+    }
+
+
+
+
+
+    protected async override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            loadService.Show();
+            Discount = (double)_userManager.User.Discount;
+            dataList = loadMenuItem(1);
+            Filter = (await ProtectedSessionStore.GetAsync<string>("SearchText")).Value;
+            pdata.PageSize = (int)ShowParameter.FirstOrDefault(x => x.Key == "ProductPageCount").Value;
+            CurrentPage = (await ProtectedSessionStore.GetAsync<int>("CurrentPage")).Value;
+            PagerPageChanged(CurrentPage);
+            loadService.Hide();
+            await ProtectedSessionStore.DeleteAsync("SearchText");
+            await ProtectedSessionStore.DeleteAsync("CurrentPage");
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+
+        if (dataList != null && category != null)
+        {
+            selectCategory = dataList.FirstOrDefault(x => x.id == category);
+        }
+        view = (int)ShowParameter.FirstOrDefault(x => x.Key == "ViewMode").Value;
+
+
+    }
+
+
+    protected async void PagerPageChanged(int page)
+    {
+
+        pdata.RowCount = await _productrepository.TotalCount(Filter ?? string.Empty, PropertySet, selectCategory is null ? 0 : selectCategory.id, pdata.CurrentPage, pdata.PageSize);
+        pdata.CurrentPage = page < 1 ? 1 : page;
+        pdata.Results = await _productrepository.GetAllAsync(Filter ?? string.Empty, PropertySet, selectCategory is null ? 0 : selectCategory.id, pdata.CurrentPage, pdata.PageSize);
+        CurrentPage = pdata.CurrentPage;
+        StateHasChanged();
+
+    }
+
+
+
+    protected async void pageSizeOnchanged(int pageSize)
+    {
+        pdata.PageSize = pageSize;
+        pdata.Results = await _productrepository.GetAllAsync(Filter ?? string.Empty, null, selectCategory is null ? 0 : selectCategory.id, pdata.CurrentPage, pdata.PageSize);
+    }
+
+    //ürün eklendiği zaman sepete ekleme işi burdan yapılacak
+    //child componentden çağrılıyor....
+    public void AddOrder(Product product, double amount, double price)
+    {
+        if (product != null)
+        {
+            OrdFiche ordFiche = _orderService.GetFiche(false, _userManager.User.Id);
+            if (ordFiche == null)
+            {
+                ordFiche = new();
+                ordFiche.Lines = new();
+                ordFiche.Id = Guid.NewGuid();
+                ordFiche.Docode = _docNoService.GetDocNo(1).DocNo.ToString();
+                ordFiche.Date_ = DateTime.Now;
+                ordFiche.Send = false;
+                ordFiche.Active = true;
+                ordFiche.ClientCode = _userManager.User.AccountCode;
+                ordFiche.FicheNo = ordFiche.Docode;
+                ordFiche.UpdateDate = DateTime.Now;
+                ordFiche.CreateDate = DateTime.Now;
+                ordFiche.UpdateUser = _userManager.User.Id;
+                ordFiche.CreateUser = _userManager.User.Id;
+                ordFiche.UserId = _userManager.User.Id;
+                ordFiche.TrCode = 1;
+                ordFiche.CurrencyId = 1; //döviz kuru seçildiğinde değişecek
+            }
+            OrdLine ordLine = ordFiche.Lines?.FirstOrDefault(x => x.Product.Code == product.Code);
+            if (ordLine == null)
+            {
+                ordLine = new();
+                ordLine.Id = Guid.NewGuid();
+                ordLine.StockRef = product.LogicalRef;
+                ordLine.Amount = amount;
+                ordLine.Price = price;
+                ordLine.Total = amount * price;
+                short lineno;
+                short.TryParse(ordFiche.Lines?.Count.ToString(), out lineno);
+                ordLine.LineNo = (short)(lineno + (short)1);
+                ordLine.TrCode = 1;
+                ordLine.Amount = amount;
+                ordLine.UomRef = product.UomRef;
+                ordLine.UsRef = product.UsRef;
+                ordLine.AvailableStock = 0;
+                ordLine.Discper = Discount;
+                ordLine.LineType = 0;
+                if (Discount > 0)
+                {
+                    ordLine.Distdisc = ordLine.Total * ordLine.Discper / 100;
+                }
+                else
+                {
+                    ordLine.Distdisc = 0;
+                }
+                ordLine.VatMatrah = Math.Round((ordLine.Total - ordLine.Distdisc), 2);
+                ordLine.Vat = product.SellVat ?? 0;
+                ordLine.VatAmnt = Math.Round((ordLine.VatMatrah * ordLine.Vat / 100), 2);
+                ordLine.Unit = product.Unit;
+
+                ordLine.CreateDate = DateTime.Now;
+                ordLine.UpdateDate = DateTime.Now;
+                ordLine.CreateUser = _userManager.User.Id;
+                ordLine.UpdateUser = _userManager.User.Id;
+                ordLine.OrdFicheId = ordFiche.Id;
+                ordLine.ProductId = product.Id;
+                ordLine.Date_ = ordFiche.Date_;
+                ordLine.CurrencyId = product.PriceLists[0].CurrencyId;
+                ordFiche.Lines.Add(ordLine);
+            }
+            else
+            {
+                ordLine.Amount += amount;
+                ordLine.Price = price;
+                ordLine.Total = Math.Round((ordLine.Amount * ordLine.Price), 2);
+                if (Discount > 0)
+                {
+                    ordLine.Distdisc = ordLine.Total * Discount / 100;
+                }
+                else
+                {
+                    ordLine.Distdisc = 0;
+                }
+                ordLine.VatMatrah = Math.Round((ordLine.Total - ordLine.Distdisc), 2);
+                ordLine.VatAmnt = Math.Round((ordLine.VatMatrah * ordLine.Vat / 100), 2);
+            }
+            ordFiche.GrossTotal = Math.Round(ordFiche.Lines.Sum(x => x.Total), 2);
+            ordFiche.TotalDiscounted = Math.Round(ordFiche.Lines.Sum(x => x.Distdisc), 2);
+            ordFiche.TotalVat = Math.Round(ordFiche.Lines.Sum(x => x.VatAmnt), 2);
+            ordFiche.Total = Math.Round(ordFiche.Lines.Sum(x => x.Total - x.Distdisc + x.VatAmnt), 2);
+            _orderService.InsertOrderLine(ordLine);
+            _orderService.AddOrdFiche(ordFiche);
+            //_orderService.AddProduct(_userManager.User, product, amount, price, docNo);
+            _notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Ürün Sepete Eklendi", Detail = "", Duration = 5000 });
+
+        }
+        else
+        {
+            _notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Ürün Boş Sepete Eklenenmedi", Duration = 5000 });
+        }
+    }
+
+
+
+    public void Enter()
+    {
+        tryFilter();
+    }
+
+    private async void tryFilter()
+    {
+        test = true;
+        loadService.Show();
+        PagerPageChanged(0);
+        loadService.Hide();
+        test = false;
+    }
+
+    private void FilterStateChange(FilterModel filter)
+    {
+        //secilen filtrenin charsetid sini filte olarakgöndereceğiz.
+        //CharCode chCode = _charCodeRepository.GetById(filter.CharCodeId).Result;
+        if (PropertySet == null)
+            PropertySet = new();
+        List<string> GetList;
+        PropertySet.TryGetValue(filter.CharCodeId, out GetList);
+        if (filter.Checked)
+        {
+            if (GetList == null)
+            {
+                GetList = new List<string>() { filter.Value };
+            }
+            else
+            {
+                GetList.Add(filter.Value);
+            }
+
+            PropertySet.TryAdd(filter.CharCodeId, GetList);
+        }
+        else
+        {
+            if (GetList.Count == 1)
+                PropertySet.Remove(filter.CharCodeId);
+            else
+                GetList.Remove(filter.Value);
+        }
+
+
+        PagerPageChanged(0);
+    }
+
+}
+
+

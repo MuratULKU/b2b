@@ -1,0 +1,48 @@
+﻿body{
+   
+}
+.product-columncontent{
+    border-radius:6px;
+    width:226px;
+    box-sizing:border-box;
+    overflow:hidden;
+    margin-bottom:16px;
+}
+.imgholder{
+    width:226px;
+    height:226px;
+
+}
+.product-main {
+}
+.product-name{
+    font-size:16px;
+    line-height:1.5;
+    overflow:hidden;
+    height:48px;
+
+}
+.product-amount{
+    justify-content:center;
+    width:120px;
+    margin:auto;
+    display:flex
+}
+.product-detail {
+}
+
+
+
+.shop-image-button{
+    margin-left:16px;
+    border: 0px solid;
+    background-color:transparent;
+}
+
+.shop-image-button:hover {
+    color:blue;
+}
+
+.shop-image-button:focus{
+    color:red;
+}

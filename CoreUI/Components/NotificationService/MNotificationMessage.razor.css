@@ -1,0 +1,127 @@
+﻿.toast_container {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    width: 300px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: #fff;
+    z-index: 1000;
+    animation: slideInFromRight 0.5s ease-in-out;
+}
+
+.toast_icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 18px;
+    color: #fff;
+}
+
+    .toast_icon.error {
+        background-color: #f44336;
+    }
+
+    .toast_icon.info {
+        background-color: #2196f3;
+    }
+
+    .toast_icon.success {
+        background-color: #4caf50;
+    }
+
+    .toast_icon.warn {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+.toast_info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.toast_title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+}
+
+.toast_description {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.toast_close {
+    margin-left: auto;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: url('close-icon.svg') no-repeat center center;
+    background-size: cover;
+}
+
+.toast_progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background-color: rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+    .toast_progress::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(76, 175, 80, 0.8); /* Green for success */
+        animation: progressBar linear forwards;
+    }
+
+    .toast_progress.red::after {
+        background-color: #f44336; /* Red for error */
+    }
+
+    .toast_progress.blue::after {
+        background-color: #2196f3; /* Blue for info */
+    }
+
+    .toast_progress.yellow::after {
+        background-color: #ffc107; /* Yellow for warning */
+    }
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes progressBar {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}

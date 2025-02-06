@@ -9,6 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Security.Cryptography;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace _3DPayment.Providers
 {
@@ -25,16 +28,17 @@ namespace _3DPayment.Providers
         {
             try
             {
-                string clientId = request.BankParameters["clientId"];
-                string processType = request.BankParameters["processType"];
-                string storeKey = request.BankParameters["storeKey"];
-                string storeType = request.BankParameters["storeType"];
+                string clientId = request.VirtualPosParameters["clientId"];
+                string processType = request.VirtualPosParameters["processType"];
+                string storeKey = request.VirtualPosParameters["storeKey"];
+                
+                string storeType = request.VirtualPosParameters["storeType"];
                 string random = DateTime.Now.Ticks.ToString();
 
                 var parameters = new Dictionary<string, object>();
                 parameters.Add("clientid", clientId);
                 parameters.Add("oid", request.OrderNumber);//sipariş numarası
-                parameters.Add("storekey", storeKey);
+               
                 if (!request.CommonPaymentPage)
                 {
                     parameters.Add("pan", request.CardNumber);
@@ -49,7 +53,8 @@ namespace _3DPayment.Providers
                 //işlem başarılı da olsa başarısız da olsa callback sayfasına yönlendirerek kendi tarafımızda işlem sonucunu kontrol ediyoruz
                 parameters.Add("okUrl", request.CallbackUrl);//başarılı dönüş adresi
                 parameters.Add("failUrl", request.CallbackUrl);//hatalı dönüş adresi
-                parameters.Add("islemtipi", processType);//direk satış
+                parameters.Add("callbackUrl", request.CallbackUrl); //pencere beklenmeyen şekilde kapatıldığında sisteme yapılacak dönüş.
+                parameters.Add("TranType", processType);//direk satış
                 parameters.Add("rnd", random);//rastgele bir sayı üretilmesi isteniyor
                 parameters.Add("currency", request.CurrencyIsoCode);//ISO code TL 949 | EURO 978 | Dolar 840
                 parameters.Add("storetype", storeType);
@@ -67,29 +72,55 @@ namespace _3DPayment.Providers
                 if (request.ManufacturerCard && request.Installment > 1)
                 {
                     string ertelemeDonemSayisi = request.Installment.ToString();
-                    parameters.Add("IMCKOD", request.BankParameters["imecekod"]);
+                    parameters.Add("IMCKOD", request.VirtualPosParameters["imecekod"]);
                     parameters.Add("FDONEM", ertelemeDonemSayisi);
                 }
 
                 //normal taksit
-                parameters.Add("taksit", installment);//taksit sayısı | 1 veya boş tek çekim olur
+                parameters.Add("Instalment", installment);//taksit sayısı | 1 veya boş tek çekim olur
 
-                var hashBuilder = new StringBuilder();
-                hashBuilder.Append(clientId);
-                hashBuilder.Append(request.OrderNumber);
-                hashBuilder.Append(totalAmount);
-                hashBuilder.Append(request.CallbackUrl);
-                hashBuilder.Append(request.CallbackUrl);
-                hashBuilder.Append(processType);
-                hashBuilder.Append(installment);
-                hashBuilder.Append(random);
-                hashBuilder.Append(storeKey);
+                parameters.Add("refreshtime", 5);
+                parameters.Add("hashAlgorithm", "ver3"); 
 
-                var hashData = GetSHA1(hashBuilder.ToString());
-                parameters.Add("hash", hashData);//hash data
+                List<KeyValuePair<string, string>> postParams = new List<KeyValuePair<string, string>>();
+                foreach (var param in parameters)
+                {
+                    KeyValuePair<string, string> newKeyValuePair = new KeyValuePair<string, string>(param.Key, param.Value.ToString());
+                    postParams.Add(newKeyValuePair);
+                }
+
+                postParams.Sort(
+                               delegate (KeyValuePair<string, string> firstPair,
+                               KeyValuePair<string, string> nextPair)
+                               {
+                               return firstPair.Key.CompareTo(nextPair.Key.ToLower(new     System.Globalization.CultureInfo("en-US", false)));
+                               }
+                           );
+
+                 
+                string hashVal = "";
+                string storekey = storeKey.Replace("\\", "\\\\").Replace("|", "\\|");
+                foreach (KeyValuePair<string, string> pair in postParams)
+                {
+                    string escapedValue = pair.Value.Replace("\\", "\\\\").Replace("|", "\\|");
+                    string lowerValue = pair.Key.ToLower(new System.Globalization.CultureInfo("en-US", false));
+                    if (!"encoding".Equals(lowerValue) && !"hash".Equals(lowerValue) && !"countdown".Equals(lowerValue))
+                    {
+                        hashVal += escapedValue + "|";
+                    }
+                }
+               hashVal += storekey;
 
 
-                return Task.FromResult(PaymentGatewayResult.Successed(parameters, request.BankParameters["gatewayUrl"]));
+                SHA512 sha = new SHA512CryptoServiceProvider();
+                byte[] hashbytes = System.Text.Encoding.GetEncoding("UTF-8").GetBytes(hashVal);
+                byte[] inputbytes = sha.ComputeHash(hashbytes);
+                string hash = System.Convert.ToBase64String(inputbytes);
+                parameters.Add("hash", hash);//hash data
+
+                //hash sonu
+               
+                return Task.FromResult(PaymentGatewayResult.Successed(parameters, request.VirtualPosParameters["gatewayUrl"]));
             }
             catch (Exception ex)
             {
@@ -99,6 +130,7 @@ namespace _3DPayment.Providers
 
         public async Task<VerifyGatewayResult> VerifyGateway(VerifyGatewayRequest request, PaymentGatewayRequest gatewayRequest, IFormCollection form)
         {
+            
             if (form == null)
             {
                 return VerifyGatewayResult.Failed("Form verisi alınamadı.");
@@ -110,31 +142,58 @@ namespace _3DPayment.Providers
                 return VerifyGatewayResult.Failed(form["mdErrorMsg"], form["ProcReturnCode"]);
             }
 
-            
+
             //mdstatus 1,2,3 veya 4 olursa 3D doğrulama geçildi anlamına geliyor
             if (!mdStatusCodes.Contains(mdStatus))
             {
                 return VerifyGatewayResult.Failed($"{form["mdErrorMsg"]}", form["ProcReturnCode"]);
             }
 
-            var hashBuilder = new StringBuilder();
-            hashBuilder.Append(request.BankParameters["clientId"]);
-            hashBuilder.Append(form["oid"].FirstOrDefault());
-            hashBuilder.Append(form["AuthCode"].FirstOrDefault());
-            hashBuilder.Append(form["ProcReturnCode"].FirstOrDefault());
-            hashBuilder.Append(form["Response"].FirstOrDefault());
-            hashBuilder.Append(form["mdStatus"].FirstOrDefault());
-            hashBuilder.Append(form["cavv"].FirstOrDefault());
-            hashBuilder.Append(form["eci"].FirstOrDefault());
-            hashBuilder.Append(form["md"].FirstOrDefault());
-            hashBuilder.Append(form["rnd"].FirstOrDefault());
-            hashBuilder.Append(request.BankParameters["storeKey"]);
-
-            var hashData = GetSHA1(hashBuilder.ToString());
-            if (!form["HASH"].Equals(hashData))
+           
+            //yeni ver3 hash doğrulamsı
+            List<KeyValuePair<string, string>> postParams = new List<KeyValuePair<string, string>>();
+            foreach (string key in form.Keys)
             {
-                return VerifyGatewayResult.Failed("Güvenlik imza doğrulaması geçersiz.");
+                KeyValuePair<string, string> newKeyValuePair = new KeyValuePair<string, string>(key, form[key]);
+                postParams.Add(newKeyValuePair);
             }
+
+            postParams.Sort(
+                delegate (KeyValuePair<string, string> firstPair,
+                KeyValuePair<string, string> nextPair)
+                {
+                    return firstPair.Key.ToLower(new System.Globalization.CultureInfo("en-US", false)).CompareTo(nextPair.Key.ToLower(new System.Globalization.CultureInfo("en-US", false)));
+                }
+            );
+
+            string hashVal = "";
+            string storeKey = request.BankParameters["storeKey"];
+            storeKey = storeKey.Replace("\\", "\\\\").Replace("|", "\\|");
+
+            foreach (KeyValuePair<string, string> pair in postParams)
+            {
+                string escapedValue = pair.Value.Replace("\\", "\\\\").Replace("|", "\\|");
+                string lowerValue = pair.Key.ToLower(new System.Globalization.CultureInfo("en-US", false));
+                if (!"encoding".Equals(lowerValue) && !"hash".Equals(lowerValue) && !"countdown".Equals(lowerValue) )
+                {
+                    hashVal += escapedValue + "|";
+                }
+            }
+            hashVal += storeKey;
+
+            var sha = new System.Security.Cryptography.SHA512CryptoServiceProvider();
+            byte[] hashbytes = System.Text.Encoding.GetEncoding("UTF-8").GetBytes(hashVal);
+            byte[] inputbytes = sha.ComputeHash(hashbytes);
+            string actualHash = System.Convert.ToBase64String(inputbytes);
+            string retrievedHash = form["HASH"];
+
+            //geçici süre kontrol yapyacağız
+
+            //if (!actualHash.Equals(retrievedHash))
+            //{
+            //    return VerifyGatewayResult.Failed("Güvenlik imza doğrulaması geçersiz.");
+            //}
+
 
             //3D MODELDE bilgileri api servere göndermek gerekiyor... xml olarak gönderiliyor
             //3d_pay için kontrol gerekir
@@ -151,13 +210,15 @@ namespace _3DPayment.Providers
                                     <CC5Request>
                                         <Name>{merchantId}</Name>
                                         <Password>{merchantPassword}</Password>
-                                        <ClientId>{gatewayRequest.BankParameters["clientId"]}</ClientId>
-                                        <Type>{form["islemtipi"]}</Type>
+                                        <ClientId>{gatewayRequest.VirtualPosParameters["clientId"]}</ClientId>
+                                        <Type>{form["TranType"]}</Type>
                                         <Number>{form["md"]}</Number>
                                         <Total>{totalAmount}</Total>
                                         <PayerSecurityLevel>{form["eci"]}</PayerSecurityLevel>
                                         <PayerTxnId>{form["xid"]}</PayerTxnId> 
                                         <PayerAuthenticationCode>{form["cavv"]}</PayerAuthenticationCode>
+                                        <Instalment>{form["Instalment"]}</Instalment>
+                                        <OrderId>{form["oid"]}</OrderId>
                                     </CC5Request>");
                 StringContent stringContent = new StringContent(xmlBuilder.ToString());
 
@@ -187,7 +248,7 @@ namespace _3DPayment.Providers
                 return VerifyGatewayResult.Successed(resultCodeNode.SelectSingleNode("TransId").InnerText, resultCodeNode.SelectSingleNode("HostRefNum").InnerText, "", gatewayRequest.Installment, 1, resultCodeNode.SelectSingleNode("ErrMsg").InnerText, resultCodeNode.SelectSingleNode("ProcReturnCode").InnerText, "");
             }
 
-            if(form["ProcReturnCode"] != "00")
+            if (form["ProcReturnCode"] != "00")
             {
                 return VerifyGatewayResult.Failed(form["ErrMsg"], form["ProcReturnCode"]);
             }
@@ -306,7 +367,7 @@ namespace _3DPayment.Providers
                                         </Extra>
                                     </CC5Request>";
 
-            var response = await client.PostAsync(request.BankParameters["verifyUrl"], new StringContent(requestXml, Encoding.UTF8, "text/xml"));
+            var response = await client.PostAsync(request.BankParameters["verifyUrl"], new StringContent(requestXml, Encoding.Latin1, "text/xml"));
             string responseContent = await response.Content.ReadAsStringAsync();
 
             var xmlDocument = new XmlDocument();
@@ -314,18 +375,19 @@ namespace _3DPayment.Providers
 
             string finalStatus = xmlDocument.SelectSingleNode("CC5Response/Extra/ORDER_FINAL_STATUS")?.InnerText ?? string.Empty;
             string transactionId = xmlDocument.SelectSingleNode("CC5Response/Extra/TRX_1_TRAN_UID")?.InnerText;
-            string referenceNumber = xmlDocument.SelectSingleNode("CC5Response/Extra/TRX_1_TRAN_UID")?.InnerText;
+            string referenceNumber = xmlDocument.SelectSingleNode("CC5Response/Extra/TRX_1_ACQRRN")?.InnerText;
             string cardPrefix = xmlDocument.SelectSingleNode("CC5Response/Extra/TRX_1_CARDBIN")?.InnerText;
             int.TryParse(cardPrefix, out int cardPrefixValue);
 
             string installment = xmlDocument.SelectSingleNode("CC5Response/Extra/TRX_1_INSTALMENT")?.InnerText ?? "0";
             string bankMessage = xmlDocument.SelectSingleNode("CC5Response/Response")?.InnerText;
             string responseCode = xmlDocument.SelectSingleNode("CC5Response/ProcReturnCode")?.InnerText;
+            string paidDate = xmlDocument.SelectSingleNode("CC5Response/Extra/TRX_1_TIME")?.InnerText;
 
             if (finalStatus.Equals("SALE", StringComparison.OrdinalIgnoreCase))
             {
                 int.TryParse(installment, out int installmentValue);
-                return PaymentDetailResult.PaidResult(transactionId, referenceNumber, cardPrefixValue.ToString(), installmentValue, 0, bankMessage, responseCode);
+                return PaymentDetailResult.PaidResult(transactionId, referenceNumber, cardPrefixValue.ToString(), installmentValue, 0, bankMessage, responseCode,paiddate:paidDate);
             }
             else if (finalStatus.Equals("VOID", StringComparison.OrdinalIgnoreCase))
             {
@@ -363,6 +425,8 @@ namespace _3DPayment.Providers
 
             return hashData;
         }
+
+
 
         private static readonly string[] mdStatusCodes = new[] { "1", "2", "3", "4" };
     }

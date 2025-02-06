@@ -1,39 +1,25 @@
-﻿@using Entity;
+﻿@using CoreUI.Components.DataGrid
+@using Entity
 @inject NavigationManager navManager
 <div class="container">
-    <DataGrid @ref="dataGridRef"
-              TItem="VirtualPos"
-              Data="@virtualPosList"
-              Editable
-              Responsive
-              ShowPager
-              CommandMode="DataGridCommandMode.ButtonRow"
-              SelectedRowChanged="ItemSelected">
-
-        <DataGridColumns>
-            <DataGridCommandColumn />
-            <DataGridColumn Field="@nameof(VirtualPos.Name)" Caption="Banka Adı" Sortable="true" />
-            <DataGridColumn Field="@nameof(VirtualPos.AccountCode)" Caption="Muhasebe Kodu" />
-
-        </DataGridColumns>
-        <ButtonRowTemplate>
-
-            <Button Color="Blazorise.Color.Success" Clicked="@(()=>navManager.NavigateTo("/virtualposcard"))">Yeni</Button>
-            <Button Color="Blazorise.Color.Primary" Disabled="selectVirtualPos==null" Clicked="@(()=>navManager.NavigateTo($"/virtualposcard/{selectVirtualPos.Id}"))">Değiştir</Button>
-            @* <Button Color="Blazorise.Color.Danger" Clicked="deletePos">Sil</Button>*@
-
-
-        </ButtonRowTemplate>
-    </DataGrid>
-
+  
+            <DataGrid TItem="VirtualPos"
+                      Items="virtualPosList"
+                      SelectedItemChanged="ItemSelected">
+                <Columns>
+                    <Column TItem="VirtualPos" Caption="Banka Adı" Field="@nameof(VirtualPos.Name)" />
+                </Columns>
+                <ButtonRowTemplate>
+                    <button type="button" class="btn btn-success" onclick="@(()=>navManager.NavigateTo("/virtualposcard"))">Ekle</button>
+                    <button type="button" class="btn btn-primary" disabled="@(selectVirtualPos == null ?true:false)" onclick="@(()=>navManager.NavigateTo($"/virtualposcard/{selectVirtualPos.Id}"))">Değiştir</button>
+                </ButtonRowTemplate>
+            </DataGrid>
+   
 </div>
-
-
 @code {
-    [Parameter] public DataGrid<VirtualPos> dataGridRef { get; set; }
-    [Parameter] public List<VirtualPos> virtualPosList { get; set; }
-    [Parameter] public VirtualPos selectVirtualPos { get; set; }
+    [Parameter] public List<VirtualPos> virtualPosList { get; set; } = default!;
     [Parameter] public EventCallback<VirtualPos> OnChanged { get; set; }
+    [Parameter] public VirtualPos selectVirtualPos { get; set; } = default!;
     private async Task ItemSelected(VirtualPos selectedItem)
     {
         selectVirtualPos = selectedItem;

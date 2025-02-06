@@ -1,0 +1,248 @@
+﻿@page "/virtualposcard"
+@page "/virtualposcard/{id:guid}"
+
+@using B2C.Data
+@using Business.Abstract
+@using Business.Concrete
+@using CoreUI.Components.Confirm
+@using CoreUI.Components.DataGrid
+@using CoreUI.Components.Modal
+@using CoreUI.Components.NotificationService
+@using CoreUI.Components.SelectList
+@inject IBankCardService bankCardService
+@inject ICardBrandService brandCradService
+@inject IVirtualPosService virtualPosService
+@inject IVirtualPosParameterService virtualPosParameterService;
+@inject NavigationManager navManager
+@inject IUserIdentityProcessor userIdentity
+@inject NotificationService notification
+<div class="container">
+    <div class="row">
+    <div class="col-6">
+        <div class="col-4">
+            <label>Sanal Pos Adı</label>
+        </div>
+        <div class="col-8">
+            <input class="form-control" id="sanalpos" @bind-value="virtualPos.Name" />
+        </div>
+        <div class="col-4">
+            <label>Banka Adı</label>
+        </div>
+        <div class="col-8">
+            <SelectList TItem="BankCard" Items="bankCardList" DisplayField="Name" ValueField="Id" @bind-Selected="ParamValueBank"></SelectList>
+        </div>
+        <div class="col-4">
+            <label>Üyesi Olduğu Kart Sistemi Adı</label>
+        </div>
+        <div class="col-8">
+            <SelectList TItem="CardBrand" Items="brandCardList" DisplayField="Name" ValueField="Id" @bind-Selected="ParamValueBrand"></SelectList>
+        </div>
+        <div class="col-4">
+            <label>Muhasebe Kodu</label>
+        </div>
+        <div class="col-8">
+            <input class="form-control" id="sanalmuhasebekodu" @bind-value="virtualPos.AccountCode" />
+        </div>
+        <div class="col-8">
+            <label>Kendi Kartlarında Tek Çekim  </label>
+        </div>
+        <div class="col-4">
+            <input type="checkbox" checked="@virtualPos.SinglePayment" @oninput="CheckboxChanged" />
+        </div>
+        <div class="col-4">
+        </div>
+        <div class="col-8 py-3">
+            <button class="btn btn-danger"  style="width:130px;" onclick="@Delete">Sil</button>
+            <button class="btn btn-primary" style="width:130px;" onclick="@Save">Kaydet</button>
+        </div>
+    </div>
+    <div class="col-6">
+            <DataGrid TItem="VirtualPosParameter" Items="virtualPos.VirtualPosParameters" @bind-SelectedItem="virtualPosParameter" @attributes="Attributes">
+            <Columns>
+                <Column Caption="Adı" Field="@nameof(VirtualPosParameter.Key)" />
+                <Column Caption="Değer" Field="@nameof(VirtualPosParameter.Value)" />
+            </Columns>
+            <ButtonRowTemplate>
+                    <button class="btn btn-success" style="width:130px;" onclick="@AddParameter">Ekle</button>
+                    <button class="btn btn-primary" style="width:130px;" onclick="@ChangeParameter">Değiştir</button>
+                    <button class="btn btn-danger" style="width:130px;" onclick="@DeleteParameter">Sil</button>
+            </ButtonRowTemplate>
+        </DataGrid>
+    </div>
+    </div>
+    <Modal @ref="modal" Title="Parametre Giriş">
+        <BodyTeplate>
+            <label for="key">Key</label>
+            <input class="form-control" id ="key" type="text" @bind-value="virtualPosParameter.Key" />
+            <label for="value">Value</label>
+            <input class="form-control" id="value" type="text" @bind-value="virtualPosParameter.Value"/>
+        </BodyTeplate>
+    </Modal>
+</div>
+<Confirm @ref="confirm" />
+@code {
+    private Confirm? confirm;
+    private Modal? modal;
+    private VirtualPos virtualPos { get; set; } = new();
+    private List<BankCard> bankCardList { get; set; } = default!;
+    private List<CardBrand> brandCardList { get; set; } = default!;
+    private bool Disabled;
+    private VirtualPosParameter virtualPosParameter { get; set; } = default!;
+
+
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public Guid id { get; set; }
+
+    protected async override void OnInitialized()
+    {
+        if(id != Guid.Empty)
+        {
+            virtualPos = await virtualPosService.GetVirtualPosAsync(id);
+
+        }
+        bankCardList = await bankCardService.GetAllBank();
+        brandCardList = await brandCradService.GetCardBrand();
+        Disabled = true;
+    }
+
+    private object ParamValueBrand
+    {
+        get
+        {
+            return virtualPos.CardBrandId;
+        }
+        set
+        {
+            if(Guid.TryParse(value.ToString(),out Guid cardbrandid))
+                virtualPos.CardBrandId = cardbrandid;
+        }
+
+    }
+
+    private object ParamValueBank
+    {
+        get
+        {
+            return virtualPos.BankCardId;
+        }
+        set
+        {
+            if (Guid.TryParse(value.ToString(), out Guid bankid))
+                virtualPos.BankCardId = bankid;
+        }
+
+    }
+
+    private void CheckboxChanged(ChangeEventArgs e)
+    {
+        virtualPos.SinglePayment = Convert.ToBoolean(e.Value);
+    }
+
+    private async void AddParameter()
+    {
+        virtualPosParameter = new()
+            {
+               VirtualPosId = virtualPos.Id,
+               CreateUser = await userIdentity.GetCurrentUserId(),
+               CreateDate = DateTime.Now,
+                UpdateUser = await userIdentity.GetCurrentUserId(),
+               UpdateDate = DateTime.Now,
+            };
+        if (modal != null && await modal.ShowAsync())
+        {
+            await virtualPosParameterService.CreateBankParameter(virtualPosParameter);
+            StateHasChanged();
+        }
+    }
+
+    private async void DeleteParameter()
+    {
+        if (virtualPosParameter != null)
+        {
+            var onay = await confirm.ShowAsync("Silme Onay", $"{virtualPosParameter.Key} Kayıt Silinecektir Onaylıyor musunuz.");
+            if (onay)
+            {
+                await virtualPosParameterService.DeleteBankParameter(virtualPosParameter);
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async void ChangeParameter()
+    {
+        if (modal != null && await modal.ShowAsync())
+        {
+            var onay = await confirm.ShowAsync("Değişirme Onay", $"{virtualPosParameter.Key} Kayıt Değiştirilecektir Onaylıyor musunuz.");
+            if (onay)
+            {
+                await virtualPosParameterService.UpdateBankParameter(virtualPosParameter);
+            }
+            StateHasChanged();
+
+        }
+    }
+    private async void Save()
+    {
+        if (virtualPos.Id == Guid.Empty)
+        {
+            virtualPos.CreateUser = await userIdentity.GetCurrentUserId();
+            virtualPos.UpdateUser = await userIdentity.GetCurrentUserId();
+            virtualPos.CreateDate = DateTime.Now;
+            virtualPos.UpdateDate = DateTime.Now;
+            virtualPos.Id = Guid.NewGuid();
+            await virtualPosService.CreateVirtualPos(virtualPos);
+
+            navManager.NavigateTo("/virtualpos");
+        }
+        else
+        {
+            var onay = await confirm.ShowAsync("Değiştirme Onayı", $"{virtualPos.Name} Kayıt Değiştilecektir Onaylıyor musunuz.");
+            if (onay)
+            {
+                virtualPos.UpdateDate = DateTime.Now;
+                virtualPos.UpdateUser = await userIdentity.GetCurrentUserId();
+
+                await virtualPosService.UpdateVirtualPos(virtualPos);
+                navManager.NavigateTo("/virtualpos");
+            }
+
+        }
+    }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> Attributes { get; set; } 
+
+    private void ChangeAttributes()
+    {
+        // Attributes üzerinde değişiklik yap
+        var modifiedAttributes = Attributes != null
+          ? new Dictionary<string, object>(Attributes) // Eğer Attributes null değilse, kopyala
+          : new Dictionary<string, object>(); // Eğer null ise, yeni boş bir dictionary oluştur
+        modifiedAttributes["class"] = "table shadow";
+
+        // Yeni attributes ile UI'yı güncelle
+        Attributes = modifiedAttributes;
+
+        StateHasChanged(); // UI'yı yenile
+    }
+
+    private async void Delete()
+    {
+        if (virtualPos.VirtualPosParameters.Count > 0)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Parametreleri Olan Kart Silinemez.", Duration = 5000 });
+            return;
+        }
+        var onay = await confirm.ShowAsync("Silme Onay", $"{virtualPos.Name} Kayıt Silinecektir Onaylıyor musunuz.");
+        if (onay)
+        {
+            if (virtualPos != null)
+            {
+                await virtualPosService.DeleteVirtualPos(virtualPos);
+                navManager.NavigateTo("/virtualpos");
+            }
+        }
+
+    }
+}

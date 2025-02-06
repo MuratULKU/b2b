@@ -1,46 +1,204 @@
 ﻿@page "/success/{guid}"
+@using Microsoft.AspNetCore.Components.Rendering
 @using Business.Abstract;
+@using Business.Concrete;
 @using DataAccess.Abstract;
 @using Entity;
 @using System.Text;
+@using SendEMail
+
 @attribute [Authorize]
-@inject IPaymentRepository paymentTransaction;
-@inject IFirmParamService firmParam;
-@((MarkupString)htmlstring);
+@inject IPaymentService paymentManager
+@inject IFirmParamService firmParam
+@inject IOrderService orderService
+@inject IUserIdentityProcessor userIdentity
+@inject IUserService userService
+@inject IJSRuntime JSRuntime
+
+
+ @((MarkupString)GenerateEmailContent())
+
+ <input type="button" class="btn btn-primary" onclick="@Print" value="Yazdır" />
+ <input type="button" class="btn btn-primary" value="Ana Sayfa" />
+ <input type="button" class="btn btn-primary" value="Ödeme Sayfası" />
 @code {
     [Parameter]
     public string guid { get; set; }
     string htmlstring;
-    PaymentTransaction paymet;
-    protected override void OnInitialized()
+    PaymentTransaction payment;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    protected async override void OnInitialized()
     {
-        base.OnInitialized();
-        paymet = paymentTransaction.GetByOrderNumber(Guid.Parse(guid));
-        if (paymet == null)
+        payment = paymentManager.GetByOrderNumber(Guid.Parse(guid)).Result.Data;
+        if (payment == null)
             throw new Exception("Hatalı Sipariş Nuraması");
         var param = firmParam.Get(1);
-        var builder = new StringBuilder();
-        using (var reader = System.IO.File.OpenText("Template/KKTahsilat.cshtml"))
-        {
-            builder.Append(reader.ReadToEnd());
-        }
-        builder.Replace("islemturu", "Mail Order Kredi Kartı Tahsilatı");
-        builder.Replace("firmaunvani", firmParam.ToString(1));
-        builder.Replace("islemno", paymet.ReferenceNumber);
-        builder.Replace("tarih", paymet.PaidDate.ToString());
-        builder.Replace("carikod", "");
-        builder.Replace("total", paymet.TotalAmount.ToString());
-        builder.Replace("yaziiletutar", NUmbertoString(paymet.TotalAmount));
-        builder.Replace("kkno", paymet.MaskedCardNumber);
-        builder.Replace("aciklama", paymet.CardHolderName);
-        builder.Replace("taksit", paymet.Installment.ToString());
-        builder.Replace("bankaadi", paymet.BankCard.Name);
-        htmlstring = builder.ToString();
+
+
+
+        // OrdFiche ordFiche = orderService.GetFiche(payment.OrderNumber);
+        // if (ordFiche != null)
+        // {
+        //     ordFiche.Send = true;
+        //     ordFiche.Explanation = ordFiche.Explanation ?? string.Empty; //null giderse api hata veriyor
+        //     // orderService.UpdateBasket(ordFiche);
+        // }
+         // EMailSender es = new EMailSender(firmParam);
+         // await es.SendEmailAsync(firmParam.ToString(7), "Kredi Kartı Tahsilat Maili", GenerateEmailContent());
+         // if (firmParam.ToString(7) != userService.User.Email)
+         //     await es.SendEmailAsync(userService.User.Email, "Kredi Kartı Tahsilat Maili",GenerateEmailContent());
+
     }
 
-    
+    private string GenerateEmailContent()
+    {
+        return $@"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <style>
+            /* CSS Document */
+            #cerceve {{
+                display: block;
+                height: 800px;
+                width: 900px;
+                margin-right: auto;
+                margin-left: auto;
+                padding: 0px;
+                overflow: hidden;
+            }}
 
-    private string NUmbertoString(decimal tutar)
+            .text-bold {{
+                font-weight: bold;
+            }}
+
+            .baslik td {{
+                padding: 15px;
+                text-align: center;
+                font-weight: bold;
+                border: 1px solid black;
+            }}
+
+            .table tr td {{
+                text-align: left;
+            }}
+
+            .table td {{
+                padding: 5px;
+            }}
+
+            .line td {{
+                padding: 5px;
+                border-bottom: 1px solid black;
+            }}
+        </style>
+        <script type='text/javascript'>
+            function Print() {{
+                window.print();
+            }}
+        </script>
+    </head>
+    <body>
+        <div id='cerceve'>
+            <img src='./media/logo.png' height='80' alt=''>
+            <table style='width:100%;'>
+                <tr class='baslik'>
+                    <td colspan='3'>islemturu</td>
+                </tr>
+                <tr>
+                    <td>İşlem No</td>
+                    <td> : </td>
+                    <td>{payment.TransactionNumber}</td>
+                </tr>
+ <tr>
+                    <td>Referans No No</td>
+                    <td> : </td>
+                    <td>{payment.ReferenceNumber}</td>
+                </tr>
+                <tr>
+                    <td>Cari Ünvanı</td>
+                    <td> : </td>
+                    <td>{firmParam.ToString(1)}</td>
+                </tr>
+                <tr>
+                    <td>Tarih</td>
+                    <td> : </td>
+                    <td>{payment.PaidDate}</td>
+                </tr>
+                <tr>
+                    <td>Cari Kod</td>
+                    <td> : </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Cari Ünvan</td>
+                    <td> : </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Açıklama</td>
+                    <td> : </td>
+                    <td>{payment.Explanation}</td>
+                </tr>
+                <tr class='line'>
+                    <td colspan='3'></td>
+                </tr>
+                <tr>
+                    <td>Ad Soyad</td>
+                    <td> : </td>
+                    <td>{payment.CardHolderName}</td>
+                </tr>
+                <tr>
+                    <td>Kredi Kartı No</td>
+                    <td> : </td>
+                    <td>{payment.MaskedCardNumber}</td>
+                </tr>
+                <tr>
+                    <td>Banka Adı</td>
+                    <td> : </td>
+                    <td>{payment.VirtualPos.BankCard.Name}</td>
+                </tr>
+                <tr>
+                    <td>Tutar</td>
+                    <td> : </td>
+                    <td>
+                        <span class=''>{payment.TotalAmount} TL</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Taksit</td>
+                    <td> : </td>
+                    <td>
+                        <span class=''>{payment.Installment}</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Yalnız</td>
+                    <td> : </td>
+                    <td>{NumbertoString(payment.TotalAmount)}</td>
+                </tr>
+                <tr class='line'>
+                    <td colspan='3'></td>
+                </tr>
+            </table>
+            <div style='display: block;'></div>
+        </div>
+    </body>
+    </html>";
+    }
+
+
+    private async void Print()
+    {
+        // JavaScript ile yazdırma işlemi başlatma
+         await JSRuntime.InvokeVoidAsync("window.print");
+    }
+
+
+    private string NumbertoString(decimal tutar)
     {
         string sTutar = tutar.ToString("F2").Replace('.', ',');
         string lira = sTutar.Substring(0, sTutar.IndexOf(','));

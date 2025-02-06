@@ -1,0 +1,139 @@
+﻿@page "/clientextre"
+@using B2B.Components.Login;
+@using Business.Concrete;
+@using Entity;
+@using Newtonsoft.Json.Linq;
+@using SanalMagazaWebApiUI.Models;
+@attribute [Authorize]
+@inject UserManager _userManager
+<div class="container">
+    <div>
+        <div style="display:flex;">
+            <div style="display:flex;">
+                <label style="margin:auto;margin-right:20px;">İlk Tarih</label>
+                <DateEdit Style="width:150px;" @bind-Date="startDate"/>
+            </div>
+            <div style="display:flex;margin-right:20px;margin-left: 50px;">
+                <label style ="margin:auto;margin-right:20px;">Son Tarih</label>
+                <DateEdit  Style="width:150px;" @bind-Date="endDate"/>
+            </div>
+            <div>
+                <button class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit" onclick="@OnParametersSet">Sorgula</button>
+            </div>
+        </div>
+        @if (ClientExtreList != null)
+        {
+            <DataGrid TItem="Entity.ClientFiche"
+                      Data="ClientExtreList.Lines"
+                      DetailRowStartsVisible="false"
+                            ShowPager
+                      PageSize="pageSize"
+                      TotalItems="ClientExtreList.TotalCount"
+                      ReadData="@OnReadData">
+                <DataGridColumns>
+                    <DataGridColumn Field="@nameof(Entity.ClientFiche.Date)" Caption="Tarih">
+                        <DisplayTemplate>
+                            @(context.Date.ToString("dd/MM/yyyy"))
+                        </DisplayTemplate>
+                    </DataGridColumn>
+                    <DataGridColumn Field="@nameof(Entity.ClientFiche.TrString)" Caption="İşlem" />
+                    <DataGridColumn Field="@nameof(Entity.ClientFiche.Debit)" Caption="Borç" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                    <DataGridColumn Field="@nameof(Entity.ClientFiche.Credit)" Caption="Alcak" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                    <DataGridColumn Field="@nameof(Entity.ClientFiche.Balance)" Caption="Bakiye" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                    <DataGridColumn Field="@nameof(Entity.ClientFiche.LineExp)" Caption="Açıklama" />
+
+
+                </DataGridColumns>
+              
+                
+                <DetailRowTemplate>
+                    @{
+                        var detail = (context as ClientFiche).GetInvoice;
+                        if (context.GetInvoice != null && context.GetInvoice.Count >= 1)
+                        {
+                            <DataGrid TItem="Entity.Invoice"
+                            Data="detail">
+                                <DataGridAggregates>
+                                    <DataGridAggregate Field="@nameof(Entity.OrderLine.Vat)" Aggregate="DataGridAggregateType.None" Context="detail">
+                                        <DisplayTemplate>
+                                            <label style="font-weight: bold;">@(
+                                        $"Toplam"
+                                        )</label>
+                                        </DisplayTemplate>
+                                    </DataGridAggregate>
+                                    <DataGridAggregate Field="@nameof(Invoice.VatAmnt)" Aggregate="DataGridAggregateType.Sum" DisplayFormat="{0:N2}" />
+                                    <DataGridAggregate Field="@nameof(Invoice.Total)" Aggregate="DataGridAggregateType.Sum" DisplayFormat="{0:N2}" />
+
+                                </DataGridAggregates>
+                                <DataGridColumns>
+                                    <DataGridColumn Field="@nameof(Invoice.StockCode)" Caption="Stok Kodu" />
+                                    <DataGridColumn Field="@nameof(Invoice.StockName)" Caption="StokAdı" />
+                                    <DataGridColumn Field="@nameof(Invoice.Amount)" Caption="Miktar" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                                    <DataGridColumn Field="@nameof(Invoice.UnitName)" Caption="Birim" />
+                                    <DataGridColumn Field="@nameof(Invoice.Price)" Caption="Fiyat" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                                    <DataGridColumn Field="@nameof(Invoice.Vat)" Caption="Vergi" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                                    <DataGridColumn Field="@nameof(Invoice.VatAmnt)" Caption="Vergi Tutarı" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                                    <DataGridColumn Field="@nameof(Invoice.Total)" Caption="Tutar" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                                </DataGridColumns>
+                            </DataGrid>
+                        }
+                    }
+                </DetailRowTemplate>
+            </DataGrid>
+        }
+        else
+        {
+            <label>@message</label>
+        }
+    </div>
+</div>
+@code {
+    private ListPage<ClientFiche> ClientExtreList { get; set; }
+    private string message = "Cari Ekstresi Sunucudan Alınıyor.";
+    private DateTime startDate = DateTime.Now.AddMonths(-1).Date;
+    private DateTime endDate = DateTime.Now;
+    private int pageSize = 10;
+    HttpClient httpClient = new HttpClient();
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    private async Task OnReadData(DataGridReadDataEventArgs<ClientFiche> e)
+    {
+        _userManager.UserManagerAsync(authenticationState.Result.User);
+        HttpResponseMessage jsondata = await httpClient.GetAsync($"/api/Client/GetExtre?id={_userManager.User.AccountCode}&startDate={startDate.ToString("MM.dd.yyyy")}&endDate={endDate.ToString("MM.dd.yyyy")}&currentPage={e.Page}&pageSize={pageSize}");
+        if (jsondata.IsSuccessStatusCode)
+        {
+            ClientExtreList = jsondata.Content.ReadFromJsonAsync<ListPage<ClientFiche>>().Result;
+
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+
+        using StreamReader openStream = new StreamReader("appsettings.json");
+        string json = openStream.ReadToEnd();
+        dynamic appsetting = JObject.Parse(json);
+        httpClient.BaseAddress = appsetting.ApiService.Url;
+    }
+    protected async override void OnParametersSet()
+    {
+        try
+        {
+            _userManager.UserManagerAsync(authenticationState.Result.User);
+            HttpResponseMessage jsondata = await httpClient.GetAsync($"/api/Client/GetExtre?id={_userManager.User.AccountCode}&startDate={startDate.ToString("MM.dd.yyyy")}&endDate={endDate.ToString("MM.dd.yyyy")}&currentPage=1&pageSize={pageSize}");
+            if (jsondata.IsSuccessStatusCode)
+            {
+                ClientExtreList = jsondata.Content.ReadFromJsonAsync<ListPage<ClientFiche>>().Result;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Sununu Cevap Vermedi Hata Hodu\n {ex.Message}";
+            StateHasChanged();
+        }
+
+    }
+
+}

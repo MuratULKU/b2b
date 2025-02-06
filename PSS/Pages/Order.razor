@@ -1,0 +1,105 @@
+﻿@page "/order"
+@using Business.Abstract
+@using CoreUI.Components.TabControl
+@using CoreUI.Components.DataGrid
+@using Entity
+
+
+@inject IOrderService orderService
+@inject IClientCardService clientCardService
+@inject NavigationManager navManager
+<div class="container">
+    <div class="offer">
+        <input class="btn btn-primary" type="button" value="Yeni Sipariş" onclick="@(()=>NewOrderButtonClick())" />
+        <DataGrid TItem="OrdFiche" Items="ordFiches" @bind-SelectedItem="ordFiche" TotalCount="dataGridTotalCount"
+                  Pager SelectedPageChange="@SelectedPageChange" RowCount="pageCount" RowsPerPage="RowCountChange">
+            <Columns>
+                <Column Caption="Tarih" Field="@nameof(OrdFiche.Date_)" />
+                <Column Caption="Müşteri Kodu">
+                    <CellTemplate>
+                        @context.Item.ClientCode
+                    </CellTemplate>
+                </Column>
+                <Column Caption="Müşteri Unvan">
+                    <CellTemplate>
+                        @clientCardService.GetByCode(@context.Item.ClientCode).Result.Name
+                    </CellTemplate>
+                </Column>
+                <Column Caption="Dokuman Kodu" Field="@nameof(OrdFiche.Docode)" />
+                <Column Caption="Fiş No" Field="@nameof(OrdFiche.FicheNo)" />
+                <Column Caption="Toplam" TextAlign="TextAlignmet.Right">
+                    <CellTemplate>
+                        @context.Item.GrossTotal.ToString("N2")
+                    </CellTemplate>
+                </Column>
+                <Column Caption="Vergi" TextAlign="TextAlignmet.Right">
+                    <CellTemplate>
+                        @context.Item.TotalVat.ToString("N2")
+                    </CellTemplate>
+                </Column>
+                <Column Caption="Genel Toplam" TextAlign="TextAlignmet.Right">
+                    <CellTemplate>
+                        @context.Item.Total.ToString("N2")
+                    </CellTemplate>
+                </Column>
+                <Column Caption="Onay">
+                    <CellTemplate>
+                        @(context.Item.Send == 1 ? "Onaylandı" : "Onaylanmadı")
+                    </CellTemplate>
+                </Column>
+            </Columns>
+            <ButtonRowTemplate>
+                <input class="btn btn-primary" value="Değiştir" disabled="@(ordFiche == null ? true:false)" onclick="@ChangeOrdFiche" />
+                <input class="btn btn-primary" value="Onay" disabled="@(ordFiche == null ? true:false)" onclick="@OrderOK" />
+
+            </ButtonRowTemplate>
+
+        </DataGrid>
+    </div>
+    <div class=""></div>
+</div>
+
+@code {
+
+    List<OrdFiche> ordFiches { get; set; }
+    OrdFiche ordFiche { get; set; }
+    int dataGridTotalCount;
+    int pageCount = 20;
+
+    private void NewOrderButtonClick()
+    {
+        navManager.NavigateTo("/OrderDetail", true);
+
+    }
+    private async void RowCountChange(int e)
+    {
+        pageCount = e;
+        ordFiches = await orderService.GetOrderFiche(2, 0, pageCount);
+    }
+
+    private void OrderOK()
+    {
+        ordFiche.Send = 1;
+        orderService.Save(ordFiche);
+
+    }
+
+    private void ChangeOrdFiche()
+    {
+        navManager.NavigateTo($"/OrderDetail/{ordFiche.Id}", true);
+    }
+
+    private async void SelectedPageChange(int value)
+    {
+        ordFiches = await orderService.GetOrderFiche(2, value, pageCount);
+        StateHasChanged();
+    }
+
+    protected async override void OnInitialized()
+    {
+        dataGridTotalCount = await orderService.GetOrderFicheCount(2);
+        ordFiches = await orderService.GetOrderFiche(2, 0, pageCount);
+    }
+
+
+}

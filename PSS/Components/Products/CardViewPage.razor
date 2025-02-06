@@ -1,0 +1,23 @@
+﻿@using CoreUI.Components.Base
+@using Entity
+@inherits UlkuComponentBase
+@typeparam TItem where TItem : Product
+<style>
+    .row{
+        justify-content:center;
+    }
+</style>
+
+<div class="row">
+    @foreach (var item in Data!)
+    {
+        <ProductCard TItem="Product" Data="item" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public IEnumerable<TItem> Data { get; set; } = default!;
+
+   
+}

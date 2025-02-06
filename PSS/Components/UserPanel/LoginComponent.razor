@@ -1,0 +1,93 @@
+﻿@using Business.Concrete
+
+@using CoreUI.Components.NotificationService
+
+@attribute [Authorize]
+@inject UserManager userManager
+@inject NavigationManager navManager
+@inject NotificationService notification
+@inject AuthenticationStateProvider authStateProvider
+<AuthorizeView>
+    <Authorized>
+        <div class="nav-item dropdown menu-text">
+            <a class="nav-link dropdown-toggle userpanel" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="oi oi-account-login" aria-hidden="true" style="padding-right:5px;" />
+               @*  @userManager.User.Username *@
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" onclick="@exitClick"><span class="oi oi-account-logout" aria-hidden="true" style="padding-right:5px;" />Çıkış</a>
+                <a class="dropdown-item" onclick="@buttonClick"><span class="oi oi-key" aria-hidden="true" style="padding-right:5px;" />Şifre Değiştir</a>
+                <a class="dropdown-item" onclick="@userProfil"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Profil</a>
+            </div>
+        </div>
+    </Authorized>
+   
+    <NotAuthorized>
+        <div class="nav-item px-3 menu-text" style="display:flex;flex-direction:row;" >
+            <NavLink class="nav-link" onclick="@(()=>navManager.NavigateTo("/login"))">
+                <span class="oi oi-login" aria-hidden="true">Giriş</span>
+            </NavLink>
+            <NavLink class="nav-link" onclick="@(()=>navManager.NavigateTo("/register"))">
+                <span class="oi oi-aseprite" aria-hidden="true">Kayıt</span>
+            </NavLink>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+<AuthorizeView Roles="Admin">
+    <div class="nav-item dropdown menu-text">
+        <a class="nav-link dropdown-toggle userpanel" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="oi oi-account-login" aria-hidden="true" style="padding-right:5px;" />
+            Yönetim
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/firmparam"))"><span class="oi oi-account-logout" aria-hidden="true" style="padding-right:5px;" />Firma Parametreleri</a>
+            <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/userlist"))"><span class="oi oi-key" aria-hidden="true" style="padding-right:5px;" />Kullanıcı İşlemleri</a>
+            <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/virtualpos"))"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Banka İşlemleri</a>
+        </div>
+    </div>
+</AuthorizeView>
+
+
+
+@code {
+    private class Model
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string Password2 { get; set; }
+    }
+
+    private Model model = new Model();
+    private bool show;
+    private void buttonClick()
+    {
+        show = true ? show == false : show == true;
+    }
+    private void entryClick()
+    {
+        if (model.Password != null && model.Password != string.Empty && model.Password == model.Password2)
+        {
+            // userManager.User.Password = model.Password;
+            // userManager.UpdateUser(userManager.User);
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Başarılı", Detail = "Şifreniz Değiştirildi.", Duration = 2000 });
+        }
+        notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Hata", Detail = "Şifreleri Farklı Girilmiş", Duration = 2000 });
+    }
+
+    private void ClickCancel()
+    {
+        show = false;
+    }
+
+    private async void exitClick()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        navManager.NavigateTo("/", true);
+    }
+
+    private void userProfil()
+    {
+        // navManager.NavigateTo($"/user/{userManager.User.Id}");
+    }
+}

@@ -1,0 +1,113 @@
+﻿@page "/login"
+@page "/login/{returnUrl}"
+@using B2B.Data;
+@using Business.Abstract;
+@using Business.Concrete;
+@using Entity;
+
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navManager
+@inject IJSRuntime js
+@inject IUserService userRepository
+@inject IUserRoleService userRoleRepository
+@inject UserManager _userManager
+@inject ILogger<UserSession> _logger
+<body>
+
+    <div class="card">
+        <div class="card-header">
+            Kullanıcı Girişi
+        </div>
+        <form method="post" onsubmit="@entryClick" onkeypres="@OnKeyPress">
+           
+            <div class="card-body form-control">
+                <div class="row">
+                    <div style="color:red; text-align:center">
+                        @((MarkupString)mymarkup)
+                    </div>
+                    <div class="col-25">
+                        <label for="UserName">Kullanıcı Adı</label>
+                    </div>
+                    <div class="col-75">
+                        <input name="UserName" @bind="model.Username" />
+                    </div>
+                    
+                </div>
+                <div class="row">
+                    <div class="col-25">
+                        <label for="Password">Kullanıcı Şifresi</label>
+                    </div>
+                    <div class="col-75">
+                        <input type="password" name="Password" @bind="model.Password" />
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer">
+                <div class="container-fluid">
+                    <input @ref="submitButton" type="submit" class="btn btn-primary" style="min-width:200px;" value="Giriş"/>
+                </div>
+            </div>
+        
+        </form>
+    </div>
+</body>
+
+
+@code {
+    private ElementReference submitButton;
+    private string? mymarkup;
+    private Model model =new();
+    [Parameter]
+    public string? returnUrl { get; set; }
+    private class Model
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private async void OnKeyPress(KeyboardEventArgs e)
+    {
+        if(e.Key == "Enter")
+        {
+            await submitButton.FocusAsync();
+            entryClick();
+        }
+    }
+
+    private async void entryClick()
+    {
+        await Authenticate();
+    }
+    private async Task Authenticate()
+    {
+        mymarkup = "";
+        Entity.User user = userRepository.GetUser(model.Username, model.Password).Result;
+        if (user == null)
+        {
+            mymarkup = "Hatalı Kullanıcı veya Şifre";
+            _logger.LogCritical($"Hatalı Kullanıcı Adı Denemesi Kulalnıcı Adı {model.Username}");
+            return;
+        }
+        else
+        {
+            List<UserRole> role =  userRoleRepository.GetAll(user.Id).Result.Data;
+            string[] roles = new string[role.Count];
+            for (int i = 0; i < role.Count; i++)
+            {
+                roles[i] = role[i].Role.RoleName;
+            }
+            var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+            await customAuthStateProvider.UpdateAuthenticationState(new UserSession
+            {
+                UserName = user.Username,
+                Role = roles,
+                UserId = user.Id
+            });
+            _logger.LogInformation($"Kullanıcı Girişi Başarılı {user.Username}");
+            navManager.NavigateTo($"/{returnUrl}", true);
+        }
+    }
+
+
+}

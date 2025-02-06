@@ -1,0 +1,70 @@
+﻿@page "/bank"
+@using Business.Abstract;
+@using Entity;
+@attribute [Authorize(Roles = "Admin")]
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <DataGrid @ref="dataGridRef"
+                      TItem="BankCard"
+                      Data="@bankCardList"
+                      @bind-SelectedRow="selectBankCard"
+                      Editable
+                      Responsive
+                      ShowPager
+                      CommandMode="DataGridCommandMode.ButtonRow"
+                      PageSize="10">
+
+                <DataGridColumns>
+                    <DataGridCommandColumn />
+
+                    <DataGridColumn Field="@nameof(BankCard.BankCode)" Caption="Banka Kodu" Sortable="true" />
+                    <DataGridColumn Field="@nameof(BankCard.Name)" Caption="Banka Adı" Sortable="true" />
+
+                </DataGridColumns>
+                <EmptyTemplate>
+                    <div class="box">
+                        Bankaların Listesi Alınamadı.
+                    </div>
+                </EmptyTemplate>
+
+            </DataGrid>
+        </div>
+        <div class="col-6">
+            <BankCardPage TItem="BankCard" Data="@bankCard"/>
+        </div>
+    </div>
+    
+</div>
+@code {
+    [Inject]
+    IBankCardService bankCardService { get; set; }
+
+    private List<BankCard> bankCardList;
+    private DataGrid<BankCard> dataGridRef;
+    private BankCard bankCard { get; set; }
+
+    private BankCard selectBankCard
+    {
+        get
+        {
+            if (bankCard == null)
+            {
+                bankCard = new BankCard();
+            }
+            return bankCard;
+        }
+        set
+        {
+            bankCard = value;
+        }
+    }
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        bankCardList =await bankCardService.GetAllBank();
+
+        
+    }
+}

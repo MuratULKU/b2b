@@ -1,0 +1,202 @@
+﻿@page "/user"
+@page "/user/{id:guid}"
+
+
+@using Business.Abstract;
+@using Business.Concrete;
+
+@using Core.Abstract
+@using CoreUI.Components.NotificationService
+@using CoreUI.Components.SelectList
+@using Entity;
+@attribute [Authorize(Roles = "Admin,User")]
+@inject IUserService userReposiyory
+@inject IRoleService roleRepository
+@inject IUserRoleService userRoleRepository
+@inject IUserIdentityProcessor userIdentity
+@inject NavigationManager navManager
+@inject NotificationService notification
+<div class="container">
+    <div class="row">
+        <div class="col-7 usercard">
+            <div class="col-5">
+                <label>Kullanıcı Adı</label>
+            </div>
+            <div class="col-7">
+                <input class="form-control" @bind-value="user.Username" />
+            </div>
+            <div class="col-5">
+                <label>Kullanıcı Maili</label>
+            </div>
+            <div class="col-7">
+                <input class="form-control" @bind-value="user.Email" />
+            </div>
+            <div class="col-5">
+                <label>Kullanıcı Şifresi</label>
+            </div>
+            <div class="col-7">
+                <input class="form-control" @bind-value="user.Password" />
+            </div>
+            <div class="col-5">
+                <label>Muhasebe Programı Cari Hesap Kodu</label>
+            </div>
+            <div class="col-7">
+                <input class="form-control" @bind-value="user.AccountCode" />
+            </div>
+            <div class="col-5">
+                <label>Firma Ünvanı</label>
+            </div>
+            <div class="col-7">
+                <input class="form-control" @bind-value="user.AccountName" />
+            </div>
+            <AuthorizeView Roles="Admin">
+                <div class="col-5">
+                    <label>Kullanıcı Rolü</label>
+                </div>
+                <div class="col-7">
+                    <SelectList TItem="Role" Items="userRole" Selected="@selectedRole.ToString()" DisplayField="RoleName" ValueField="Id" SelectedChanged="(e)=>selectedRole = new Guid(e.ToString())" />
+                </div>
+                <div class="col-5">
+                    <label>İskonto Oranı</label>
+                </div>
+                <div class="col-7">
+                    <input type="number" class="form-control" @bind-value="user.Discount" />
+                </div>
+            </AuthorizeView>
+        </div>
+        <div class="col-5">
+            <div>
+                <SelectList Items="userRole" DisplayField="RoleName" ValueField="Id" SelectedChanged="(e)=>selectedRole = new Guid(e.ToString())"></SelectList>
+                <button class="btn-primary" @onclick="()=>Addrole(selectedRole)">Yekti Ver</button>
+            </div>
+            <div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Bölün Adı</th>
+                            <th>Operasyon</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (user.UsersRoles != null)
+                        {
+                            @foreach (var item in user.UsersRoles)
+                            {
+                                <tr>
+                                    <td>@item.Role.RoleName</td>
+                                    <td><button class="btn-danger" value="@item.Id" @onclick="()=>DeleteRole(item.Id)">Sil</button></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+        </div>
+    </div>
+    <div class="col-5 my-3"></div>
+    <div class="col-7 align-items-center">
+        <button class="btn btn-danger" style="width:180px;" @onclick="Back">Kullanıcı Listesi</button>
+        <button class="btn btn-primary" style="width:130px;" @onclick="Save">Kaydet</button>
+    </div>
+</div>
+@code {
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public Guid id { get; set; }
+    private User user;
+    private Guid selectedRole;
+    private List<Role> userRole;
+    private Role SelectedUserRole;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    private async void Addrole(Guid RoleId)
+    {
+        UserRole userRole1 = new UserRole();
+        userRole1.Id = Guid.NewGuid();
+        userRole1.RoleId = RoleId;
+        userRole1.UserId = user.Id;
+        userRoleRepository.AddRole(userRole1);
+        user = await userReposiyory.GetUser(await userIdentity.GetCurrentUserId());
+        StateHasChanged();
+    }
+
+    private async void DeleteRole(Guid userRoleId)
+    {
+        var userRole = await userRoleRepository.GetUserRole(userRoleId);
+        if (userRole != null)
+            userRoleRepository.DeleteRole(userRole);
+        user = null;
+        var result = await userReposiyory.GetUser(id);
+       
+    }
+
+    protected async override void OnInitialized()
+    {
+        // userReposiyory.UserManagerAsync(authenticationState.Result.User);
+        user = await userReposiyory.GetUser(id);
+        userRole = roleRepository.GetAllRole().Result.Data;
+
+
+        if (id == Guid.Empty)
+            selectedRole = userRole.FirstOrDefault().Id;
+        else
+            selectedRole = user.UsersRoles.FirstOrDefault().Role.Id;
+
+            navManager.NavigateTo($"/user/{user.Id}");
+        
+
+
+    }
+
+    private async void Save()
+    {
+        if (id == Guid.Empty)
+        {
+            user.Id = Guid.NewGuid();
+            user.CreateDate = DateTime.Now;
+            user.UpdateDate = DateTime.Now;
+            user.CreateUser = user.Id;
+            user.UpdateUser = user.Id;
+            UserRole userRole = new();
+            userRole.RoleId = selectedRole;
+            userRole.UserId = user.Id;
+            userReposiyory.AddUser(user);
+            var result = await userRoleRepository.AddRole(userRole);
+            if(result.Status == ResultStatus.Success)
+            {
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+            }
+            else
+            {
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = result.Message, Duration = 5000 });
+            }
+        }
+        else
+        {
+            user.UpdateDate = DateTime.Now;
+            user.UpdateUser = user.Id;
+            userReposiyory.UpdateUser(user);
+            UserRole userrole = user.UsersRoles.FirstOrDefault();
+            userrole.RoleId = selectedRole;
+            var result = await userRoleRepository.UpdateRole(userrole);
+            if (result.Status == ResultStatus.Success)
+            {
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+            }
+            else
+            {
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = result.Message, Duration = 5000 });
+            }
+        }
+
+        navManager.NavigateTo("/userlist");
+    }
+    private void Back()
+    {
+        navManager.NavigateTo("/userlist");
+    }
+}

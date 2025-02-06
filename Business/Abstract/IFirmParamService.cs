@@ -1,4 +1,5 @@
-﻿using Entity;
+﻿using Core.Abstract;
+using Entity;
 
 using System;
 using System.Collections.Generic;
@@ -10,13 +11,13 @@ namespace Business.Abstract
 {
     public interface IFirmParamService
     {
-        List<FirmParam> GetAll();
-        object Get(int No);
+        Task<List<FirmParam>> GetAll();
+        Task<FirmParam> Get(int No);
         string ToString(int no);
         bool ToBoolean(int no);
         int ToInteger(int no);
-        FirmParam Create(FirmParam firmParam);
-        FirmParam Update(FirmParam firmParam);
-        FirmParam Delete(FirmParam firmParam);
+        Task<IResult> Create(FirmParam firmParam);
+        Task<IResult> Update(FirmParam firmParam);
+        Task<IResult> Delete(FirmParam firmParam);
     }
 }

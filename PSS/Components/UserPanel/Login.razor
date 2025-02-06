@@ -1,0 +1,122 @@
+﻿@page "/login"
+@page "/login/{returnUrl}"
+@using Business.Concrete
+@using Entity
+@using PSS.Data
+
+@inject ILogger<Login> _logger;
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navManager
+@inject UserManager _userManager
+@inject UserRoleManager _userRoleManager
+
+<style>
+    .header {
+        margin-top: 10px;
+    }
+
+    .footer {
+        margin-top: 20px;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 14px;
+    }
+</style>
+
+<form method="post" onsubmit="@entryClick" onkeypres="@OnKeyPress">
+    <div class="content-center">
+        <div class="card shadow" style="max-width:500px">
+            <div class="header content-center">
+                <label>Kullanıcı Girişi</label>
+                @if (!string.IsNullOrEmpty(mymarkup))
+                {
+                    <div class="error-message">@mymarkup</div>
+                }
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="form-input" style="width:500px; min-width:250px;">
+                        <div class="entryarea">
+                            <input type="text" required @bind="model.Username" name="UserName" />
+                            <div class="labelline">Mail Adresinizi Girin</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-input" style="width:500px; min-width:250px;">
+                        <div class="entryarea">
+                            <input type="password" required @bind="model.Password" name="Password" />
+                            <div class="labelline">Şifre</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-center footer">
+                    <input type="submit" class="btn btn-success" style="min-width:50px;" value="Giriş" />
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@code {
+    private ElementReference submitButton;
+    private string? mymarkup;
+    private Model model = new();
+
+    [Parameter]
+    public string? returnUrl { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+
+
+    private class Model
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private async Task OnKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await submitButton.FocusAsync();
+            await entryClick();
+        }
+    }
+
+    private async Task entryClick()
+    {
+        await Authenticate();
+    }
+
+    private async Task Authenticate()
+    {
+        mymarkup = null; // Clear any previous error message
+        Entity.User user = await _userManager.GetUser(model.Username, model.Password);
+        if (user == null)
+        {
+            mymarkup = "Hatalı Kullanıcı veya Şifre";
+            _logger.LogCritical($"Failed login attempt for user {model.Username}");
+            return;
+        }
+
+        List<UserRole> roles = _userRoleManager.GetAll(user.Id).Result;
+        string[] roleNames = roles.Select(r => r.Role.RoleName).ToArray();
+
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(new UserSession
+            {
+                UserName = user.Username,
+                Role = roleNames,
+                UserId = user.Id
+            });
+
+        _logger.LogInformation($"User {user.Username} logged in successfully");
+
+
+        navManager.NavigateTo($"/{returnUrl ?? ""}", true);
+    }
+}

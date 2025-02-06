@@ -1,0 +1,130 @@
+﻿@page "/paymentreportadmin"
+@using B2B.Components.Login;
+@using Business.Abstract;
+@using Business.Concrete;
+
+@using Entity;
+@using Newtonsoft.Json.Linq;
+@using _3DPayment.Request;
+@using _3DPayment;
+
+@inject NotificationService notification
+@inject IBankCardService bankCardService
+@inject IPaymentProviderFactory _paymentProviderFactory;
+@inject IPaymentService paymentRepository
+@attribute [Authorize]
+<div class="container">
+    <div>
+        <div style="display:flex;">
+            <div style="display:flex;">
+                <label style="margin:auto;margin-right:20px;">İlk Tarih</label>
+                <DateEdit Style="width:150px;" @bind-Date="startDate" />
+            </div>
+            <div style="display:flex;margin-right:20px;margin-left: 50px;">
+                <label style="margin:auto;margin-right:20px;">Son Tarih</label>
+                <DateEdit Style="width:150px;" @bind-Date="endDate" />
+            </div>
+            <div>
+                <button class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit" onclick="@OnParametersSet">Sorgula</button>
+            </div>
+        </div>
+
+        <DataGrid TItem="PaymentTransaction"
+                  Data="paymentTransactionList"
+                        Responsive
+                        Resizable
+                  ResizeMode="TableResizeMode.Columns"
+        @bind-SelectedRow="SelectedPaymentTrans"
+                        ShowPager PageSize="10">
+
+            <DataGridColumns>
+                <DataGridCommandColumn />
+                <DataGridColumn Field="@nameof(PaymentTransaction.CreateDate)" Caption="Tarih" Width="100px" />
+                <DataGridColumn Caption="Kullanıcı" Width="100px">
+                    <DisplayTemplate>
+                        @(context.User.Username)
+                    </DisplayTemplate>
+                </DataGridColumn>
+                <DataGridColumn Caption="Banka Adı" Width="100px">
+                    <DisplayTemplate>
+                        @(context.BankCard.Name)
+                    </DisplayTemplate>
+                </DataGridColumn>
+                <DataGridColumn Field="@nameof(PaymentTransaction.MaskedCardNumber)" Caption="Kredi Kartı No" Width="150px" />
+                <DataGridColumn Field="@nameof(PaymentTransaction.CardHolderName)" Caption="Ad Soyad" Width="150px" />
+                <DataGridColumn Field="@nameof(PaymentTransaction.Installment)" Caption="Taksit" Width="50px" />
+                <DataGridColumn Field="@nameof(PaymentTransaction.TotalAmount)" Caption="Tutar" Width="75px" />
+                <DataGridColumn Field="@nameof(PaymentTransaction.BankErrorMessage)" Caption="Hata Mesajı" Width="100px" />
+                <DataGridColumn Field="@nameof(PaymentTransaction.Status)" Caption="Durum" Width="50px" />
+                <DataGridColumn Field="@nameof(PaymentTransaction.Explanation)" Caption="Açıklama" Width="150px" />
+            </DataGridColumns>
+            <ButtonRowTemplate>
+                <Button Color="Blazorise.Color.Success" Clicked="checkKK" Disabled="(SelectedPaymentTrans is null)">KK Doğrulama</Button>
+            </ButtonRowTemplate>
+        </DataGrid>
+    </div>
+</div>
+@code {
+
+    private List<PaymentTransaction> paymentTransactionList;
+    private DateTime startDate = DateTime.Now.AddMonths(-1).Date;
+    private DateTime endDate = DateTime.Now;
+
+    private PaymentTransaction SelectedPaymentTrans;
+    protected override void OnParametersSet()
+    {
+        paymentTransactionList = paymentRepository.GetFull(startDate, endDate).Result.Data;
+    }
+
+    private async void checkKK()
+    {
+        
+        try
+        {
+            //dynamic requestdata = JArray.Parse("["+SelectedPaymentTrans.BankRequest+"]");
+            //string cardNumber = requestdata[0].CardNumber;
+            PaymentDetailRequest paymentDetail = new PaymentDetailRequest();
+            //paymentDetail.CardNumber = cardNumber;
+            paymentDetail.CurrencyIsoCode = "949"; // sistemden çekilecek
+            paymentDetail.Amount = SelectedPaymentTrans.TotalAmount;
+            paymentDetail.TransactionId = SelectedPaymentTrans.TransactionNumber;
+            paymentDetail.OrderNumber = SelectedPaymentTrans.OrderNumber.ToString();
+            System.Collections.Generic.List<BankParameter> bankParameters = bankCardService.GetBankParameters(SelectedPaymentTrans.BankCardId).Result.Data;
+            paymentDetail.BankParameters = bankParameters.ToDictionary(key => key.Key, value => value.Value);
+            paymentDetail.BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), SelectedPaymentTrans.BankCard.SystemName);
+            IPaymentProvider provider = _paymentProviderFactory.Create(paymentDetail.BankName);
+
+            var result = await provider.PaymentDetailRequest(paymentDetail);
+
+
+            if (result.Paid)
+            {
+                SelectedPaymentTrans.Status = PaymentStatus.Paid;
+                SelectedPaymentTrans.PaidDate = result.PaidDate;
+                //garanti banaksından kredi kartı numarası dönmüyor.
+                if (result.CardNumber != null && result.CardNumber != string.Empty)
+                    SelectedPaymentTrans.MaskedCardNumber = result.CardNumber;
+                SelectedPaymentTrans.BankErrorMessage = result.BankMessage;
+                paymentRepository.Update(SelectedPaymentTrans);
+            }
+            else if (!result.Failed)
+            {
+                SelectedPaymentTrans.Status = PaymentStatus.Failed;
+                SelectedPaymentTrans.BankErrorMessage = result.ErrorMessage;
+                paymentRepository.Update(SelectedPaymentTrans);
+            }
+            else if (result.Failed)
+            {
+                //şidilik bir şey yazmayalım
+            }
+        }
+        catch (Exception ex)
+        {
+            
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message, Duration = 5000 });
+            
+        }
+        
+       
+    }
+}

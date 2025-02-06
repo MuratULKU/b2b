@@ -1,0 +1,134 @@
+﻿@using B2B.Components.Login
+@using B2B.Data;
+@using Business.Abstract;
+@using Business.Concrete;
+@using DataAccess.Abstract;
+@attribute [Authorize]
+@inject IJSRuntime js
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navManager
+@inject IUserRoleRepository userRoleRepository
+@inject IUserRepository userRepository
+@inject UserManager _userManager
+@inject NotificationService _notification
+<div class="popup" style="z-index:1;">
+    <AuthorizeView>
+        <Authorized>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle userpanel" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="oi oi-account-login" aria-hidden="true" style="padding-right:5px;" />
+                    @_userManager.User.Username
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class="dropdown-item" onclick="@exitClick"><span class="oi oi-account-logout" aria-hidden="true" style="padding-right:5px;" />Çıkış</a>
+                    <a class="dropdown-item" onclick="@buttonClick"><span class="oi oi-key" aria-hidden="true" style="padding-right:5px;" />Şifre Değiştir</a>
+                    <a class="dropdown-item" onclick="@userProfil"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Profil</a>
+                </div>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            @*<div class="nav-item px-3">
+            <NavLink class="nav-link text-white" onclick="@buttonClick">
+            <span class="oi oi-account-login" aria-hidden="true"></span> Login
+            </NavLink>
+            </div>*@
+        </NotAuthorized>
+    </AuthorizeView>
+
+    @if (show)
+    {
+        <div class="card">
+            <div class="card-header">
+                Şifre Değiştir
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="@ClickCancel">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row my-1">
+                    <div class="col-5">
+                        <span>Yeni Şifre</span>
+                    </div>
+                    <div class="col-4">
+                        <input type="password" name="UserName" @bind="model.Password" />
+                    </div>
+                </div>
+                <div class="row my-1">
+                    <div class="col-5">
+                        <span>Tekrar Şifre</span>
+                    </div>
+                    <div class="col-4">
+                        <input type="password" name="Password" @bind="model.Password2" />
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary" style="width:150px;" onclick="@entryClick">Tamam</button>
+            </div>
+        </div>
+
+    }
+</div>
+
+
+@code {
+
+    private class Model
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string Password2 { get; set; }
+    }
+
+    private Model model = new Model();
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected async override void OnInitialized()
+    {
+
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            if (authState.User != null)
+            {
+                if (authState.User.Identity.IsAuthenticated)
+                    _userManager.UserManagerAsync(authState.User);
+            }
+        }
+    }
+   
+    private bool show;
+    private void buttonClick()
+    {
+        show = true ? show == false : show == true;
+    }
+    private void entryClick()
+    {
+        if (model.Password != null && model.Password != string.Empty && model.Password == model.Password2)
+        {
+            _userManager.User.Password = model.Password;
+            userRepository.UpdateUser(_userManager.User);
+            _notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Başarılı", Detail = "Şifreniz Değiştirildi.", Duration = 2000 });
+        }
+        _notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Hata", Detail = "Şifreleri Farklı Girilmiş", Duration = 2000 });
+    }
+
+    private void ClickCancel()
+    {
+        show = false;
+    }
+   
+    private async void exitClick()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        navManager.NavigateTo("/", true);
+    }
+
+    private void userProfil()
+    {
+        navManager.NavigateTo($"/user/{_userManager.User.Id}");
+    }
+}

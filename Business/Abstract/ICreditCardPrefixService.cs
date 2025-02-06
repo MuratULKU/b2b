@@ -1,20 +1,17 @@
-﻿using Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Core.Abstract;
+using Entity;
+
 
 namespace Business.Abstract
 {
     public interface ICreditCardPrefixService
     {
-        List<CreditCardPrefix> GetAll();
-        CreditCardPrefix Get(Guid id);
-        List<CreditCardPrefix> GetBankList(int BankCode);
-        CreditCardPrefix GetByPrefix(string prefix);
-        CreditCardPrefix Create(CreditCardPrefix creditCardPrefix);
-        CreditCardPrefix Update(CreditCardPrefix creditCardPrefix);
-        CreditCardPrefix Delete(CreditCardPrefix creditCardPrefix);
+        Task<IList<CreditCardPrefix>> GetAll();
+        Task<CreditCardPrefix> Get(Guid id);
+        Task<List<CreditCardPrefix>> GetBankList(Guid BankId);
+        Task<CreditCardPrefix> GetByPrefix(string prefix);
+        Task<IResult> Create(CreditCardPrefix creditCardPrefix);
+        Task<IResult> Update(CreditCardPrefix creditCardPrefix);
+        Task<IResult> Delete(CreditCardPrefix creditCardPrefix);
     }
 }

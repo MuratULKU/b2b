@@ -1,0 +1,48 @@
+﻿@page "/Products"
+
+@using B2B.Data
+@using CoreUI.Components.Base
+@using CoreUI.Components.NotificationService
+@using CoreUI.Components.Pagenation
+@using Entity
+@inject CartService cartService
+@inject IUserIdentityProcessor userIdentity
+@inject NotificationService notification
+<div class="container">
+    <div class="findarea">
+        <form @onsubmit="SearchEnter">
+            <input class="findtext" type="text" placeholder="Arama" id="filter" name="filter" @bind-value="@Filter" />
+            <input type="hidden" id="category" name="category" value="@selectCategory" />
+            <button class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit">
+            </button>
+        </form>
+    </div>
+
+    <DataGridView TItem="Product" Data="pdata.Results" AddProduct="addproduct" />
+    <Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="pdata.PageSize" RowCount="pdata.RowCount" OnPageSizeChanged="pageSizeOnchanged" />
+</div>
+
+@code{
+
+    private void SearchEnter()
+    {
+        PagerPageChanged(0);
+    }
+
+    private async void addproduct(Product Data)
+    {
+        Guid UserId = await userIdentity.GetCurrentUserId();
+        if (Data != null &&  Data.PriceLists?.Count > 0 && Data.OrderAmount > 0 && UserId != Guid.Empty)
+        {
+            cartService.AddUserCart(Data, Data.PriceLists[0].Price, Data.OrderAmount, 0, UserId);
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "", Detail = "Sepete Eklendi.", Duration = 2000 });
+        }
+        else
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Ürün Bilgileri Hatalı", Duration = 2000 });
+        }
+
+    }
+   
+
+}

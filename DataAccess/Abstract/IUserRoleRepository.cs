@@ -1,13 +1,10 @@
-﻿using Entity;
+﻿using Core.Abstract;
+using Entity;
 
 namespace DataAccess.Abstract
 {
-    public interface IUserRoleRepository
+    public interface IUserRoleRepository:IRepository<UserRole>
     {
-        List<UserRole> GetAll(Guid UserId);
-        Task<UserRole> GetUserRole(Guid id);
-        UserRole AddRole(UserRole role);
-        UserRole UpdateRole(UserRole role);
-        UserRole DeleteRole(UserRole role);
+      
     }
 }

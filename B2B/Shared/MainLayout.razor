@@ -1,17 +1,21 @@
-﻿@using B2B.Components.NotificationService
+﻿@using CoreUI.Components.Modal
+@using CoreUI.Components.NotificationService
+
 @inherits LayoutComponentBase
 
-<PageTitle>B2B</PageTitle>
 
 <div class="page">
-   <div class="sidebar">
-        <NavMenu />
-    </div>
-    <MNotification></MNotification>
+
     <main>
+        <NavMenu />
+      
         <article class="content px-4">
-         
+            <MNotification />
             @Body
         </article>
     </main>
 </div>
+
+@code {
+
+}

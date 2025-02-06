@@ -1,0 +1,60 @@
+﻿@using Entity
+@typeparam TItem where TItem : BankCard
+<div class="row>">
+    <div class="col-12">
+        <Text class="center">Banka Kartları</Text>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <Text>Banka Kodu</Text>
+        </div>
+        <div class="col-6">
+            <input class="form-control" @bind-value="Data.BankCode" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <Text>Banka Adı</Text>
+        </div>
+        <div class="col-6">
+            <input class="form-control" @bind-value="Data.Name" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <Text>Sistem Adı</Text>
+        </div>
+        <div class="col-6">
+            <input class="form-control" @bind-value="Data.SystemName" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <Text>Logo Yolu</Text>
+        </div>
+        <div class="col-6">
+            <input class="form-control" @bind-value="Data.LogoPath" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <Text>Aktif mi</Text>
+        </div>
+        <div class="col-6">
+            <input class="form-control" @bind-value="Data.Active" />
+        </div>
+    </div>
+    <div class="row justify-content-end">
+        <div class="col-6"> </div>
+        <div class="col-6">
+            <button class="btn btn-success justify-content-end">Yeni</button>
+            <button class="btn btn-danger justify-content-end">Sil</button>
+            <button class="btn btn-primary justify-content-end">Kaydet</button>
+        </div>
+    </div>
+
+</div>
+@code {
+    [Parameter]
+    public TItem Data { get; set; } = default!;
+}

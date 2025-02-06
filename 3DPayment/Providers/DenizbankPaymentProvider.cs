@@ -25,10 +25,10 @@ namespace _3DPayment.Providers
         {
             try
             {
-                string shopCode = request.BankParameters["shopCode"];
-                string txnType = request.BankParameters["txnType"];
-                string storeKey = request.BankParameters["storeKey"];
-                string secureType = request.BankParameters["secureType"];
+                string shopCode = request.VirtualPosParameters["shopCode"];
+                string txnType = request.VirtualPosParameters["txnType"];
+                string storeKey = request.VirtualPosParameters["storeKey"];
+                string secureType = request.VirtualPosParameters["secureType"];
                 string random = DateTime.Now.ToString();
 
                 var parameters = new Dictionary<string, object>();
@@ -84,7 +84,7 @@ namespace _3DPayment.Providers
                 var hashData = GetSHA1(hashBuilder.ToString());
                 parameters.Add("Hash", hashData);//hash data
 
-                return Task.FromResult(PaymentGatewayResult.Successed(parameters, request.BankParameters["gatewayUrl"]));
+                return Task.FromResult(PaymentGatewayResult.Successed(parameters, request.VirtualPosParameters["gatewayUrl"]));
             }
             catch (Exception ex)
             {

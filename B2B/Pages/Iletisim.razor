@@ -1,5 +1,6 @@
 ﻿@page "/iletisim"
 @using Business.Abstract;
+@using CoreUI.Components.NotificationService
 @using SendEMail;
 @inject IFirmParamService firmParamService
 @inject NotificationService notification
@@ -19,7 +20,7 @@
                     @firmParamService.ToString(7)
                 </span>
 
-
+               
             </div>
 
             <div class="map">

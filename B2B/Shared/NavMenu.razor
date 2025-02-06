@@ -1,163 +1,131 @@
-﻿
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">B2B</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+﻿@using B2B.Components.UserPanel
+@using Entity
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navManager
+@inject IUserIdentityProcessor userIdentity
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%)">
+    <div class="container">
+        <a class="navbar-brand" href="#">B2B</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <B2B.Components.Login.LoginComponent />
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav" style="margin-right:auto !important">
+                <AuthorizeView Roles="Admin,Sales">
+                    <li class="nav-item">
+                        <a class="nav-link" href="products"><span class="oi oi-plus" aria-hidden="true" style="padding-right:5px;" />Ürünler</a>
+                    </li>
+                </AuthorizeView>
+              
+                <AuthorizeView Roles="Admin,Sales">
+                    <li class="nav-item">
+                        <a class="nav-link" href="cart"><span class="oi oi-cart" aria-hidden="true" style="padding-right:5px;" />Sepet</a>
+                    </li>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin,Payment">
+                    <li class="nav-item">
+                        <a class="nav-link" href="payment"><span class="oi oi-cart" aria-hidden="true" style="padding-right:5px;" />Ödeme</a>
+                    </li>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin,UserReport">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="oi oi-document" aria-hidden="true" style="padding-right:5px;" />
+                            Raporlar
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="report/1"><span class="oi oi-box" aria-hidden="true" style="padding-right:5px;" />Bekleyen Siparişler</a>
+                            <a class="dropdown-item" href="report/4"><span class="oi oi-briefcase" aria-hidden="true" style="padding-right:5px;" />Onaylı Siparişler</a>
+                            <a class="dropdown-item" href="clientextre"><span class="oi oi-document" aria-hidden="true" style="padding-right:5px;" />Cari Hesap Extresi</a>
+                            <a class="dropdown-item" onclick="@(()=>ccreport())"><span class="oi oi-credit-card" aria-hidden="true" style="padding-right:5px;" />Kredi Kartı Logları</a>
+                        </div>
+                    </li>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin,Bank">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="oi oi-list-rich" aria-hidden="true" style="padding-right:5px;" />
+                            Banka
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="bank"><span class="oi oi-home" aria-hidden="true" style="padding-right:5px;" />Banka Tanımları</a>
+                            <a class="dropdown-item" href="creditcard"><span class="oi oi-credit-card" aria-hidden="true" style="padding-right:5px;" />Kredi Kartı Tanımları</a>
+                            <a class="dropdown-item" href="virtualpos"><span class="oi oi-laptop" aria-hidden="true" style="padding-right:5px;" />Sanalpos Tanımları</a>
+                           
+                        </div>
+                    </li>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin,Managment">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="oi oi-wrench" aria-hidden="true" style="padding-right:5px;" />
+                            Yönetim
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="companylist"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Firma Tanımları</a>
+                            <a class="dropdown-item" href="userlist"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Kullanıcı Tanımları</a>
+                            <a class="dropdown-item" href="firmparam"><span class="oi oi-list" aria-hidden="true" style="padding-right:5px;" />Firma Parametreleri</a>
+                            <a class="dropdown-item" href="paymentreport"><span class="oi oi-credit-card" aria-hidden="true" style="padding-right:5px;" />Kredi Kartı Logları</a>
+                            <a class="dropdown-item" href="cartreport"><span class="oi oi-box" aria-hidden="true" style="padding-right:5px;" />Aktif Sepet Listesi</a>
+                        </div>
+                    </li>
+
+                </AuthorizeView>
+
+            </ul>
+
+            <ul class="navbar-nav" style="margin-right:auto !important">
+                <li class="nav-item">
+                    <a class="nav-link" href="iletisim"><span class="oi oi-envelope-closed" aria-hidden="true" style="padding-right:5px;" />İletişim</a>
+                </li>
+                <li class="nav-item">
+
+                    <AuthorizeView>
+                        <Authorized>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />
+                                    Profil
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <a class="dropdown-item" href="companylist"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Firma Bilgileri</a>
+                                    <a class="dropdown-item" href="userlist"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Kullanıcı Tanımları</a>
+                                    <a class="dropdown-item" href="firmparam"><span class="oi oi-list" aria-hidden="true" style="padding-right:5px;" />Yetkiler</a>
+                                    <a class="dropdown-item" onclick="@(()=>exitUser())"><span class="oi oi-credit-card" aria-hidden="true" style="padding-right:5px;" />Çıkış</a>
+                            
+                                </div>
+                            </li>
+                        </Authorized>
+                        <NotAuthorized>
+                            <a class="nav-link" href="login"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Giriş</a>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </li>
+            </ul>
+
+
+        </div>
     </div>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <AuthorizeView Roles="Admin, User">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="products">
-                    <span class="oi oi-plus" aria-hidden="true"></span> Ürünler
-                </NavLink>
-            </div>
-
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="payment">
-                    <span class="oi oi-credit-card" aria-hidden="true"></span> Ödeme
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="cart">
-                    <span class="oi oi-cart" aria-hidden="true"></span> Sepet
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.Third)">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Raporlar
-                </NavLink>
-                @if (navSubmenu == NavSubmenu.Third)
-                {
-                    <div class="menu" @onclick="ToggleNavMenu">
-                        <div class="px-3">
-                            <NavLink class="nav-link darkcolor" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="report/1">
-                                <span class="oi oi-plus" aria-hidden="true"></span> Bekleyen Siparişler
-                            </NavLink>
-                        </div>
-                        <div class="px-3">
-                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="report/4">
-                                <span class="oi oi-credit-card" aria-hidden="true"></span> Onaylı Siparişler
-                            </NavLink>
-                        </div>
-                        <div class="px-3">
-                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="clientextre">
-                                <span class="oi oi-credit-card" aria-hidden="true"></span>Cari Hesap Extresi
-                            </NavLink>
-                        </div>
-                        <div class="px-3">
-                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="virtualposparameter">
-                                <span class="oi oi-credit-card" aria-hidden="true"></span>Kredi Kartı Logları
-                            </NavLink>
-                        </div>
-                    </div>
-
-                }
-
-            </div>
-        </AuthorizeView>
-        <AuthorizeView Roles="Admin">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.First)">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Banka
-                </NavLink>
-                @if (navSubmenu == NavSubmenu.First)
-                {
-                    <div class="menu" @onclick="ToggleNavMenu">
-                        <div class="px-3">
-                            <NavLink class="nav-link darkcolor" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="bank">
-                                <span class="oi oi-plus" aria-hidden="true"></span> Banka Tanımları
-                            </NavLink>
-                        </div>
-                        <div class="px-3">
-                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="creditcard">
-                                <span class="oi oi-credit-card" aria-hidden="true"></span> Kredi Kartı Tanımları
-                            </NavLink>
-                        </div>
-                        <div class="px-3">
-                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="virtualpos">
-                                <span class="oi oi-credit-card" aria-hidden="true"></span>Sanal Pos Tanımları
-                            </NavLink>
-                        </div>
-                        <div class="px-3">
-                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="virtualposparameter">
-                                <span class="oi oi-credit-card" aria-hidden="true"></span>Sanal Parametre Tanımları
-                            </NavLink>
-                        </div>
-                    </div>
-                }
-
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.Second)">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Yönetim
-                </NavLink>
-                @if (navSubmenu == NavSubmenu.Second)
-                {
-                    <div class="menu">
-                        <div class="px-3">
-                            <NavLink class="nav-link darkcolor" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="userlist">
-                                <span class="oi oi-plus" aria-hidden="true"></span> Kullanıcı Tanımları
-                            </NavLink>
-                        </div>
-                        <div class="px-3">
-                            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="firmparam">
-                                <span class="oi oi-credit-card" aria-hidden="true"></span> Firma Parametreleri
-                            </NavLink>
-                        </div>
-
-                    </div>
-                }
-
-            </div>
-        </AuthorizeView>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="() => ToggleNavMenu(NavSubmenu.None)" href="iletisim">
-                <span class="oi oi-envelope-closed" aria-hidden="true"></span> İletişim
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
-@code {
-
-    private enum NavSubmenu
+</nav>
+@code
+{
+    private async void ccreport()
     {
-        None,
-        First,
-        Second,
-        Third
+        var userId = await userIdentity.GetCurrentUserId();
+        if(userId != Guid.Empty)
+        {
+            navManager.NavigateTo($"/paymentreport/{userId}",true);
+        }
+        else
+        {
+            navManager.NavigateTo("/paymentreport",true);
+        }
     }
 
-    private NavSubmenu navSubmenu = NavSubmenu.None;
-
-    private void ToggleNavMenu(NavSubmenu? submenu = null)
+    private async void exitUser()
     {
-        navSubmenu = submenu ?? navSubmenu;
-
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        navManager.NavigateTo("/", true);
     }
-
-
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-
-    }
-
-
 }

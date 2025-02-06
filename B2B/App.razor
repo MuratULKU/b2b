@@ -1,19 +1,21 @@
-﻿@inject NavigationManager NavigationManager
+﻿@using CoreUI.Components.Base
+
+@inject NavigationManager NavigationManager
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
-        
+
         <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(B2BLayout)">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
-                    <B2B.Components.Login.RedirectToLogin ReturnUrl="@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)" />
+                    <RedirectToLogin ReturnUrl="@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)" />
                 </NotAuthorized>
             </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
         <NotFound>
             <PageTitle>Not found</PageTitle>
-            <LayoutView Layout="@typeof(B2BLayout)">
-                <p role="alert">Sorry, there's nothing at this address.</p>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <RedirectToLogin />
             </LayoutView>
         </NotFound>
     </Router>

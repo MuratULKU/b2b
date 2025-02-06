@@ -1,0 +1,62 @@
+﻿/* Genel Stil Ayarları */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Yalnızca pagination için kullanılan özel bir row class'ı */
+.pagination-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media (max-width: 600px) {
+    .pagination-row {
+        flex-flow: column;
+    }
+}
+
+.col-pagination, .col-page-count, .col-page-info {
+    flex: 1;
+ 
+}
+
+.col-pagination {
+    text-align: left;
+    display: flex;
+    gap: 0;
+    align-items: center;
+}
+
+.col-page-info {
+    text-align: right;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+    .pagination li {
+        margin: 0;
+    }
+
+    .pagination .disabled a {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+.page-info, .page-count {
+    margin-top: 10px;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

@@ -1,23 +1,16 @@
-﻿using DataAccess.Abstract;
+﻿using Core.Abstract;
+using Core.Concrete;
+using DataAccess.Abstract;
 using DataAccess.EFCore;
 using Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Concrete
 {
-    public class RoleRepository : IRoleRepository
+    public class RoleRepository : Repository<Role>, IRoleRepository
     {
-        private readonly RepositoryContext _dbContext;
-
-        public RoleRepository(RepositoryContext dbContext)
+        public RoleRepository(RepositoryContext context) : base(context)
         {
-            _dbContext = dbContext;
         }
-
-        public List<Role> GetAllRole()
-        {
-            return _dbContext.Roles.ToList();
-        }
-
-
     }
 }

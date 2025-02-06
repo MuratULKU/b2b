@@ -1,0 +1,258 @@
+﻿@using CoreUI.Components.Pagenation
+@attribute [CascadingTypeParameter(nameof(TItem))]
+@typeparam TItem
+
+<CascadingValue IsFixed="true" Value="this">@Columns</CascadingValue>
+@* <CascadingValue IsFixed="true" Value="this">@DataGridAggregates</CascadingValue> *@
+<CascadingValue IsFixed="true" Value="this">
+
+    <div @ref=_gridElement class="container-fluid">
+        <table @attributes="Attributes">
+            <thead>
+                <tr class="Header">
+                    @foreach (var column in RenderedColumns)
+                    {
+                        @HeaderText(column)
+                    }
+                </tr>
+            </thead>
+            <tbody class="Body">
+                @if (_items != null && _items.Count > 0)
+                {
+                    var rowIndex = 0;
+
+
+                    <MVirtualize IsEnabled="Virtualize" Items="CurrentPageItems" Context="item">
+                        @{
+                            RowClass = (item.Equals(SelectedItem)) ? "selectedRow" : "";
+                            var rowclass = new CssBuilder(RowClass).Build();
+                        }
+                        @*  <tr class="@rowclass" @key="item" @onclick="@((args) => OnRowClickedAsync(args, item, rowIndex))"> *@
+                        <tr class="@rowclass" onclick="@(()=>OnRowClickedAsync(item, rowIndex))">
+
+                            @foreach (var column in RenderedColumns)
+                            {
+                                @if (column.ChildContent != null)
+                                {
+                                    @column.ChildContent
+                                }
+                                else
+                                {
+                                    @Cell(column, item)
+                                }
+
+                            }
+                        </tr>
+                        @if(DetailRowTemplate != null)
+                        {
+                            if (DetailRowVisible(item))
+                            {
+                                <tr>
+                                    <td colspan="@RenderedColumns.Count">
+                                        @DetailRowTemplate
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        
+                    </MVirtualize>
+                }
+                else
+                {
+                    if (NoDataTemplate != null)
+                    {
+                        @NoDataTemplate
+                    }
+                }
+            </tbody>
+            <tfoot class="Footer">
+             
+                @if (FooterTemplate != null)
+                {
+                    @FooterTemplate
+                }
+            </tfoot>
+        </table>
+
+        <div style="margin-top:20px;max-width:100%;margin-bottom:20px;">
+
+            @if (Pager && _totalCount >1)
+            {
+                <DataGridPager TItem="TItem" />
+            }
+            @if (ButtonRowTemplate != null)
+            {
+                <div>
+                    @ButtonRowTemplate
+                </div>
+            }
+        </div>
+    </div>
+</CascadingValue>
+@code {
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> Attributes { get; set; }
+
+    private ElementReference _gridElement;
+    private List<TItem> _items;
+    internal void AddColumn(Column<TItem> column)
+    {
+        RenderedColumns.Add(column);
+    }
+
+    internal void AddDataGridAggregates(DataGridAggregate<TItem> aggregate)
+    {
+        DataGridAggregatesColumns.Add(aggregate);
+    }
+
+    [Parameter]
+    public List<TItem> Items
+    {
+        get
+        {
+            return _items;
+        }
+        set
+        {
+            if (_items == value) return;
+            _items = value;
+
+            if (PagerStateHasChangedEvent != null)
+                InvokeAsync(PagerStateHasChangedEvent);
+        }
+    }
+
+
+
+
+
+    internal
+     RenderFragment HeaderText(Column<TItem> column)
+    {
+        return @<text>
+        <th style="@column.CssStyle" @key="column" onclick="@(column.IsSortable ? () => OnHeaderColumnClickedAysnc(column.Value, column.Field) : null)">
+            @if (column.Caption != null)
+            @column.Caption
+        else
+            @column.Title
+
+
+            @if (_sortColumn == column.Field)
+        {
+        if (_ascending)
+        {
+        column.SortDirection = SortDirection.Asc;
+            <svg style="margin-left:5px;" fill="#000000" width="16px" height="16px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <title>down</title>
+                <path d="M11.125 16.313l7.688-7.688 3.594 3.719-11.094 11.063-11.313-11.313 3.5-3.531z"></path>
+            </svg>
+        }
+        else
+        {
+        column.SortDirection = SortDirection.Desc;
+            <svg style="margin-left:5px;" fill="#000000" width="16px" height="16px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <title>up</title>
+                <path d="M11.25 15.688l-7.656 7.656-3.594-3.688 11.063-11.094 11.344 11.344-3.5 3.5z"></path>
+            </svg>
+        }
+        }
+        </th>
+    </text>;
+    }
+
+
+    // internal RenderFragment Cell(Column<TItem> column, TItem item)
+    // {
+    //     return
+    // @<text>
+    //     @{
+    // var cell = new Cell<TItem>(this, column, item);
+    //     }
+    //     <td style="@column.CssStyle">
+    //         @if (column.IsEditable && !ReadOnly && Editable)
+    //     {
+    //         @if (column.CellTemplate != null)
+    //     {
+    //         @column.CellTemplate(cell.cellContext)
+    //     }
+
+    //         @if (column.DataType == typeof(string))
+    //     {
+    //         <input style="border:0px;" type="text" value="@cell.Value" @onchange="@(cell.StringValueChangedAsync)" />
+    //     }
+    //     else if (column.DataType == typeof(double) | column.DataType == typeof(decimal))
+    //     {
+    //         <input style="border:0px;float:right;text-align:right;width:@column.Width.ToString()px" type="number" value="@cell.Value" @onchange="@(cell.NumberValueChangedAsync)" />
+    //     }
+    //     }
+    //     else
+    //     {
+    //         @if (column.CellTemplate != null)
+    //     {
+    //         @column.CellTemplate(cell.cellContext)
+    //     }
+    //     else
+    //     {
+    //         @cell.Value
+    //     }
+    //     }
+    //     </td>
+    // </text>
+    // ;
+    // }
+
+
+    internal RenderFragment Cell(Column<TItem> column, TItem item)
+    {
+        return
+    @<text>
+        @{
+    var cell = new Cell<TItem>(this, column, item);
+        }
+        <td style="@column.CssStyle">
+            @if (column.IsEditable && !ReadOnly && Editable)
+        {
+            @if (column.CellTemplate != null)
+        {
+            @column.CellTemplate(cell.cellContext)
+        }
+
+            @if (column.DataType == typeof(string))
+        {
+            <input style="border:0px;" type="text" value="@cell.Value" @onchange="@(cell.StringValueChangedAsync)" />
+        }
+        else if (column.DataType == typeof(double) || column.DataType == typeof(decimal))
+        {
+            <input style="border:0px;float:right;text-align:right;width:@column.Width.ToString()px"
+                   type="number"
+                   value="@cell.Value"
+                   @onchange="@(cell.NumberValueChangedAsync)" />
+        }
+        }
+        else
+        {
+            @if (column.CellTemplate != null)
+        {
+            @column.CellTemplate(cell.cellContext)
+        }
+        else
+        {
+        if (column.DataType == typeof(double) || column.DataType == typeof(decimal))
+        {
+            @Convert.ToDouble(cell.Value).ToString("N2")
+        ;
+        }
+        else
+        {
+            @cell.Value
+        }
+        }
+        }
+        </td>
+    </text>
+;
+    }
+
+
+}

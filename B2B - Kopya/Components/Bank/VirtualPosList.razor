@@ -1,0 +1,176 @@
+﻿@page "/virtualpos"
+@using B2B.Components.Confirm
+@using B2B.Components.Login;
+@using Business.Abstract;
+@using Business.Concrete;
+@using Entity;
+@inject IVirtualPosService virtualPosService
+@inject NavigationManager navManager
+@inject UserManager userManager
+@inject ICreditCardInstallmentService creditCardInstallmentManager
+@attribute [Authorize(Roles = "Admin")]
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <VirtualPosListPage virtualPosList="virtualPosList" OnChanged="(e)=>selectVirtualPos = e" />
+        </div>
+        <div class="col-6">
+            @if (selectVirtualPos != null)
+            {
+                <div class="row">
+
+                    <DataGrid TItem="CreditCard" >
+                    ShowPager
+                   >
+                        <DataGridColumn Field="@nameof(CreditCard.Name)" Caption="Kredi Kartı Adı" Sortable="true" />
+                    </DataGrid>
+
+                </div>
+                <div class="row">
+                    <DataGrid @ref="dataInstallement" TItem="CreditCardInstallment" Data="selectVirtualPos.BankCard.Installments"
+                    @bind-SelectedRow="selectInstallment"
+                                            ShowPager
+                              CommandMode="DataGridCommandMode.ButtonRow">
+                        <DataGridColumns>
+                            <DataGridCommandColumn />
+                            <DataGridColumn Caption="Kart Tipi" Sortable="true">
+                                <DisplayTemplate>
+                                    @context.CreditCard.Name
+                                </DisplayTemplate>
+                            </DataGridColumn>
+                            <DataGridColumn Field="@nameof(CreditCardInstallment.Installment)" Caption="Taksit Sayısı" Sortable="true" TextAlignment="TextAlignment.End" />
+                            <DataGridColumn Field="@nameof(CreditCardInstallment.InstallmentRate)" Caption="Taksit Oranı" Sortable="true" TextAlignment="TextAlignment.End" />
+
+                        </DataGridColumns>
+                        <ButtonRowTemplate>
+                            <Button Color="Blazorise.Color.Success" Clicked="installmentModelNew" Disabled="selectedCreditCard is null">Ekle</Button>
+                            <Button Color="Blazorise.Color.Primary" Clicked="installmentModelChange" Disabled="selectInstallment is null">Değiştir</Button>
+                            <Button Color="Blazorise.Color.Danger" Clicked="installmentModelDelete" Disabled="selectInstallment is null">Sil</Button>
+                        </ButtonRowTemplate>
+
+                    </DataGrid>
+
+                </div>
+            }
+        </div>
+    </div>
+    @*Kredi kartı taksit planı*@
+    <Modal @ref="installmentModal" Closing="installmentModelClosing">
+        <ModalContent Centered>
+            <ModalHeader>
+                <label>Kredi Kartı Taksit Ekleme Değiştirme</label>
+            </ModalHeader>
+            <ModalBody>
+                @if (selectInstallment != null)
+                {
+
+                    <div class="col-4">
+                        <label>Taksit Sayısı</label>
+                    </div>
+                    <div class="col-8">
+                        <NumericEdit TValue="int" @bind-Value="selectInstallment.Installment" />
+                    </div>
+                    <div class="col-4">
+                        <label>Komisyon Oranı</label>
+                    </div>
+                    <div class="col-8">
+                        <NumericEdit TValue="decimal" @bind-Value="selectInstallment.InstallmentRate" />
+                    </div>
+                }
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="@CloseModal">Vazgeç</Button>
+                <Button Color="Color.Primary" Clicked="@TryCloseModal">Kaydet</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+
+</div>
+
+<Confirm @ref="confirm" BodyText="Kayıt Silinecek Onaylıyormusunuz."> </Confirm>
+
+@code {
+
+    private DataGrid<CreditCardInstallment> dataInstallement;
+    private Confirm confirm;
+    private List<VirtualPos> virtualPosList;
+    private VirtualPos selectVirtualPos;
+    private CreditCardInstallment selectInstallment;
+    private CreditCard selectedCreditCard;
+    private Modal installmentModal;
+    private bool cancelClose;
+
+    private async void installmentModelDelete()
+    {
+        var onay = await confirm.ShowAsync("Kayıt Silme Onay",$"{selectInstallment} {selectInstallment.Installment} Kayıt Silinecektir Onaylıyor musunuz.");
+        if (onay)
+        {
+            creditCardInstallmentManager.Delete(selectInstallment);
+            virtualPosList = await virtualPosService.GetVirtualPosAsync();
+            StateHasChanged();
+        }
+        OnReadData();
+        dataInstallement.Reload();
+    }
+
+    private async void OnReadData()
+    {
+        virtualPosList = await virtualPosService.GetVirtualPosAsync();
+
+    }
+
+
+
+    private Task CloseModal()
+    {
+        cancelClose = false;
+
+        return installmentModal.Hide();
+    }
+
+    private Task TryCloseModal()
+    {
+        if (selectInstallment != null)
+            creditCardInstallmentManager.Update(selectInstallment);
+        else
+            creditCardInstallmentManager.Create(selectInstallment);
+        cancelClose = false;
+        OnReadData();
+        dataInstallement.Reload();
+        StateHasChanged();
+        return installmentModal.Hide();
+    }
+    private void installmentModelNew()
+    {
+        selectInstallment = new();
+       
+        selectInstallment.CreditCardId = selectedCreditCard.Id;
+       
+        selectInstallment.Business = selectedCreditCard.isBusiness;
+        selectInstallment.CreateUser = userManager.User.Id;
+        selectInstallment.CreateDate = DateTime.Now;
+        selectInstallment.UpdateUser = userManager.User.Id;
+        selectInstallment.UpdateDate = DateTime.Now;
+        installmentModal.Show();
+    }
+    private void installmentModelChange()
+    {
+        if (selectInstallment != null)
+        {
+            installmentModal.Show();
+        }
+    }
+
+    private Task installmentModelClosing(ModalClosingEventArgs e)
+    {
+        e.Cancel = cancelClose
+           || e.CloseReason != CloseReason.UserClosing;
+
+        return Task.CompletedTask;
+    }
+
+    protected override void OnInitialized()
+    {
+        OnReadData();
+    }
+}

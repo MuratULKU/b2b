@@ -1,0 +1,142 @@
+﻿    @page "/login"
+    @page "/login/{returnUrl}"
+
+
+@using B2C.Data
+    @using Business.Abstract
+    @using Business.Concrete
+
+@using B2C.Components.UserPanel
+
+    @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Microsoft.AspNetCore.Cors.Infrastructure
+
+    @inject AuthenticationStateProvider authStateProvider
+    @inject NavigationManager navManager
+    @inject IUserService userRepository
+    @inject IUserRoleService userRoleRepository
+    @inject UserManager _userManager
+    @inject IOrderService orderManager
+    @inject ILogger<UserSession> _logger
+
+
+
+    <style>
+   
+        .header{
+            margin-top:10px;
+        }
+        .footer{
+            margin-top:20px;
+        }
+    </style>
+     <form method="post" onsubmit="@entryClick" onkeypres="@OnKeyPress">
+    <div class="content-center">
+        <div class="card shadow" style="max-width:500px">
+            <div class="header content-center">
+                <label>Kullanıcı Girişi</label>
+                <div>
+                <label class="color:red;font-size:400;">@mymarkup</label>
+                    </div>
+            </div>  
+            <div class="card-body">
+                <div class="row">
+                    <div class="form-input" style="width:500px; min-width:250px;">
+                        <div class="entryarea">
+                                <input type="text" required @bind="model.Username" name="UserName" />
+                            <div class="labelline">Mail Adresinizi Girin</div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+
+                    <div class="form-input" style="width:500px; min-width:250px;">
+                        <div class="entryarea">
+                                <input type="password" required @bind="model.Password" name="Password" />
+                            <div class="labelline">Şifre</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-center footer">
+                    <input type="submit" class="btn btn-success" style="min-width:50px;" value="Giriş"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>
+    @code {
+        private ElementReference submitButton;
+        private string? mymarkup;
+        private Model model = new();
+  
+        [Parameter]
+        public string? returnUrl { get; set; }
+        [CascadingParameter]
+        private Task<AuthenticationState>? authenticationState { get; set; }
+        private class Model
+        {
+            public string Username { get; set; } = string.Empty;
+            public string Password { get; set; } = string.Empty;
+        }
+
+        private async void OnKeyPress(KeyboardEventArgs e)
+        {
+            if (e.Key == "Enter")
+            {
+                await submitButton.FocusAsync();
+                entryClick();
+            }
+        }
+
+        private async void entryClick()
+        {
+            await Authenticate();
+        }
+        private async Task Authenticate()
+        {
+            mymarkup = "";
+            Entity.User user = await userRepository.GetUser(model.Username, model.Password);
+            if (user == null)
+            {
+                mymarkup = "Hatalı Kullanıcı veya Şifre";
+                _logger.LogCritical($"Hatalı Kullanıcı Adı Denemesi Kulalnıcı Adı {model.Username}");
+                return;
+            }
+            else
+            {
+                List<UserRole> role =await userRoleRepository.GetAll(user.Id);
+                string[] roles = new string[role.Count];
+                for (int i = 0; i < role.Count; i++)
+                {
+                    roles[i] = role[i].Role.RoleName;
+                }
+                var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+                await customAuthStateProvider.UpdateAuthenticationState(new UserSession
+                    {
+                        UserName = user.Username,
+                        Role = roles,
+                        UserId = user.Id
+                    });
+                _logger.LogInformation($"Kullanıcı Girişi Başarılı {user.Username}");
+          
+                if (authenticationState is not null)
+                {
+                    var authState = await authenticationState;
+                    if (authState.User != null)
+                    {
+                        // if (authState.User.Identity.IsAuthenticated)
+                        //     _userManager.UserManagerAsync(authState.User);
+                        // @if (cartService._cartLines?.Count > 0)
+                        // {
+                        //     OrderFicheModel orderFiche = new();
+
+                        // }
+                    }
+                }
+            
+                navManager.NavigateTo($"/{returnUrl}", true);
+            }
+        }
+
+    }

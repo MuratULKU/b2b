@@ -1,4 +1,5 @@
-﻿using Entity;
+﻿using Core.Abstract;
+using Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,17 +10,15 @@ namespace Business.Abstract
 {
     public interface IBankCardService
     {
-        List<BankCard> GetAllBank();
-        Task<BankCard> GetBank(Guid id);
+        Task<List<BankCard>> GetAllBank();
+        Task<IDataResult<BankCard>> GetBank(Guid id);
         Task<BankCard> GetBankbyCode(int Code);
-        BankCard CreateBank(BankCard bankCard);
-        BankCard UpdateBank(BankCard bankCard);
+        Task<IResult>CreateBank(BankCard bankCard);
+        Task UpdateBank(BankCard bankCard);
 
-        void DeleteBank(BankCard bankCard);
-
-      
-        Task<CreditCard> GetCreditCardByPrefix(string prefix,
-            bool includeInstallments = false);
-        Task<List<BankParameter>> GetBankParameters(Guid bankId);
+        Task<IResult> DeleteBank(BankCard bankCard);
+             
+       
+       
     }
 }

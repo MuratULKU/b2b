@@ -1,0 +1,54 @@
+﻿@* @page "/product"
+@using Core.Extantaion;
+@using CoreUI.Components.Base
+@using B2C.Components.CartPanel
+@using DataAccess.Abstract
+@using Entity
+
+@inject IProductRepository _productRepository
+@inject SessionManager sessionManager
+@inject CartService cartPanel
+@if (product != null)
+{
+    <div class="product container">
+        <div class="imgholder">
+            <img width="180" src="@product.ToImage()" />
+        </div>
+        <div class="product-detail">
+            <div>@product.Code @product.Name</div>
+            <div>@product.Name2</div>
+            <div>@product.Name3</div>
+            <div>@product.Name4</div>
+            <div>@product.SpeCode</div>
+            <div>@product.SpeCode2</div>
+            <div>@product.SpeCode3</div>
+            <div>@product.SpeCode4</div>
+            <div>@product.SpeCode5</div>
+        </div>
+        <div class="cart-button">
+            <input type="button" class="btn btn-primary" value="Sepete Ekle" onclick="@addBasket"/>
+        </div>
+    </div>
+    <div class="product-detail container">
+
+    </div>
+}
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "code")]
+    public string ProductCode { get; set; }
+
+    private Product product;
+
+    protected override void OnParametersSet()
+    {
+        product = _productRepository.GetByCode(ProductCode).Result;
+    }
+
+    private void addBasket()
+    {
+        // sessionManager.AddCart(product);
+        // cartPanel.AddCart(product, 1);
+    }
+}
+ *@

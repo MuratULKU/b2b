@@ -1,0 +1,27 @@
+﻿
+@using CoreUI.Components.DataGrid
+@using Entity
+@inject NavigationManager navManager
+<DataGrid TItem="VirtualPos"
+          Items="virtualPosList"
+          SelectedItemChanged="ItemSelected">
+    <Columns>
+        <Column TItem="VirtualPos" Caption="Banka Adı" Field="@nameof(VirtualPos.Name)" />
+    </Columns>
+    <ButtonRowTemplate>
+        <button type="button" class="btn btn-success" onclick="@(()=>navManager.NavigateTo("/virtualposcard"))">Ekle</button>
+        <button type="button" class="btn btn-primary" onclick="@(()=>navManager.NavigateTo($"/virtualposcard?id={selectVirtualPos.Id}"))">Değiştir</button>
+    </ButtonRowTemplate>
+</DataGrid>
+
+@code {
+
+    [Parameter] public List<VirtualPos> virtualPosList { get; set; }
+    [Parameter] public EventCallback<VirtualPos> OnChanged { get; set; }
+    [Parameter] public VirtualPos selectVirtualPos { get; set; }
+    private async Task ItemSelected(VirtualPos selectedItem)
+    {
+        selectVirtualPos = selectedItem;
+        await OnChanged.InvokeAsync(selectedItem);
+    }
+}

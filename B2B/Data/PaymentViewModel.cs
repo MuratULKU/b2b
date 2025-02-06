@@ -11,8 +11,11 @@
         public int Installment { get; set; }
         public bool ManufacturerCard { get; set; }
         public decimal TotalAmount { get; set; }
-        public Guid BankId { get; set; }
+        public string Explanation { get; set; }
+        public Guid VirtualPosId { get; set; }
         public string ClientCode { get; set;}
-        public Entity.User User { get; set; }
+        public Guid UserId { get; set; }
+        public Guid OrderId { get; set; }
+        public Guid CompanyId { get; set; }
     }
 }

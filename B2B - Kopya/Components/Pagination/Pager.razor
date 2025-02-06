@@ -1,0 +1,82 @@
+﻿@inherits PagerModel
+
+@if (Result != null)
+{
+    <div class="row">
+        <div class="col-sm-6" style="margin:auto;display:inline-flex">
+            @if (Result.PageCount > 1)
+            {
+                <ul class="pagination">
+                    <li class="page-item @(Result.HasPreviousPage?null:"disabled")" style="cursor:pointer">
+                        <a class="page-link" onclick="@(() => PagerButtonClicked(1))">
+                            İlk
+                        </a>
+                    </li>
+                    <li class="page-item @(Result.HasPreviousPage?null:"disabled")" style="cursor:pointer">
+                        <a class="page-link" onclick="@(() => PagerButtonClicked(Result.CurrentPage -1))">
+                            Onceki
+                        </a>
+                    </li>
+
+                    @for (var i = StartIndex; i <= FinishIndex; i++)
+                    {
+                        var currentIndex = i;
+                        @if (i == Result.CurrentPage)
+                        {
+                            <li class="page-item active" style="cursor:pointer">
+                                <a class="page-link" onclick="@(()=>PagerButtonClicked(currentIndex))">
+                                    <span>@i</span>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item" style="cursor:pointer">
+                                <a class="page-link" onclick="@(()=>PagerButtonClicked(currentIndex))">
+                                    <span>@i</span>
+                                </a>
+                            </li>
+                        }
+                    }
+                    <li class="page-item @(Result.HasNextPage?null:"disabled")" style="cursor:pointer">
+                        <a class="page-link" style="cursor:pointer"
+                           onclick="@(() => PagerButtonClicked(Result.CurrentPage +1))">
+                            Sonraki
+                        </a>
+                    </li>
+                    <li class="page-item @(Result.HasNextPage?null:"disabled")" style="cursor:pointer">
+                        <a class="page-link" style="cursor:pointer"
+                           onclick="@(() => PagerButtonClicked(Result.PageCount))">
+                            Son
+                        </a>
+                    </li>
+                </ul>
+
+
+
+            }
+        </div>
+        
+        <div class="col-sm-4" style="display:inline-flex;padding:0px;height:38px;">
+            <div class="justify-content-md-start" style="width:150px;display:inline-flex;margin:0px;padding:0px;">
+                <select value="@PageSize" style="width:75px;" class="form-select" role="button" @onchange="@(PageSizeChanged)">
+                    @foreach (var i in PageSizeSelectorItems)
+                    {
+                        <option>@i</option>
+                    }
+                </select>
+                <div style="margin:auto;margin-left:5px;">Kayıt</div>
+            </div>
+        </div>
+        
+        <div class="col-sm-2" style="display:inline-flex; margin:auto;">
+            @Result.PageCount Sayfa @Result.RowCount Kayıt
+        </div>
+    </div>
+
+}
+
+@code {
+
+
+}

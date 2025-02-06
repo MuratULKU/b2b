@@ -1,0 +1,63 @@
+﻿.popup {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 14px;
+}
+.label{
+    position:relative;
+    display:inline-block;
+    
+}
+.card{
+    top:45px;
+    position:absolute;
+    min-width:150px;
+    right:20px;
+}
+.card-header {
+    text-align: center;
+}
+.text-right {
+    text-align: right;
+}
+input{
+    margin-top:3px;
+    margin-right :5px;
+    max-width:100px;
+}
+span{
+    margin-top:5px;
+}
+.label{
+    border: 0px;
+}
+.h-allign{
+    align-content:end;
+}
+.nav-item {
+    cursor: pointer;
+    color: white;
+}
+.text-white{
+    color:white;
+}
+.card-footer{
+    text-align:right;
+    padding-right:20px;
+}
+
+.userpanel {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 200;
+    color: white;
+    opacity:0.7;
+}
+.userpanel:hover{
+    opacity:1;
+}
+.close{
+    position:absolute;
+    right:5px;
+}
+.close:hover{
+    color:red;
+}

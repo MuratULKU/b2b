@@ -1,0 +1,19 @@
+﻿.basket-container{
+    display:flex;
+    padding-top:20px;
+    position:relative;
+    width:100%;
+   
+}
+.cart-basket {
+    max-width:80%;
+    float:left;
+    min-width:950px;
+}
+
+.basket-summary{
+    max-width:20%;
+    float:right;
+    min-width:250px;
+    margin:30px;
+}

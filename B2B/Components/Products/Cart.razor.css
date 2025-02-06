@@ -1,0 +1,149 @@
+﻿/* Genel container ayarı */
+.container {
+    /*display: flex;
+    flex-direction: row;*/ /* Yatay hizalama */
+    /*justify-content: space-between;*/ /* Sağ ve sol taraf boşluklu */
+    /*gap: 20px;*/ /* Sağ ve sol arasında boşluk */
+    /*padding: 10px;*/
+    /*box-sizing: border-box;*/ /* Taşmayı önlemek için kutu modelini ayarla */
+}
+
+/* Sepet kısmı (Tablo) */
+.cart-basket {
+    flex: 2; /* Sepet kısmı daha geniş */
+    overflow-x: auto; /* Taşmaları yatay kaydırılabilir yap */
+}
+
+/* Tablo genel stili */
+.table {
+    width: 100%;
+    border-collapse: collapse; /* Çizgileri birleştir */
+    background-color: #ffffff;
+}
+
+    .table th,
+    .table td {
+        border: 1px 0px solid #ddd; /* Hücre kenarlıkları */
+        padding: 8px;
+       
+    }
+
+    .table th {
+        background-color: #1b6ec2; /* Başlıklar için mavi arka plan */
+        color: #ffffff; /* Başlık metni beyaz */
+        font-weight: bold;
+    }
+
+    /* Tablo satırlarının hover efekti */
+    .table tr:hover {
+        background-color: #f1f1f1; /* Üzerine gelindiğinde hafif gri arka plan */
+    }
+
+/* Silme butonu */
+.cart-delete-button {
+    padding: 5px 15px;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+    color: #fff;
+    background-color: #e60000; /* Kırmızı arka plan */
+    border: none;
+    border-radius: 15px;
+    transition: background-color 0.3s ease;
+}
+
+    .cart-delete-button:active {
+        background-color: #cc0000;
+        transform: translateY(4px);
+    }
+
+/* Sağ taraf: Kartlar (Basket Summary) */
+.basket-summary {
+    flex: 1; /* Sağ taraf sabit genişlik */
+    max-width: 300px; /* Sağ taraf maksimum genişlik */
+    display: flex;
+    flex-direction: column; /* Kartlar alt alta */
+    gap: 10px; /* Kartlar arası boşluk */
+    position: relative;
+   /* padding: 10px;*/
+    /*background-color: #f8f9fa;*/ /* Açık gri arka plan */
+    border-radius: 8px;
+    /*box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);*/ /* Hafif gölge */
+    height: fit-content; /* İçeriğe göre yükseklik */
+}
+
+    /* Kart stili */
+    .basket-summary .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #ffffff; /* Kartın arka planı beyaz */
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+        overflow: hidden;
+    }
+
+    /* Kart başlıkları */
+    .basket-summary .card-header {
+        font-weight: bold;
+        text-align: center;
+        background-color: #1b6ec2; /* Primary mavi arka plan */
+        color: white; /* Beyaz metin */
+        padding: 10px;
+    }
+
+    /* Kart içeriği */
+    .basket-summary .card-body {
+        padding: 10px;
+        color: #333; /* Metin koyu gri */
+        font-size: 14px;
+    }
+
+    /* Kart altı footer */
+    .basket-summary .card-footer {
+        text-align: center;
+        background-color: #f1f1f1;
+        padding: 8px;
+    }
+
+/* Mobil tasarım için responsive ayar */
+@media screen and (max-width: 768px) {
+    .container {
+        flex-direction: column; /* Alt alta dizilim */
+        gap: 10px; /* Kart ve tablo arasında boşluk */
+    }
+
+    .cart-basket {
+        flex: none;
+        width: 100%; /* Tam genişlik */
+    }
+
+    .basket-summary {
+        flex: none;
+        width: 100%; /* Tam genişlik */
+    }
+
+    .cart-basket .table thead {
+        display: none; /* Mobilde tablo başlıklarını gizle */
+    }
+
+    .cart-basket .table tr {
+        display: block;
+        margin-bottom: 15px; /* Satırlar arasında boşluk */
+    }
+
+    .cart-basket .table td {
+        display: block;
+        text-align: left;
+        border: none;
+        padding: 10px 5px;
+        position: relative;
+    }
+
+        .cart-basket .table td::before {
+            content: attr(data-label); /* Data-label ile başlıkları göster */
+            font-weight: bold;
+            margin-right: 10px;
+            display: inline-block;
+            width: 50%;
+        }
+}
+a

@@ -1,0 +1,33 @@
+﻿
+@using B2B.Data;
+@using DataAccess.Abstract;
+
+<div class="form-check">
+    <input class="form-check-input" type="checkbox" id="flexCheckDefault" checked="@isChecked" @oninput="CheckboxChanged">
+    <label class="form-check-label" for="flexCheckDefault">
+        @filterModel.Name
+    </label>
+    <label class="amount">(@Amount)</label>
+</div>
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public FilterModel filterModel { get; set; }
+
+    [Parameter]
+    public EventCallback<FilterModel> ChangeState { get; set; }
+
+    private bool isChecked;
+
+    [EditorRequired]
+    [Parameter]
+    public Int32 Amount { get; set; }
+
+    private void CheckboxChanged(ChangeEventArgs e)
+    {
+        filterModel.Checked = Convert.ToBoolean(e.Value);
+        ChangeState.InvokeAsync(filterModel);
+    }
+  
+}

@@ -1,0 +1,130 @@
+﻿@using Business.Abstract;
+@using Entity;
+@inject IOrderService orderService
+@page "/cartreport"
+<div class="container">
+
+    <DataGrid @ref="dataGrid" TItem="OrdFiche"
+              Data="ordFiches"
+              Context="ordFiches"
+    @bind-SelectedRow="selectedRow"
+              CommandMode="DataGridCommandMode.ButtonRow"
+                ShowPager
+              DetailRowStartsVisible=false>
+        <DataGridAggregates>
+            <DataGridAggregate Field="@nameof(Entity.OrdFiche.FicheNo)" Aggregate="DataGridAggregateType.None" Context="detail">
+                <DisplayTemplate>
+                    <label style="font-weight: bold;">
+                        @(
+                            $"Toplam"
+                            )
+                    </label>
+                </DisplayTemplate>
+            </DataGridAggregate>
+            <DataGridAggregate Field="@nameof(OrdFiche.GrossTotal)" Aggregate="DataGridAggregateType.Sum" DisplayFormat="{0:N2}" />
+            <DataGridAggregate Field="@nameof(OrdFiche.TotalDiscounted)" Aggregate="DataGridAggregateType.Sum" DisplayFormat="{0:N2}" />
+            <DataGridAggregate Field="@nameof(OrdFiche.TotalVat)" Aggregate="DataGridAggregateType.Sum" DisplayFormat="{0:N2}" />
+            <DataGridAggregate Field="@nameof(OrdFiche.Total)" Aggregate="DataGridAggregateType.Sum" DisplayFormat="{0:N2}" />
+
+        </DataGridAggregates>
+        <DataGridColumns>
+            <DataGridColumn Field="@nameof(Entity.OrdFiche.Date_)" Caption="Tarih" Width="150" />
+            <DataGridColumn Field="@nameof(Entity.OrdFiche.FicheNo)" Caption="No" />
+            <DataGridColumn Caption="Sahibi">
+                <DisplayTemplate>
+                    @context.User.AccountName
+                </DisplayTemplate>
+            </DataGridColumn>
+            <DataGridColumn Caption="Ürün Sayısı" TextAlignment="TextAlignment.End">
+                <DisplayTemplate>
+                    @context.Lines.Count()
+                </DisplayTemplate>
+            </DataGridColumn>
+            <DataGridColumn Caption="Toplam Miktar" TextAlignment="TextAlignment.End">
+                <DisplayTemplate>
+                    @context.Lines.Sum(x=>x.Amount)
+                </DisplayTemplate>
+            </DataGridColumn>
+
+            <DataGridColumn Field="@nameof(Entity.OrdFiche.GrossTotal)" Caption="Ara Toplam" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+            <DataGridColumn Field="@nameof(Entity.OrdFiche.TotalDiscounted)" Caption="Toplam İndirim" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+            <DataGridColumn Field="@nameof(Entity.OrdFiche.TotalVat)" Caption="Vergi" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+            <DataGridColumn Field="@nameof(Entity.OrdFiche.Total)" Caption="Tutarı" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+        </DataGridColumns>
+
+        <DetailRowTemplate>
+            @{
+                var detail = ordFiches.Lines;
+                <DataGrid TItem="OrdLine" Data="detail">
+                    <DataGridColumns>
+
+                        <DataGridColumn Caption="Stok Kodu">
+                            <DisplayTemplate>@context.Product.Code</DisplayTemplate>
+                        </DataGridColumn>
+                        <DataGridColumn Caption="Stok Adı">
+                            <DisplayTemplate>@context.Product.Name</DisplayTemplate>
+                        </DataGridColumn>
+                        <DataGridColumn Field="@nameof(OrdLine.Amount)" Caption="Miktar" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                        <DataGridColumn Field="@nameof(OrdLine.Unit)" Caption="Birim" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                        <DataGridColumn Field="@nameof(OrdLine.Price)" Caption="Fiyat" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                        <DataGridColumn Field="@nameof(OrdLine.Total)" Caption="Toplam" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                        <DataGridColumn Field="@nameof(OrdLine.Discper)" Caption="İsk Oran" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                        <DataGridColumn Field="@nameof(OrdLine.Distdisc)" Caption="İsk Tutar" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                        <DataGridColumn Field="@nameof(OrdLine.VatMatrah)" Caption="Ara Toplam" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                        <DataGridColumn Field="@nameof(OrdLine.VatAmnt)" Caption="Vergi" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                        <DataGridColumn Field="@nameof(OrdLine.Total)" Caption="Toplam" TextAlignment="TextAlignment.End" DisplayFormat="{0:N2}" />
+                    </DataGridColumns>
+
+                </DataGrid>
+            }
+        </DetailRowTemplate>
+        <ButtonRowTemplate>
+            <Button Color="Blazorise.Color.Primary" Disabled="selectedRow == null" Clicked="onay">Sepeti Onayla</Button>
+            <Button Color="Blazorise.Color.Danger" Disabled="selectedRow == null" Clicked="delete">Sepeti Sil</Button>
+        </ButtonRowTemplate>
+    </DataGrid>
+</div>
+@code {
+    List<OrdFiche> ordFiches;
+    DataGrid<OrdFiche> dataGrid;
+    OrdFiche selectedRow;
+
+
+    protected async override void OnParametersSet()
+    {
+        ordFiches = await orderService.GetAllFiche();
+    }
+
+    protected override void OnInitialized()
+    {
+        Refresh();
+    }
+
+    private void onay()
+    {
+        selectedRow.Send = true;
+        selectedRow.Date_ = DateTime.Now.Date;
+        selectedRow.Explanation = "Admin Onaylı Sipariş";
+        foreach (OrdLine ordLine in selectedRow.Lines)
+        {
+            ordLine.Date_ = selectedRow.Date_;
+        }
+        orderService.UpdateBasket(selectedRow);
+        OnParametersSet();
+    }
+
+    private void delete()
+    {
+        orderService.DeleteOrdFiche(selectedRow);
+        OnParametersSet();
+    }
+
+    private async void Refresh()
+    {
+        await Task.Delay(60000);
+        OnParametersSet();
+        await dataGrid.Reload();
+        StateHasChanged();
+        Refresh();
+    }
+}

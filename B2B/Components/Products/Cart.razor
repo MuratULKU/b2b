@@ -1,188 +1,145 @@
 ﻿@page "/cart"
-@using B2B.Components.Confirm
-@using B2B.Components.SanalMagazaUI.InputNumber
-@using B2B.Data;
-@using Business.Abstract;
-@using Business.Concrete;
-@using DataAccess.Abstract;
-@using Entity;
-@inject IOrderService orderService
-@inject UserManager userService
-@inject IFirmParamService firmParamService
-@inject IProductRepository _productRepository
-@inject NavigationManager navManager
-@attribute [Authorize]
-@if (baskets != null)
-{
-    <div class="container">
-        <div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Görsel</th>
-                        <th>Ürün</th>
-                        <th>Stok</th>
-                        <th>KDV</th>
-                        <th>Miktar</th>
-                        <th>Birim Fiyat</th>
-                        <th>Tutar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in baskets)
-                    {
-                        <tr>
-                            <td>Görsel</td>
-                            <td>@item.ProductName</td>
-                            <td class="text-right">
-                                <InputIntNumber @bind-Value="@item.Amount"
-                                                Change="@((e)=>change(e,item))"></InputIntNumber>
-                            </td>
-                            <td class="text-right">@item.VatRate</td>
-                            <td>Stok Miktarı</td>
-                            <td class="text-right">@item.Price.ToString("N2")</td>
-                            <td class="text-right">@item.Total.ToString("N2")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
 
-            <div class="row">
-                <div class="col-md-7" style="margin-top:20px;">
-                    <label>Açıklama</label>
-                    <input class="form-control" type="text" @bind-value="explanation">
-                </div>
-                <div class="col-md-5">
-                    <table class="table">
+
+@using B2B.Data
+@using CoreUI.Components.NotificationService
+@using Entity
+@inject CartService cartService
+@inject IUserIdentityProcessor userIdentity
+@inject NavigationManager navManager
+@inject NotificationService notification
+@attribute [Authorize]
+<div class="container">
+    @if (cartService._ordFiche!= null)
+    {
+        <div class="basket-container row">
+            <div class="cart-basket">
+
+                @if (ordlines != null)
+                {
+                    int _count = 0;
+                    <table class="table table-hover">
                         <thead>
-                            <tr class="text-left">
-                                <th class="text-left">Alt Toplam</th>
-                                <th class="text-left">Tutar</th>
+                            <tr>
+                                <th class="text-center" scope="col">#</th>
+                                <th class="text-center" scope="col">Ürün Kodu</th>
+                                <th class="text-center" scope="col">Ürün Adı</th>
+                                <th class="text-center" scope="col">Miktarı</th>
+                                <th class="text-center" scope="col">Birim</th>
+                                <th class="text-center" scope="col">Birim Fiyatı</th>
+                                <th class="text-center" scope="col">Iskonto %</th>
+                                <th class="text-center" scope="col">Vergi %</th>
+                                <th class="text-center" scope="col">Tutar</th>
+                                <th class="text-center" scope="col">İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr style="width:200px;">
-                                <td class="text-left">Ara Toplam</td>
-                                <td class="text-right">@baskets.Sum(x=>x.Total).ToString("N2")</td>
-                            </tr>
-                            <tr>
-                                <td class="text-left">Vergi Tutarı</td>
-                                <td class="text-right">@baskets.Sum(x=>x.VatPrice).ToString("N2")</td>
-                            </tr>
-                            <tr>
-                                <td class="text-left">Genel Toplam</td>
-                                <td class="text-right">@baskets.Sum(x=>x.Total + x.VatPrice).ToString("N2")</td>
-                            </tr>
+                            @foreach (var cartitem in ordlines)
+                            {
+                                _count++;
+                                <tr>
+                                    <td data-label="#">@_count</td>
+                                    <td data-label="Ürün Kodu">@cartitem.Product.Code</td>
+                                    <td data-label="Ürün Adı">@cartitem.Product.Name</td>
+                                    <td data-label="Miktarı" class="text-end">@cartitem.Amount.ToString("N2")</td>
+                                    <td data-label="Birim">@cartitem.Unit</td>
+                                    <td data-label="Birim Fiyatı" class="text-end">@cartitem.Price.ToString("N2")</td>
+                                    <td data-label="Iskonto %" class="text-end">@cartitem.Discper.ToString("N2")</td>
+                                    <td data-label="Vergi %" class="text-end">@cartitem.Vat.ToString("N2")</td>
+                                    <td data-label="Tutar" class="text-end">@cartitem.Total.ToString("N2")</td>
+                                    <td data-label="İşlem">
+                                        <input type="button" class="cart-delete-button"
+                                               onclick="@(() => { cartService.RemoveCart(cartitem); StateHasChanged(); })"
+                                               value="Sil" />
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
+                    <input class="btn btn-primary" value="Onayla" disabled="@(cartService._ordFiche.Lines?.Count < 1)" onclick="@(()=>ApprovingOrder())" />
+                }
+            </div>
+            <div class="basket-summary">
+                <div class="card">
+                    <div class="card-header">
+                        <label class="text-center">Firma Bilgileri</label>
+                    </div>
+
+                    <div class="card-body">
+                        @cartService.company.Name
+                    </div>
+                    <div class="card-footer text-end">
+                    </div>
+                </div>
+
+
+
+                <div class="card">
+                    <div class="card-header">
+                        <label class="text-center">Kullanıcı Bilgileri</label>
+                    </div>
+
+                    <div class="card-body">
+                        @cartService.user.Username
+                    </div>
+                    <div class="card-footer text-end">
+                    </div>
+                </div>
+
+
+
+                <div class="card">
+                    <div class="card-header">
+                        <label class="text-center">Sepet Özeti</label>
+                    </div>
+
+                    <div class="card-body">
+                        @if (ordlines?.Count > 0)
+                        {
+                            <div class="row">
+                                <label class="col-6">Ara Toplam: </label>
+                                <span class="col-6 text-end">@cartService._ordFiche.GrossTotal.ToString("N2") TL</span>
+                            </div>
+                            <div class="row">
+                                <label class="col-6">Iskonto: </label>
+                                <span class="col-6 text-end">@cartService._ordFiche.TotalDiscounted.ToString("N2") TL</span>
+                            </div>
+                            <div class="row">
+                                <label class="col-6">Vergi: </label>
+                                <span class="col-6 text-end">@cartService._ordFiche.TotalVat.ToString("N2") TL</span>
+                            </div>
+                            <div class="row">
+                                <label class="col-6">Toplam: </label>
+                                <span class="col-6 text-end">@cartService._ordFiche.Total.ToString("N2") TL</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer text-end">
+                    </div>
                 </div>
             </div>
         </div>
-        <div>
-            <div class="row">
-                <div class="col-7">
-                    <button class="btn btn-primary" onclick="@basketUpdate">Sepeti Güncelle</button>
-                    <button class="btn btn-primary" onclick="@BasketDelete">Sepeti Boşalt</button>
-                </div>
-                <div class="col-5" style="text-align:right;">
-                    <Button Color="Blazorise.Color.Success" Clicked="@SendData" Disabled="firmParamService.ToBoolean(16)">Siparişi Tamamla</Button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-else
-{
-    <label>Sepet Boş</label>
-}
-
-<Confirm @ref="ConfirmRef" ConfirmationChanged="ConfirmDeleteBasket" />
-
-
+    }
+</div>
 @code {
-    private List<Basket> baskets { get; set; }
-    private Basket selectedBasket;
-    private Confirm ConfirmRef;
-    private string explanation;
-    private double amount { get; set; }
+  
+    List<OrdLine> ordlines { get; set; }
 
-    protected override Task OnParametersSetAsync()
+    protected async override void OnInitialized()
     {
-        baskets = orderService.GetAll(userService.User).Where(x => x.Send == false).ToList();
-        foreach (var basket in baskets) //daha sonra servise taşınacak
+        Guid userid = await userIdentity.GetCurrentUserId();
+        if (userid != Guid.Empty)
         {
-            Product product = _productRepository.GetByCode(basket.ProductCode).Result;
-            if (basket.Price != product.PriceLists[0].Price)
-            {
-                basket.Price = product.PriceLists[0].Price;
-                basket.Total = basket.Price * basket.Amount;
-                basket.VatPrice = basket.Total * basket.VatRate / 100;
-
-            }
-        }
-        return base.OnParametersSetAsync();
-    }
-
-    protected override void OnInitialized()
-    {
-        
-    }
-    private void LineDelete(MouseEventArgs e)
-    {
-        if (selectedBasket != null)
-        {
-            orderService.DeleteProduct(selectedBasket);
-            baskets = orderService.GetAll(userService.User);
-        }
-    }
-    private void BasketDelete(MouseEventArgs e)
-    {
-        ConfirmRef.BodyText = "Sepetteki Tüm Ürünler Silinecek Onaylıyormusunuz.?";
-        ConfirmRef.Show();
-    }
-
-
-    private void basketUpdate()
-    {
-
-        foreach (var basket in baskets.ToArray())
-        {
-            if (basket.Amount == 0)
-            {
-                baskets.Remove(basket);
-                orderService.DeleteProduct(basket);
-            }
-        }
-        StateHasChanged();
-    }
-
-    private void change(double e, Basket basket)
-    {
-        basket.Amount = e;
-        basket.Total = basket.Amount * basket.Price;
-        basket.VatPrice = basket.Total * basket.VatRate / 100;
-
-    }
-
-
-    private void ConfirmDeleteBasket(bool confirm)
-    {
-        if (confirm)
-        {
-            orderService.DeleteBasket(userService.User.Id);
-            baskets = orderService.GetAll(userService.User);
+            ordlines = await cartService.ReadCart(userid);
+            StateHasChanged();
         }
     }
 
-
-    private void SendData()
+    private void ApprovingOrder()
     {
-        foreach (var basket in baskets)
-        {
-            basket.Send = true;
-            orderService.UpdateBasket(basket);
-        }
+        cartService.OrderSend();
+        notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Kayıt Tamamlandı.", Detail = "Sipariş Kayıt Edildi.", Duration = 2000 });
         navManager.NavigateTo("/products");
-        StateHasChanged();
     }
+
 }

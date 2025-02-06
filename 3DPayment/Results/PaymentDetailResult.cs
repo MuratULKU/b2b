@@ -17,18 +17,19 @@ namespace _3DPayment.Results
         public string ResponseCode { get; set; }
         public string ErrorMessage { get; set; }
         public string ErrorCode { get; set; }
-
+        public DateTime PaidDate { get; set; }
         public bool Paid { get; set; }
         public bool Refunded { get; set; }
         public bool Canceled { get; set; }
         public bool Failed { get; set; }
-
+        public string CardNumber { get; set; }
         public static PaymentDetailResult PaidResult(string transactionId, string referenceNumber,
             string cardPrefix = null, int installment = 0,
             int extraInstallment = 0,
             string bankMessage = null, string responseCode = null,
-            string errorMessage = null, string errorCode = null)
+            string errorMessage = null, string? errorCode = null,string? paiddate = null,string cardnumber = null)
         {
+            
             return new PaymentDetailResult
             {
                 Paid = true,
@@ -40,7 +41,9 @@ namespace _3DPayment.Results
                 BankMessage = bankMessage,
                 ResponseCode = responseCode,
                 ErrorMessage = errorMessage,
-                ErrorCode = errorCode
+                ErrorCode = errorCode,
+                PaidDate = Convert.ToDateTime(paiddate),
+                CardNumber = cardnumber
             };
         }
 

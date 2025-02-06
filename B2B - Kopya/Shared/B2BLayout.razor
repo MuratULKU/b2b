@@ -1,0 +1,36 @@
+﻿@using B2B.Components.Preload
+@using Business.Abstract;
+@inherits LayoutComponentBase
+@inject IFirmParamService firmParamService
+<CascadingValue Value="ShowParameter">
+    <div class="page">
+        <MNotification />
+        <main>
+            <B2BMenu />
+            <Preload></Preload>
+            <MModal IsServiceModal="true" />
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
+</CascadingValue>
+@code {
+    public Dictionary<string, object> ShowParameter { get; set; } = new();
+    protected override void OnInitialized()
+    {
+        ShowParameter.Add("DefaultPos", firmParamService.ToString(10));
+        ShowParameter.Add("ShowPage", firmParamService.ToBoolean(16));
+        ShowParameter.Add("ViewMode", firmParamService.ToInteger(17));
+        ShowParameter.Add("StockAmountShow", firmParamService.ToInteger(23));
+        ShowParameter.Add("StockWarningAmount", firmParamService.ToInteger(24));
+        ShowParameter.Add("ProductPageCount", firmParamService.ToInteger(25));
+        ShowParameter.Add("ShowProducerCode", firmParamService.ToBoolean(28));
+        ShowParameter.Add("ShowGroupCode", firmParamService.ToBoolean(29));
+        ShowParameter.Add("ShowSpeCode", firmParamService.ToBoolean(30));
+        ShowParameter.Add("ShowSpeCode2", firmParamService.ToBoolean(31));
+        ShowParameter.Add("ShowSpeCode3", firmParamService.ToBoolean(32));
+        ShowParameter.Add("ShowSpeCode4", firmParamService.ToBoolean(33));
+        ShowParameter.Add("ShowSpeCode5", firmParamService.ToBoolean(34));
+    }
+}

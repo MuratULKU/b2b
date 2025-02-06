@@ -1,0 +1,154 @@
+﻿@page "/virtualposcard/"
+@page "/virtualposcard/{selectedGuid:guid}"
+@using B2B.Components.Confirm
+@using B2B.Components.Login;
+@using B2B.Components.SelectList
+@using B2B.Data;
+@using Business.Abstract;
+@using Business.Concrete;
+
+@using Entity;
+@using System.Text;
+@attribute [Authorize(Roles = "Admin")]
+@inject IBankCardService bankCardRepository
+@inject IVirtualPosService virtualPosService
+@inject FirmParameterService param
+@inject UserManager userManager
+@inject NavigationManager navManager
+@if (selectedGuid != Guid.Empty)
+{
+    SelectVirtualPos(selectedGuid);
+}
+<div class="container">
+
+    <div class="col-6">
+        <div class="col-4">
+            <label>Sanal Pos Adı</label>
+        </div>
+        <div class="col-8">
+            <input class="form-control" id="sanalpos" @bind-value="virtualPos.Name" />
+        </div>
+        <div class="col-4">
+            <label>Banka Adı</label>
+        </div>
+        <div class="col-8">
+            <SelectList TItem="BankCard" Items="bankCardList" DisplayField="Name" ValueField="Id" SelectedChanged="(e)=>virtualPos.BankCardId = new Guid(e.ToString())"></SelectList>
+        </div>
+        <div class="col-4">
+            <label>Üyesi Olduğu Kart Sistemi Adı</label>
+        </div>
+        <div class="col-8">
+            <SelectList TItem="CardBrand" Items="brandCardList" DisplayField="Name" ValueField="Id" @bind-Selected="ParamValue"></SelectList>
+        </div>
+        <div class="col-4">
+            <label>Muhasebe Kodu</label>
+        </div>
+        <div class="col-8">
+            <input class="form-control" id="sanalmuhasebekodu" @bind-value="virtualPos.AccountCode" />
+        </div>
+        <div class="col-8">
+            <label>Kendi Kartlarında Tek Çekim  </label>
+        </div>
+        <div class="col-4">
+            <input type="checkbox" checked="@virtualPos.SinglePayment" @oninput="CheckboxChanged" />
+        </div>
+        <div class="col-4">
+        </div>
+        <div class="col-8 py-3">
+            <button class="btn btn-danger" disabled="@Disabled" style="width:130px;" onclick="@Delete">Sil</button>
+            <button class="btn btn-primary" style="width:130px;" onclick="@Save">Kaydet</button>
+        </div>
+    </div>
+</div>
+<Confirm @ref="confirm" />
+@code {
+
+    private Confirm confirm { get; set; }= default!;
+    private bool Disabled;
+    private List<BankCard> bankCardList { get; set; } = default!;
+    private List<CardBrand> brandCardList { get; set; } = default!;
+
+    [Parameter]
+    public Guid selectedGuid { get; set; }
+    private VirtualPos virtualPos { get; set; } = new();
+
+    private BankCard selectedBankCard { get; set; } = default!;
+    private CardBrand selectedBrandCard { get; set; } = default!;
+
+    protected async override void OnInitialized()
+    {
+        bankCardList = await bankCardRepository.GetAllBank();
+        brandCardList = await bankCardRepository.GetCardBrand();
+        virtualPos.BankCardId = bankCardList[0].Id;
+        Disabled = true;
+    }
+
+    private async void SelectVirtualPos(Guid selectedbank)
+    {
+        virtualPos = await virtualPosService.GetVirtualPosAsync(selectedGuid);
+        brandCardList.Find(x=>x.Id == virtualPos?.CardBrand?.Id);
+        Disabled = false;
+    }
+
+    private object ParamValue
+    {
+        get
+        {
+            return virtualPos.CardBrandId;
+        }
+        set
+        {
+            virtualPos.CardBrandId = new Guid(value.ToString());
+        }
+
+    }
+
+    private void CheckboxChanged(ChangeEventArgs e)
+    {
+        virtualPos.SinglePayment = Convert.ToBoolean(e.Value);
+    }
+
+    private async void Delete()
+    {
+        var onay = await confirm.ShowAsync("Silme Onay", $"{virtualPos.Name} Kayıt Silinecektir Onaylıyor musunuz.");
+        if(onay)
+        {
+            if (virtualPos != null)
+            {
+                selectedGuid = Guid.Empty;
+                await virtualPosService.DeleteVirtualPos(virtualPos);
+                navManager.NavigateTo("/virtualpos");
+            }
+        }
+
+    }
+
+    private async void Save()
+    {
+        if (virtualPos.Id == Guid.Empty)
+        {
+            virtualPos.CreateUser = userManager.User.Id;
+            virtualPos.UpdateUser = userManager.User.Id;
+            virtualPos.CreateDate = DateTime.Now;
+            virtualPos.UpdateDate = DateTime.Now;
+            virtualPos.Id = Guid.NewGuid();
+            await virtualPosService.CreateVirtualPos(virtualPos);
+            navManager.NavigateTo("/virtualpos");
+        }
+        else
+        {
+            var onay = await confirm.ShowAsync("Değiştirme Onayı", $"{virtualPos.Name} Kayıt Değiştilecektir Onaylıyor musunuz.");
+            if(onay)
+            {
+                virtualPos.UpdateDate = DateTime.Now;
+                virtualPos.UpdateUser = userManager.User.Id;
+
+                await virtualPosService.UpdateVirtualPos(virtualPos);
+                navManager.NavigateTo("/virtualpos");
+            }
+            
+        }
+    }
+}
+
+

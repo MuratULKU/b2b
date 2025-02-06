@@ -1,0 +1,400 @@
+﻿@page "/orderDetail"
+@page "/orderDetail/{id:guid}"
+
+@using Business.Abstract
+@using CoreUI.Components.NotificationService
+@using CoreUI.Data
+@using Entity
+@using Microsoft.EntityFrameworkCore
+@using PSS.Components.CartPanel
+
+@inject IClientCardService clientCardManager
+@inject IUserIdentityProcessor _userIdentityProcessor
+@inject NotificationService notification
+@inject IUserService userService
+@inject IOrderService orderService
+@inject IDocumentNoService documentNoService
+@inject NavigationManager navManager
+<div class="container">
+<TabControl ChangedActivePage="OnActiveTabChanged">
+    <TabPage Text="Müşteri Seçimi">
+        <h1>Müşteri</h1>
+        <div>
+           <div class="row">
+               <div class="col-4">
+                  
+                   <div>
+                        <input class="@newClient ? btn btn-secondary: btn-primary" type="button" value="Mevcut Müşteri" @onclick="@(()=>newClient = false)"/>
+                        <input class="@newClient ? btn-primary:btn btn-secondary" type="button" value="Yeni Müşteri" @onclick="@(()=>newClient=true)"/>
+                   </div>
+                    <label>Müşteri</label>
+                    <SelectList TItem="Client" Items="_clientList" DisplayField="Name" ValueField="Id" @bind-Selected="ChangedClient" />
+                    <label>Vergi No</label>
+                    <input class="form-control" type="tel" @bind-value="_client.VKN" />
+                    <label>Vergi Dairesi</label>
+                    <input class="form-control" type="text" @bind-value="_client.VatOffice" />
+                    <label>Mail Adres</label>
+                    <input class="form-control" type="tel" @bind-value="_client.MailAdress" />
+                    <label>Telefon Numarası</label>
+                    <input class ="form-control" type="tel" @bind-value="_client.Phone1" />
+               </div>
+                <div class="col-4">
+                    <h3>Adress</h3>
+                    <label>Adres</label>
+                    <input class="form-control" type="text" @bind-value="_client.Address1" />
+                    <label>Adres</label>
+                    <input class="form-control" type="text" @bind-value="_client.Address2" />
+                    <label>İlçe</label>
+                    <input class="form-control" type="text" @bind-value="_client.Town" />
+                    <label>İl</label>
+                    <input class="form-control" type="text" @bind-value="_client.City" />
+                    <label>Ülke</label>
+                    <input class ="form-control" type="text" @bind-value="_client.Country" />
+                </div>
+                <div class="col-4">
+                    <h3>Firma Yetkilisi</h3>
+                    <label>Adı</label>
+                    <inputclass ="form-control" type="text" @bind-value="_client.FirmExecutiveName" />
+                    <label>SoyAdı</label>
+                    <input class="form-control" type="text" @bind-value="_client.FirmExecutiveSurName" />
+                    <label>Telefon</label>
+                    <input class="form-control" type="text" @bind-value="_client.Phone2" />
+                    <label>Mail Adres</label>
+                    <input class="form-control" type="text" @bind-value="_client.MailAdress2" />
+                </div>
+           </div>
+            
+
+        </div>
+        <div>
+        </div>
+    </TabPage>
+    <TabPage Text="Ürün Seçimi" IsValid="pageValid" >
+        <div class="container">
+  <div class="findarea">
+                <form @onsubmit="SearchEnter">
+                    <input class="findtext" type="text" placeholder="Arama" id="filter" name="filter" @bind-value="@Filter" />
+                    <input type="hidden" id="category" name="category" value="@selectCategory" />
+                    <button class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit">
+                       
+                    </button>
+                </form>
+            </div>
+        
+            <DataGridView TItem="Product" Data="pdata.Results" UserId="UserId" AddProduct="addproduct"/>
+            <Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="pdata.PageSize" RowCount="pdata.RowCount" OnPageSizeChanged="pageSizeOnchanged" />
+        </div>
+    </TabPage>
+    <TabPage Text="Toplamlar" IsValid="pageValid">
+        <div class="basket-container">
+            <div class="cart-basket">
+
+                @if (_ordFiche?.Lines != null)
+                {
+                    int _count = 0;
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center" scope="col">#</th>
+                                <th class="text-center" scope="col">Ürün Kodu</th>
+                                <th class="text-center" scope="col">Ürün Adı</th>
+                                <th class="text-center" scope="col">Miktarı</th>
+                                <th class="text-center" scope="col">Birim</th>
+                                <th class="text-center" scope="col">Birim Fiyatı</th>
+                                <th class="text-center" scope="col">Iskonto %</th>
+                                <th class="text-center" scope="col">Vergi %</th>
+                                <th class="text-center" scope="col">Tutar</th>
+                                <th class="text-center" scope="col">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cartitem in _ordFiche.Lines)
+                            {
+                                _count++;
+                                <tr>
+                                    <td scope="row">@_count</td>
+                                    <td>@cartitem.Product?.Code</td>
+                                    <td>@cartitem.Product?.Name</td>
+                                    <td class="text-end">@cartitem.Amount.ToString("N2")</td>
+                                    <td>@cartitem.Unit</td>
+                                    <td class="text-end">@cartitem.Price.ToString("N2")</td>
+                                    <td class="text-end">@cartitem.Distdisc.ToString("N2")</td>
+                                    <td class="text-end">@cartitem.VatAmnt.ToString("N2")</td>
+                                    <td class="text-end">@cartitem.Total.ToString("N2")</td>
+                                    <td><input type="button" class="btn btn-danger" onclick="@(()=>{RemoveLine(cartitem);StateHasChanged(); })" value="Sil" /></td>
+                                </tr>
+
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <label>Sepetiniz Boş Görünüyor</label>
+                }
+            </div>
+            <div class="basket-summary">
+                <div class="card">
+                    <div class="card-header">
+                        <label class="text-center">Siparişi Oluşturan</label>
+                    </div>
+                    <div class="card-body">
+                        @_user?.Username
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <label class="text-center">Müşteri Bilgileri</label>
+                    </div>
+                    <div class="card-body">
+                        @_client?.Name
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <label class="text-center">Sepet Özeti</label>
+                    </div>
+                    <div class="card-body">
+                        @if (_ordFiche?.Lines?.Count > 0)
+                        {
+                            <label>Toplam : </label>
+                            <label>@_ordFiche.Lines.Sum(x => x.Total).ToString("N2") TL</label>
+                        }
+                    </div>
+                    <div class="card-footer text-end">
+                        <input type="button" class="btn btn-success" onclick="@SaveChanged" value="Odeme" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </TabPage>
+</TabControl>
+</div>
+@code {
+
+    [Parameter]
+    public Guid id { get; set; } 
+    private Guid clientid {get;set;}
+    private OrdFiche _ordFiche { get; set; }
+    private User _user { get; set; }
+    private Client _client { get; set; } = new();
+    private List<Client> _clientList = new List<Client>();
+    private DocumentNo _documentNo{ get; set; }
+    private bool newClient { get; set; } = default!;
+
+    private bool pageValid {get;set;}
+
+    private void SearchEnter()
+    {
+        PagerPageChanged(0);
+    }
+
+    private object ChangedClient
+    {
+        get
+        {
+            return clientid;
+        }
+        set
+        {
+            if (Guid.TryParse(value.ToString(), out Guid guid))
+                clientid = guid;
+            _client = clientCardManager.GetByGuid(clientid).Result;
+            pageValid = true;
+        }
+
+    }
+    private void SaveChanged()
+    {
+        documentNoService.Update(_documentNo);
+        orderService.Save(_ordFiche);
+        navManager.NavigateTo("/order");
+    }
+
+    private async void RemoveLine(OrdLine line)
+    {
+        await orderService.DeleteLine(line);
+        _ordFiche.Lines?.Remove(line);
+        short count = 0;
+        foreach (var ordline in _ordFiche.Lines)
+        {
+            ordline.LineNo = count;
+            count++;
+        }
+        _ordFiche.GrossTotal = Math.Round(_ordFiche.Lines.Sum(x => x.Total), 2);
+        _ordFiche.TotalDiscounted = Math.Round(_ordFiche.Lines.Sum(x => x.Distdisc), 2);
+        _ordFiche.TotalVat = Math.Round(_ordFiche.Lines.Sum(x => x.VatAmnt), 2);
+        _ordFiche.Total = Math.Round(_ordFiche.Lines.Sum(x => x.Total - x.Distdisc + x.VatAmnt), 2);
+    }
+
+    private void addproduct(Product product)
+    {
+        var s = product;
+        AddCart(product, product.OrderAmount, product.PriceLists[0].Price, 0, UserId);
+    }
+
+    private async void AddFiche(string ClientCode, Guid UserId)
+    {
+        if (_ordFiche == null)
+        {
+
+            _ordFiche = new OrdFiche
+                {
+                    Docode = "12",
+                    Date_ = DateTime.Now,
+                    Send = 0,
+                    Active = true,
+                    ClientCode = ClientCode,
+                    FicheNo = await documentNoService.GetDocNo(2),
+                    UpdateDate = DateTime.Now,
+                    CreateDate = DateTime.Now,
+                    UpdateUser = UserId,
+                    CreateUser = UserId,
+                    UserId = UserId,
+                    TrCode = 2,
+                    CurrencyId = 1 //döviz kuru seçildiğinde değişecek
+                };
+
+
+            _ordFiche.Lines = new();
+        }
+    }
+
+    private async void AddCart(Product product, double Amount, double Price, double Discount, Guid UserId)
+    {
+        AddFiche(_client.Code, UserId);
+
+        OrdLine ordLine = _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == product.Id);
+        if (ordLine == null)
+        {
+            ordLine = new OrdLine
+                {
+                    StockRef = product.LogicalRef,
+                    Amount = Amount,
+                    Price = Price,
+                    Total = Amount * Price,
+                    Product = product,
+                    ProductId = product.Id,
+                    UomRef = product.UomRef,
+                    UsRef = product.UsRef,
+                    AvailableStock = 0,
+                    Discper = Discount,
+                    LineType = 0,
+                    LineNo = (short)(_ordFiche.Lines.Count + 1),  // Assuming Lines is always initialized
+                    TrCode = 2,
+                    Vat = product.SellVat ?? 0,
+                    VatMatrah = Math.Round((Amount * Price - Discount) / (1 + (product.SellVat ?? 0) / 100), 2),
+                    VatAmnt = Math.Round(((Amount * Price - Discount) * (product.SellVat ?? 0)) / 100, 2),
+                    Unit = product.Unit,
+                    CreateDate = DateTime.Now,
+                    UpdateDate = DateTime.Now,
+                    CreateUser = UserId,
+                    UpdateUser = UserId,
+                    OrdFicheId = _ordFiche.Id,
+                    Date_ = _ordFiche.Date_,
+                    CurrencyId = 1,
+                   
+                };
+      
+            _ordFiche.Lines.Add(ordLine);
+        }
+        else
+        {
+            ordLine.Amount += Amount;
+            ordLine.Price = Price;
+            ordLine.Total = Math.Round((ordLine.Amount * ordLine.Price), 2);
+            if (Discount > 0)
+            {
+                ordLine.Distdisc = ordLine.Total * Discount / 100;
+            }
+            else
+            {
+                ordLine.Distdisc = 0;
+            }
+            ordLine.VatMatrah = Math.Round((ordLine.Total - ordLine.Distdisc), 2);
+            ordLine.VatAmnt = Math.Round((ordLine.VatMatrah * ordLine.Vat / 100), 2);
+        }
+
+        _ordFiche.GrossTotal = Math.Round(_ordFiche.Lines.Sum(x => x.Total), 2);
+        _ordFiche.TotalDiscounted = Math.Round(_ordFiche.Lines.Sum(x => x.Distdisc), 2);
+        _ordFiche.TotalVat = Math.Round(_ordFiche.Lines.Sum(x => x.VatAmnt), 2);
+        _ordFiche.Total = Math.Round(_ordFiche.Lines.Sum(x => x.Total - x.Distdisc + x.VatAmnt), 2);
+
+    }
+
+    private async Task OnActiveTabChanged(bool isTabChanged)
+    {
+        if(isTabChanged)
+        {
+            _client = await clientCardManager.GetByGuid(clientid);
+            if (_client == null)
+                pageValid = false;
+            else
+                pageValid = true;
+        }
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        _clientList = await clientCardManager.GetAll();
+
+    }
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            UserId = Guid.Parse(await _userIdentityProcessor.GetCurrentUserId());
+            _user = userService.GetUser(UserId).Result;
+            if (id != Guid.Empty)
+            {
+                _ordFiche =await  orderService.GetOrderFiche(id);
+                _client= await clientCardManager.GetByCode(_ordFiche.ClientCode);
+                ChangedClient = _client.Id;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private Guid UserId { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "q")]
+    public string q { get; set; }
+
+    private MenuItemModel selectCategory { get; set; } = default!;
+    public string? Filter { get; set; } = default!;
+    public Dictionary<Guid, List<string>> PropertySet { get; set; } = default!;
+
+    protected PagedResult<Product> pdata = new();
+    protected async void pageSizeOnchanged(int pageSize)
+    {
+        pdata.PageSize = pageSize;
+        pdata.CurrentPage = 1;
+        pdata.Results = await ProductServices.GetAllAsync(Filter ?? string.Empty, null, selectCategory is null ? 0 : selectCategory.id, pdata.CurrentPage, pdata.PageSize);
+
+    }
+    [Inject] IProductServices ProductServices { get; set; } = default!;
+    protected async void PagerPageChanged(int page)
+    {
+
+        pdata.RowCount = await ProductServices.TotalCount(Filter ?? string.Empty, PropertySet, selectCategory is null ? 0 : selectCategory.id, pdata.CurrentPage, pdata.PageSize);
+        pdata.CurrentPage = page < 1 ? 1 : page;
+        pdata.Results = await ProductServices.GetAllAsync(Filter ?? string.Empty, PropertySet, selectCategory is null ? 0 : selectCategory.id, pdata.CurrentPage, pdata.PageSize);
+
+        StateHasChanged();
+
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            PagerPageChanged(pdata.CurrentPage);
+            if(id == Guid.Empty)
+            {
+               
+              
+            }
+        }
+    }
+}

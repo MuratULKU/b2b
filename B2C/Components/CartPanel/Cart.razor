@@ -1,0 +1,82 @@
+﻿
+@using B2C.Data
+@using Business.Concrete
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage localStorage
+@inject CartService cartService
+@inject NavigationManager navManager
+@page "/cart"
+<div class="basket-container">
+    <div class="cart-basket">
+
+       @if (cartService._ordFiche.Lines != null)
+        {
+            int _count = 0;
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th class="text-center" scope="col">#</th>
+                        <th class="text-center" scope="col">Ürün Adı</th>
+                        <th class="text-center" scope="col">Miktarı</th>
+                        <th class="text-center" scope="col">Birim</th>
+                        <th class="text-center" scope="col">Birim Fiyatı</th>
+                        <th class="text-center" scope="col">Iskonto %</th>
+                        <th class="text-center" scope="col">Vergi %</th>
+                        <th class="text-center" scope="col">Tutar</th>
+                        <th class="text-center" scope="col">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cartitem in cartService._ordFiche.Lines)
+                    {
+                        _count++;
+                        <tr>
+                            <td scope="row">@_count</td>
+                            <td>@cartitem.Product.Code</td>
+                            <td class="text-end">@cartitem.Amount.ToString("N2")</td>
+                            <td>@cartitem.Unit</td>
+                            <td class="text-end">@cartitem.Price.ToString("N2")</td>
+                            <td class="text-end">@cartitem.Discper.ToString("N2")</td>
+                            <td class="text-end">@cartitem.VatAmnt.ToString("N2")</td>
+                            <td class="text-end">@cartitem.Total.ToString("N2")</td>
+                            <td><input type="button" class="btn btn-danger" onclick="@(()=>{cartService.RemoveCart(cartitem);StateHasChanged();})" value="Sil" /></td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <label>Sepetiniz Boş Görünüyor</label>
+        }
+    </div>
+    <div class="basket-summary">
+        <div class="card">
+            <div class="card-header">
+                <label class="text-center">Sepet Özeti</label>
+            </div>
+            <div class="card-body">
+                @if (cartService._ordFiche.Lines?.Count > 0)
+                {
+                    <label>Toplam : </label>
+                    <label>@cartService._ordFiche.Lines.Sum(x => x.Total).ToString("N2") TL</label>
+                }
+            </div>
+            <div class="card-footer text-end">
+                <input type="button" class="btn btn-success" onclick="@saveBasket" value="Odeme" />
+            </div>
+        </div>
+    </div>
+</div> 
+@code {
+   
+
+    private void saveBasket()
+    {
+        navManager.NavigateTo($"/payment/{cartService._ordFiche.Id}");
+    }
+
+
+}
+ 

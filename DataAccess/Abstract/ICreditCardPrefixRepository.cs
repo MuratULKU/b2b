@@ -1,20 +1,11 @@
-﻿using Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Core.Abstract;
+using DataAccess.Concrete;
+using Entity;
 
 namespace DataAccess.Abstract
 {
-    public interface ICreditCardPrefixRepository
+    public interface ICreditCardPrefixRepository: IRepository<CreditCardPrefix>
     {
-        List<CreditCardPrefix> GetAll();
-        CreditCardPrefix Get(Guid id);
-        CreditCardPrefix GetByPrefix(string prefix);
-        List<CreditCardPrefix> GetBankList(int BankCode); //bunu gerek yoksa silelim
-        CreditCardPrefix Create(CreditCardPrefix creditCardPrefix);
-        CreditCardPrefix Update(CreditCardPrefix creditCardPrefix);
-        CreditCardPrefix Delete(CreditCardPrefix creditCardPrefix);
+       
     }
 }

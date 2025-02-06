@@ -2,64 +2,14 @@
 using DataAccess.EFCore;
 using Entity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace DataAccess.Concrete
 {
-    public class PriceListRepository : IPriceListRepository
+    public class PriceListRepository : Repository<PriceList>, IPriceListRepository
     {
-        private readonly RepositoryContext _dbContext;
-
-        public PriceListRepository(RepositoryContext dbContext)
+        public PriceListRepository(RepositoryContext context) : base(context)
         {
-            _dbContext = dbContext;
-        }
-
-        public void Delete(PriceList priceList)
-        {
-            _dbContext.PriceLists.Remove(priceList);
-        }
-
-        public List<PriceList> GetAll()
-        {
-            return _dbContext.PriceLists.ToList();
-        }
-
-        public async Task<int> DeleteAll()
-        {
-            _dbContext.PriceLists.ExecuteDelete();
-            return await _dbContext.SaveChangesAsync();
-        }
-
-        public Task<PriceList> GetByCode(string code)
-        {
-            return _dbContext.PriceLists.FirstOrDefaultAsync(x=>x.Code == code);
-        }
-
-        public Task<PriceList> GetByProductCode(string productCode)
-        {
-            return _dbContext.PriceLists.FirstOrDefaultAsync(x => x.ProductCode == productCode);
-        }
-
-        public Task<PriceList> GetByProductCode(string productCode, int priorty)
-        {
-            return _dbContext.PriceLists.FirstOrDefaultAsync(x=>x.ProductCode == productCode && x.Priorty == priorty);
-        }
-
-        public void Insert(PriceList priceList)
-        {
-            _dbContext.PriceLists.Add(priceList);
-            _dbContext.SaveChanges();
-        }
-
-        public void Update(PriceList priceList)
-        {
-            _dbContext.PriceLists.Update(priceList);
-            _dbContext.SaveChanges();
         }
     }
 }

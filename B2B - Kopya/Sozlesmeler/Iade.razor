@@ -1,0 +1,102 @@
+﻿@page "/infoiade"
+@using Business.Abstract;
+@inject IFirmParamService firmParamService
+<div class="box-body">
+    <p>
+        @firmParamService.ToString(1) online alışveriş sitesinden satın aldığınız ürünleri teslimat tarihinden itibaren
+        14 gün içinde iade edebilir veya farklı bir ürünle değiştirebilirsiniz.
+    </p>
+    <p>
+        <b>İade Koşulları</b>
+        Orjinal ambalajı bozulmuş, tekrar satılabilirlik özelliğini kaybetmiş, başka bir müşteri
+        tarafından satın alınamayacak durumda olan ürünlerin iadesi kabul edilmemektedir.
+    </p>
+    @firmParamService.ToString(1) fiziksel mağazalarından satın alınan ürünlerle ilgili iade veya değişim işlemleri
+    @firmParamService.ToString(1) online alışveriş sitesi üzerinden yapılmamaktadır.
+    <p>
+        <b>İade Prosedürü</b>
+        Hesabım alanından Siparişler sayfanıza ulaşın. Siparişler sayfanıza ulaşmak için buraya
+        tıklayabilirsiniz.
+    </p>
+    <p>
+        Siparişler sayfasından İade veya Değişim işlemi yapmak istediğiniz siparişi seçin.
+    </p>
+    <p>
+        Sipariş detay sayfasında sağ alt bölümde yer alan " İADE ET" butonuna tıklayın.
+    </p>
+    <p>
+        Açılan ekranda iade etmek istediğiniz ürünü seçtikten sonra iade nedeninizi kısaca
+        belirterek "GÖNDER" butonuna tıklayın.
+    </p>
+    <p>
+        Yukarıda belirtilen işlemleri yaptığınız anda iade talebiniz bize ulaşacaktır.
+        Sonrasında müşteri temsilcilerimizden biri size email yoluyla geri dönüş sağlayacak ve
+        İade/Değişim talebinizi işleme alacaktır.
+    </p>
+    <p>
+        Yukarıda belirtilen adımları takip etmeden yapılacak iadelerde yaşanabilecek
+        aksaklıklardan Temaser sorumlu değildir.
+    </p>
+    <p>
+        İade ettiğiniz ürün(ler) bize ulaştığında gerekli kontroller yapılarak iade koşullarına
+        uygunluğu incelenecektir ve 3 (üç) iş günü içinde tarafınıza bilgilendirme yapılacaktır.
+        İade koşullarına uygun ürünler için beğendiğiniz farklı bir ürünle DEĞİŞİM talep
+        edebilir, bir sonraki siparişinizde kullanmak üzere MAĞAZA KREDİSİ tanımlanmasını
+        isteyebilir veya ÜCRET İADESİ talep edebilirsiniz.
+    </p>
+    <p>
+        Talep ettiğiniz iade türü onaylandığında (Değişim, Mağaza Kredisi, Ücret İadesi)
+        tarafınıza email yoluyla bilgilendirme yapılmaktadır.
+    </p>
+    <p>
+        <b>Kargo Ücretleri</b>
+        İade edilecek ürün(ler) anlaşmalı olduğumuz Kargo ile gönderildiği takdirde kargo
+        ücreti tarafımızca karşılanacaktır.
+    </p>
+    <p>
+        Anlaşmalı kargo şirketi dışında farklı bir şirket aracılığıyla gönderilen iadelerde
+        kargo ücreti müşteriye aittir.
+    </p>
+    <p>
+        Anlaşmalı kargo şirketi dışında farklı bir kargo şirketiyle alıcı ödemeli olarak
+        gönderilen iadelerde, kargo ücreti iade tutarından düşülecektir.
+    </p>
+    <p>
+        İade seçeneği olarak Değişim işlemi yapıldığı takdirde kargo ücreti @firmParamService.ToString(1) tarafından
+        karşılanacaktır. Yapılan değişim işlemindeki ürün iade edilmek istendiği takdirde kargo
+        ücreti müşteriye ait olacaktır.
+    </p>
+    <p>
+        Kargo ödenmiş bir ürünün iadesi yapıldığında sadece ürünün fatura üstünde yazan tutarı
+        iade edilir. Kargo ücreti iade edilmemektedir.
+    </p>
+    <p>
+        Türkiye dışından yapılan iadelerde kargo ücreti müşteriye aittir.
+    </p>
+    
+</div>
+
+<div class="box-footer">
+    <div class="row">
+        <div class="col-md-3">
+            <a href="/infoguvenlik">Güvenlik ve Gizlilik</a>
+        </div>
+        <div class="col-md-3">
+            <a href="/infomesafeli">Mesafeli Sözleşmeler</a>
+        </div>
+        <div class="col-md-3">
+            <a href="/infoiade">Değişim ve İade Koşulları</a>
+        </div>
+        <div class="col-md-3">
+            <a href="/infokargo">Teslimat ve Kargo</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+}

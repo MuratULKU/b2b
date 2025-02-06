@@ -1,0 +1,158 @@
+﻿@page "/company"
+
+@using Business.Abstract
+@using Core.Abstract
+@using CoreUI.Components.NotificationService
+@using DataAccess.Abstract
+@using Entity
+@using Microsoft.Extensions.Configuration
+@inject ICompanyService companyService
+@inject IUserService userService
+@inject IRoleService roleService
+@inject IUserRoleService userRoleService
+@inject IUserIdentityProcessor userIdentity
+@inject NotificationService notification
+@inject IConfiguration _configuration
+
+<EditForm Model="@company" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="name" class="form-label">Company Name</label>
+        <InputText id="name" class="form-control" @bind-Value="company.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label for="address1" class="form-label">Address 1</label>
+        <InputText id="address1" class="form-control" @bind-Value="company.Address1" />
+    </div>
+
+    <div class="mb-3">
+        <label for="address2" class="form-label">Address 2</label>
+        <InputText id="address2" class="form-control" @bind-Value="company.Address2" />
+    </div>
+
+    <div class="mb-3">
+        <label for="city" class="form-label">City</label>
+        <InputText id="city" class="form-control" @bind-Value="company.City" />
+    </div>
+
+    <div class="mb-3">
+        <label for="town" class="form-label">Town</label>
+        <InputText id="town" class="form-control" @bind-Value="company.Town" />
+    </div>
+
+    <div class="mb-3">
+        <label for="telNo1" class="form-label">Telephone 1</label>
+        <InputText id="telNo1" class="form-control" @bind-Value="company.TelNo1" />
+    </div>
+
+    <div class="mb-3">
+        <label for="telNo2" class="form-label">Telephone 2</label>
+        <InputText id="telNo2" class="form-control" @bind-Value="company.TelNo2" />
+    </div>
+
+    <div class="mb-3">
+        <label for="mail" class="form-label">Email</label>
+        <InputText id="mail" class="form-control" @bind-Value="company.Mail" />
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Şifre</label>
+        <InputText id="password" class="form-control" @bind-Value="password" />
+    </div>
+
+    <div class="mb-3">
+        <label for="programCode" class="form-label">Program Code</label>
+        <InputText id="programCode" class="form-control" @bind-Value="company.ProgramCode" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    @*   <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button> *@
+</EditForm>
+
+@code {
+
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public Guid id { get; set; }
+    [Parameter]
+    public Company company { get; set; } = default!;
+    private User user { get; set; } = default!;
+    public string password { get; set; } = default!;
+   
+
+
+
+    protected async override void OnInitialized()
+    {
+        if (id == Guid.Empty)
+        {
+            company = new Company();
+            company.Id = Guid.NewGuid();
+        }
+        else
+            company = await companyService.Get(id);
+        base.OnInitialized();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            HttpClient _httpClient = new HttpClient();
+            _httpClient.BaseAddress = new Uri(_configuration.GetSection("ApiService").GetSection("Url").Value);
+            string url = $"/api/v1/client/check?code={company.ProgramCode}";
+            var response = await _httpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                bool result = bool.Parse(await response.Content.ReadAsStringAsync());
+                if (!result)
+                    throw new Exception("Client Code wrong");
+            }
+            if(id != Guid.Empty)
+            {
+                user = new();
+                user.Id = Guid.NewGuid();
+                user.CompanyId = company.Id;
+                user.Username = company.Mail;
+                user.Password = password;
+                user.Email = company.Mail;
+                user.CreateDate = DateTime.Now;
+                user.UpdateDate = DateTime.Now;
+                user.CreateUser = await userIdentity.GetCurrentUserId();
+                user.UpdateUser = await userIdentity.GetCurrentUserId();
+                UserRole userRole = new();
+                userRole.Id = Guid.NewGuid();
+                userRole.RoleId = roleService.GetRole("Managment").Result.Data.Id;
+                userRole.UserId = user.Id;
+                userRole.CreateUser = user.CreateUser;
+                userRole.UpdateUser = user.UpdateUser;
+                userRole.CreateDate = DateTime.Now;
+                userRole.UpdateDate = DateTime.Now;
+                var success = await companyService.Insert(company, user, userRole);
+                if (success)
+                {
+                    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Kayıt Tamamlandı.", Detail = "Firma Kayıt Edildi.", Duration = 2000 });
+                }
+            }
+            else
+            {
+                var success = await companyService.Update(company);
+                if (success)
+                {
+                    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Kayıt Tamamlandı.", Detail = "Firma Bilgileri Güncellendi.", Duration = 2000 });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            var errorDetail = ex.InnerException != null ? $"{ex.Message}\n{ex.InnerException.Message}" : ex.Message;
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Hata", Detail = errorDetail, Duration = 5000 });
+           
+        }
+
+       
+
+    }
+}

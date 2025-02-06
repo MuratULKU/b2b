@@ -24,9 +24,9 @@ namespace _3DPayment.Providers
         {
             try
             {
-                string merchantId = request.BankParameters["merchantId"];
-                string merchantPassword = request.BankParameters["merchantPassword"];
-                string enrollmentUrl = request.BankParameters["enrollmentUrl"];
+                string merchantId = request.VirtualPosParameters["merchantId"];
+                string merchantPassword = request.VirtualPosParameters["merchantPassword"];
+                string enrollmentUrl = request.VirtualPosParameters["enrollmentUrl"];
 
                 var httpParameters = new Dictionary<string, string>();
                 httpParameters.Add("Pan", request.CardNumber);
@@ -39,8 +39,8 @@ namespace _3DPayment.Providers
                  * Master Card 200
                  * American Express 300
                 */
-                httpParameters.Add("BrandName", "100");
-                httpParameters.Add("VerifyEnrollmentRequestId", request.OrderNumber);//sipariş numarası
+                httpParameters.Add("BrandName", "200");
+                httpParameters.Add("VerifyEnrollmentRequestId", Guid.NewGuid().ToString("N"));//sipariş numarası
                 httpParameters.Add("SessionInfo", "1");//banka dökümanları sabit bir değer
                 httpParameters.Add("MerchantID", merchantId);
                 httpParameters.Add("MerchantPassword", merchantPassword);
@@ -49,10 +49,10 @@ namespace _3DPayment.Providers
 
                 string installment = request.Installment.ToString();
                 if (request.Installment < 2)
-                    installment = string.Empty;//0 veya 1 olması durumunda taksit bilgisini boş gönderiyoruz
+                    installment = string.Empty;//0 veya 1 olması durumunda taksit bilgisini boş gönderiyoruzdddddddd
 
-                httpParameters.Add("InstallmentCount", installment);
-
+               // httpParameters.Add("InstallmentCount", installment);
+               
                 var response = await client.PostAsync(enrollmentUrl, new FormUrlEncodedContent(httpParameters));
                 string responseContent = await response.Content.ReadAsStringAsync();
 

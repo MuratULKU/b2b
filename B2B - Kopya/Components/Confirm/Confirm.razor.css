@@ -1,0 +1,11 @@
+﻿.close{
+    border:none;
+    opacity:0.7;
+}
+.close:hover{
+    opacity:1;
+}
+.title{
+    width:100%;
+    text-align:center;
+}

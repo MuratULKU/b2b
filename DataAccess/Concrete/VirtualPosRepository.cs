@@ -2,74 +2,31 @@
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Abstract;
 using Entity;
-
+using System.Linq;
+using Core.Abstract;
+using Core.Concrete;
+using DataAccess.Concrete;
+using System.Linq.Expressions;
 
 namespace SanalMagaza.DataAccess.Concrete
 {
-    public class VirtualPosRepository : IVirtualPosRepository
+    public class VirtualPosRepository : Repository<VirtualPos>, IVirtualPosRepository
     {
-        private readonly RepositoryContext _dbContext;
-
-        public VirtualPosRepository(RepositoryContext dbContext)
+        public VirtualPosRepository(RepositoryContext context)
+           : base(context)
         {
-            _dbContext = dbContext;
         }
 
-        public VirtualPos Create(VirtualPos virtualPos)
+        public async Task<VirtualPos> GetVirtualPosAsync(Guid id, Expression<Func<VirtualPos, object>>[] includes)
         {
-            _dbContext.VirtualPos.Add(virtualPos);
-            _dbContext.SaveChanges();
-            return virtualPos;
-        }
+            IQueryable<VirtualPos> query = this.dbContext.Set<VirtualPos>();
 
-        public VirtualPos Delete(VirtualPos virtualPos)
-        {
-            _dbContext.VirtualPos.Remove(virtualPos);
-            _dbContext.SaveChanges();
-            return virtualPos;
-        }
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
 
-        public VirtualPos Get(Guid id)
-        {
-            return _dbContext.VirtualPos.
-                Include(x=>x.BankCard).
-                FirstOrDefault(x => x.Id == id);
-        }
-
-        public VirtualPos GetByBankCode(int bankCode,bool isBusiness)
-        {
-            var id = _dbContext.BankCards.FirstOrDefault(x=>x.BankCode == bankCode).Id;
-            return _dbContext.VirtualPos.
-                Include(x=>x.BankCard).
-                ThenInclude(x=>x.Installments.Where(i=>i.Business == isBusiness && i.BankCardId == id)).
-                FirstOrDefault(x => x.BankCardId == id);
-            
-        }
-
-        
-        public List<VirtualPos> GetAll()
-        {
-            return _dbContext.VirtualPos
-               .Include(x=>x.BankCard)
-               .Include(x=>x.CardBrand)
-               .Include(x=>x.BankCard.CreditCards)
-               .ThenInclude(x=>x.Installments)
-                .ToList();
-        }
-
-        public VirtualPos Update(VirtualPos virtualPos)
-        {
-            _dbContext.VirtualPos.Update(virtualPos);
-            _dbContext.SaveChanges();
-            return virtualPos;
-        }
-
-        public List<VirtualPos> GetByBrandCode(int brandCode)
-        {
-            return _dbContext.VirtualPos.Where(x => x.CardBrand.Code == brandCode)
-                .Include(x=>x.BankCard)
-                .ThenInclude(x=>x.Installments)
-                .ToList();
+            return await query.SingleOrDefaultAsync(x => x.Id == id);
         }
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace B2B.Migrations
+namespace B2C.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
     partial class RepositoryContextModelSnapshot : ModelSnapshot
@@ -57,117 +57,10 @@ namespace B2B.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BankCode")
+                        .IsUnique();
+
                     b.ToTable("BankCards");
-                });
-
-            modelBuilder.Entity("Entity.BankParameter", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("BankCardId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("CreateUser")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UpdateUser")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BankCardId");
-
-                    b.ToTable("BankParameters");
-                });
-
-            modelBuilder.Entity("Entity.Basket", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("Amount")
-                        .HasColumnType("REAL");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("CreateUser")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Date_")
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("DiscountPrice")
-                        .HasColumnType("REAL");
-
-                    b.Property<double>("DiscountRate")
-                        .HasColumnType("REAL");
-
-                    b.Property<string>("DocNo")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("LineNUmber")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("REAL");
-
-                    b.Property<string>("ProductCode")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ProductDescription")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ProductGuid")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Send")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("Total")
-                        .HasColumnType("REAL");
-
-                    b.Property<DateTime>("UpdateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UpdateUser")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UserGuid")
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("VatPrice")
-                        .HasColumnType("REAL");
-
-                    b.Property<double>("VatRate")
-                        .HasColumnType("REAL");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Baskets");
                 });
 
             modelBuilder.Entity("Entity.CardBrand", b =>
@@ -186,7 +79,6 @@ namespace B2B.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdateDate")
@@ -196,6 +88,9 @@ namespace B2B.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("CardBrands");
                 });
@@ -234,7 +129,323 @@ namespace B2B.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Code")
+                        .IsUnique();
+
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Entity.CharAsgn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CharCodeCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CharCodeId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CharCodeName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CharValCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CharValId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CharValName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LogicalRef")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharCodeId");
+
+                    b.HasIndex("CharValId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("CharAsgns");
+                });
+
+            modelBuilder.Entity("Entity.CharCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CSetCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LogiclRef")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("CharCodes");
+                });
+
+            modelBuilder.Entity("Entity.CharSet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LogicalRef")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("CharSets");
+                });
+
+            modelBuilder.Entity("Entity.CharVal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CharCodeId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LogicalRef")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharCodeId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("CharVals");
+                });
+
+            modelBuilder.Entity("Entity.Client", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Address1")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Address2")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("City")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FirmExecutiveName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FirmExecutiveSurName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MailAdress")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MailAdress2")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Phone1")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Phone2")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Town")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VKN")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VatOffice")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Clients");
+                });
+
+            modelBuilder.Entity("Entity.Company", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Address1")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Address2")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Mail")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProgramCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TelNo1")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TelNo2")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Town")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("Entity.CreditCard", b =>
@@ -271,7 +482,6 @@ namespace B2B.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdateDate")
@@ -279,6 +489,9 @@ namespace B2B.Migrations
 
                     b.Property<Guid>("UpdateUser")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("isBusiness")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -298,14 +511,8 @@ namespace B2B.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("BankCardId")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("Business")
                         .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("CardBrandId")
-                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("TEXT");
@@ -332,10 +539,6 @@ namespace B2B.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BankCardId");
-
-                    b.HasIndex("CardBrandId");
 
                     b.HasIndex("CreditCardId");
 
@@ -373,7 +576,6 @@ namespace B2B.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Prefix")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdateDate")
@@ -387,9 +589,37 @@ namespace B2B.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreditCardId");
+                    b.HasIndex("Prefix")
+                        .IsUnique();
 
                     b.ToTable("CreditCardPrefixes");
+                });
+
+            modelBuilder.Entity("Entity.Currency", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CurrencyName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CurrencySymbol")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Currencies");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CurrencyName = "Türk Lirası",
+                            CurrencySymbol = "TL"
+                        });
                 });
 
             modelBuilder.Entity("Entity.DocumentNo", b =>
@@ -402,12 +632,19 @@ namespace B2B.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Prefix")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("DocType");
 
                     b.ToTable("DocumentNo");
+
+                    b.HasData(
+                        new
+                        {
+                            DocType = 1,
+                            DocNo = 1,
+                            Prefix = ""
+                        });
                 });
 
             modelBuilder.Entity("Entity.FirmDoc", b =>
@@ -435,7 +672,7 @@ namespace B2B.Migrations
                     b.Property<Guid?>("ProductId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("ProtuctId")
+                    b.Property<Guid>("ProtuctId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdateDate")
@@ -475,21 +712,197 @@ namespace B2B.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<byte[]>("Value")
-                        .IsRequired()
                         .HasColumnType("BLOB");
 
                     b.HasKey("Key");
 
+                    b.HasIndex("No")
+                        .IsUnique();
+
                     b.ToTable("FirmParams");
+                });
+
+            modelBuilder.Entity("Entity.OrdFiche", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ApprovingUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ClientCode")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date_")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Docode")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Explanation")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FicheNo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("GrossTotal")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("LogicalRef")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte>("Send")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("Total")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("TotalDiscounted")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("TotalVat")
+                        .HasColumnType("REAL");
+
+                    b.Property<short>("TrCode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OrdFiches");
+                });
+
+            modelBuilder.Entity("Entity.OrdLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("AvailableStock")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("ClientRef")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date_")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Discper")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("Distdisc")
+                        .HasColumnType("REAL");
+
+                    b.Property<short>("LineNo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("LineType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Logicalref")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("OrdFicheId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("REAL");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StockRef")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("Total")
+                        .HasColumnType("REAL");
+
+                    b.Property<short>("TrCode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Unit")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("UomRef")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("UsRef")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("Vat")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("VatAmnt")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("VatMatrah")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("OrdFicheId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrdLine");
                 });
 
             modelBuilder.Entity("Entity.PaymentTransaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("BankCardId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("BankErrorMessage")
@@ -507,7 +920,7 @@ namespace B2B.Migrations
                     b.Property<string>("CardPrefix")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ClientCode")
+                    b.Property<Guid>("CompanyId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreateDate")
@@ -518,6 +931,9 @@ namespace B2B.Migrations
 
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Explanation")
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("ExtraInstallment")
                         .HasColumnType("INTEGER");
@@ -558,12 +974,22 @@ namespace B2B.Migrations
                     b.Property<string>("UserAgent")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("UserIpAddress")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("VirtualPosId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BankCardId");
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("VirtualPosId");
 
                     b.ToTable("PaymentTransactions");
                 });
@@ -586,7 +1012,13 @@ namespace B2B.Migrations
                     b.Property<Guid>("CreateUser")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Currency")
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("IncVat")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Logicalref")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -613,6 +1045,8 @@ namespace B2B.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CurrencyId");
+
                     b.HasIndex("ProductId");
 
                     b.ToTable("PriceLists");
@@ -624,8 +1058,10 @@ namespace B2B.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("CharSetId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Code")
-                        .IsRequired()
                         .HasColumnType("TEXT COLLATE NOCASE");
 
                     b.Property<DateTime>("CreateDate")
@@ -634,12 +1070,35 @@ namespace B2B.Migrations
                     b.Property<Guid>("CreateUser")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Keyword1")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Keyword2")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Keyword3")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Keyword4")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Keyword5")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("LogicalRef")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT COLLATE NOCASE");
+
+                    b.Property<string>("Name2")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name3")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name4")
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("ParentRef")
                         .HasColumnType("INTEGER");
@@ -669,7 +1128,6 @@ namespace B2B.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Unit")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Unit1")
@@ -690,16 +1148,27 @@ namespace B2B.Migrations
                     b.Property<decimal?>("Unit3rate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("UomRef")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("UpdateUser")
                         .HasColumnType("TEXT");
 
-                    b.Property<double?>("Vat")
+                    b.Property<int>("UsRef")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("Vat")
                         .HasColumnType("REAL");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CharSetId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("Products");
                 });
@@ -708,6 +1177,10 @@ namespace B2B.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreateDate")
@@ -767,22 +1240,168 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("9401df5e-51c2-42ca-a08d-7878fc8a447e"),
-                            CreateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(833),
-                            CreateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
+                            Id = new Guid("d05e1bb3-3383-4cb8-bc53-644b7bee8c1f"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7751),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
                             RoleName = "Admin",
-                            UpdateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(848),
-                            UpdateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008")
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7758),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3")
                         },
                         new
                         {
-                            Id = new Guid("ad8064ec-cc84-4767-bd02-8e6251f27d21"),
-                            CreateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(908),
-                            CreateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
+                            Id = new Guid("be9901da-f04f-44cc-8129-f39921ad6500"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7764),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
                             RoleName = "User",
-                            UpdateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(910),
-                            UpdateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008")
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7764),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3")
+                        },
+                        new
+                        {
+                            Id = new Guid("5214148c-b160-49ec-89de-4e0fe37c8299"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7772),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
+                            RoleName = "B2C",
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7772),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3")
+                        },
+                        new
+                        {
+                            Id = new Guid("b86d9b61-1972-4c8f-84e4-e228c00d8e6c"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7773),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
+                            RoleName = "Managment",
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7773),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3")
+                        },
+                        new
+                        {
+                            Id = new Guid("8b49a3a5-f378-49ab-988d-c3695af90f72"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7774),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
+                            RoleName = "Payment",
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7774),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3")
+                        },
+                        new
+                        {
+                            Id = new Guid("f52cbb25-2911-4274-8118-34a45a382cdd"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7775),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
+                            RoleName = "Dashboard",
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7775),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3")
+                        },
+                        new
+                        {
+                            Id = new Guid("ac2527f1-5769-42d8-9710-9076ca347c5d"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7776),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
+                            RoleName = "UserReport",
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7776),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3")
+                        },
+                        new
+                        {
+                            Id = new Guid("3ff11bb0-e84b-4ad0-97d7-564f6da064a1"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7777),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
+                            RoleName = "Bank",
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7777),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3")
+                        },
+                        new
+                        {
+                            Id = new Guid("361080bc-cdc5-411c-bab2-e55983a0c952"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7777),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
+                            RoleName = "Sales",
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7778),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3")
                         });
+                });
+
+            modelBuilder.Entity("Entity.ShipAdress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Address1")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Address2")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Inchange")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SpeCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Town")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ShipAdresses");
                 });
 
             modelBuilder.Entity("Entity.User", b =>
@@ -794,18 +1413,28 @@ namespace B2B.Migrations
                     b.Property<string>("AccountCode")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("AccountName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Active")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("CompanyId")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("CreateUser")
                         .HasColumnType("TEXT");
 
+                    b.Property<double?>("Discount")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdateDate")
@@ -815,24 +1444,31 @@ namespace B2B.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Username")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Users");
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
+                            Id = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
                             AccountCode = "",
-                            CreateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(986),
-                            CreateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7793),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
                             Email = "murat@ulkubilgisayar.com",
                             Password = "Admin",
-                            UpdateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(988),
-                            UpdateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7793),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
                             Username = "Admin"
                         });
                 });
@@ -869,13 +1505,13 @@ namespace B2B.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
-                            RoleId = new Guid("9401df5e-51c2-42ca-a08d-7878fc8a447e"),
-                            CreateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(1023),
-                            CreateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008"),
-                            Id = new Guid("19cd1ab7-2db4-4ab2-aa8a-1fb10cd61831"),
-                            UpdateDate = new DateTime(2023, 11, 27, 17, 30, 32, 32, DateTimeKind.Local).AddTicks(1023),
-                            UpdateUser = new Guid("994fb179-7e63-4f69-b84a-492ac1d48008")
+                            UserId = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
+                            RoleId = new Guid("d05e1bb3-3383-4cb8-bc53-644b7bee8c1f"),
+                            CreateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7799),
+                            CreateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"),
+                            Id = new Guid("c737c015-1146-469d-8fbe-ef83f7a3699a"),
+                            UpdateDate = new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7800),
+                            UpdateUser = new Guid("b6958f05-df58-4c21-a698-fe5aff764df3")
                         });
                 });
 
@@ -886,7 +1522,6 @@ namespace B2B.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("AccountCode")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("BankCardId")
@@ -902,8 +1537,10 @@ namespace B2B.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("SinglePayment")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("TEXT");
@@ -915,26 +1552,87 @@ namespace B2B.Migrations
 
                     b.HasIndex("BankCardId");
 
-                    b.HasIndex("CardBrandId");
-
                     b.ToTable("VirtualPos");
                 });
 
-            modelBuilder.Entity("Entity.BankParameter", b =>
+            modelBuilder.Entity("Entity.VirtualPosParameter", b =>
                 {
-                    b.HasOne("Entity.BankCard", "Bank")
-                        .WithMany("Parameters")
-                        .HasForeignKey("BankCardId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("VirtualPosId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VirtualPosId");
+
+                    b.ToTable("VirtualPosParameters");
+                });
+
+            modelBuilder.Entity("Entity.CharAsgn", b =>
+                {
+                    b.HasOne("Entity.CharCode", "CharCode")
+                        .WithMany()
+                        .HasForeignKey("CharCodeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Bank");
+                    b.HasOne("Entity.CharVal", "CharVal")
+                        .WithMany()
+                        .HasForeignKey("CharValId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.Product", "Product")
+                        .WithMany("CharAsgn")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CharCode");
+
+                    b.Navigation("CharVal");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Entity.CharVal", b =>
+                {
+                    b.HasOne("Entity.CharCode", "CharCode")
+                        .WithMany("CharVals")
+                        .HasForeignKey("CharCodeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CharCode");
                 });
 
             modelBuilder.Entity("Entity.CreditCard", b =>
                 {
                     b.HasOne("Entity.BankCard", "Bank")
-                        .WithMany("CreditCards")
+                        .WithMany()
                         .HasForeignKey("BankCardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -952,38 +1650,13 @@ namespace B2B.Migrations
 
             modelBuilder.Entity("Entity.CreditCardInstallment", b =>
                 {
-                    b.HasOne("Entity.BankCard", "BankCard")
-                        .WithMany("Installments")
-                        .HasForeignKey("BankCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Entity.CardBrand", "CardBrand")
-                        .WithMany()
-                        .HasForeignKey("CardBrandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Entity.CreditCard", "CreditCard")
-                        .WithMany("Installments")
+                        .WithMany()
                         .HasForeignKey("CreditCardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("BankCard");
-
-                    b.Navigation("CardBrand");
 
                     b.Navigation("CreditCard");
-                });
-
-            modelBuilder.Entity("Entity.CreditCardPrefix", b =>
-                {
-                    b.HasOne("Entity.CreditCard", null)
-                        .WithMany("Prefixes")
-                        .HasForeignKey("CreditCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Entity.FirmDoc", b =>
@@ -993,26 +1666,111 @@ namespace B2B.Migrations
                         .HasForeignKey("ProductId");
                 });
 
-            modelBuilder.Entity("Entity.PaymentTransaction", b =>
+            modelBuilder.Entity("Entity.OrdFiche", b =>
                 {
-                    b.HasOne("Entity.BankCard", "BankCard")
+                    b.HasOne("Entity.Company", "Company")
                         .WithMany()
-                        .HasForeignKey("BankCardId")
+                        .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("BankCard");
+                    b.HasOne("Entity.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Entity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Entity.OrdLine", b =>
+                {
+                    b.HasOne("Entity.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Entity.OrdFiche", null)
+                        .WithMany("Lines")
+                        .HasForeignKey("OrdFicheId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Entity.PaymentTransaction", b =>
+                {
+                    b.HasOne("Entity.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.VirtualPos", "VirtualPos")
+                        .WithMany()
+                        .HasForeignKey("VirtualPosId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("User");
+
+                    b.Navigation("VirtualPos");
                 });
 
             modelBuilder.Entity("Entity.PriceList", b =>
                 {
+                    b.HasOne("Entity.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Entity.Product", "Product")
                         .WithMany("PriceLists")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Currency");
+
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Entity.Product", b =>
+                {
+                    b.HasOne("Entity.CharSet", "CharSet")
+                        .WithMany()
+                        .HasForeignKey("CharSetId");
+
+                    b.Navigation("CharSet");
                 });
 
             modelBuilder.Entity("Entity.ProductAmount", b =>
@@ -1024,6 +1782,24 @@ namespace B2B.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Entity.ShipAdress", b =>
+                {
+                    b.HasOne("Entity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Entity.User", b =>
+                {
+                    b.HasOne("Entity.Company", null)
+                        .WithMany("Users")
+                        .HasForeignKey("CompanyId");
                 });
 
             modelBuilder.Entity("Entity.UserRole", b =>
@@ -1048,42 +1824,44 @@ namespace B2B.Migrations
             modelBuilder.Entity("Entity.VirtualPos", b =>
                 {
                     b.HasOne("Entity.BankCard", "BankCard")
-                        .WithMany("VirtualPos")
+                        .WithMany()
                         .HasForeignKey("BankCardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Entity.CardBrand", "CardBrand")
-                        .WithMany()
-                        .HasForeignKey("CardBrandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("BankCard");
-
-                    b.Navigation("CardBrand");
                 });
 
-            modelBuilder.Entity("Entity.BankCard", b =>
+            modelBuilder.Entity("Entity.VirtualPosParameter", b =>
                 {
-                    b.Navigation("CreditCards");
-
-                    b.Navigation("Installments");
-
-                    b.Navigation("Parameters");
+                    b.HasOne("Entity.VirtualPos", "VirtualPos")
+                        .WithMany("VirtualPosParameters")
+                        .HasForeignKey("VirtualPosId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("VirtualPos");
                 });
 
-            modelBuilder.Entity("Entity.CreditCard", b =>
+            modelBuilder.Entity("Entity.CharCode", b =>
                 {
-                    b.Navigation("Installments");
+                    b.Navigation("CharVals");
+                });
 
-                    b.Navigation("Prefixes");
+            modelBuilder.Entity("Entity.Company", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Entity.OrdFiche", b =>
+                {
+                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("Entity.Product", b =>
                 {
+                    b.Navigation("CharAsgn");
+
                     b.Navigation("PriceLists");
 
                     b.Navigation("ProductAmounts");
@@ -1099,6 +1877,11 @@ namespace B2B.Migrations
             modelBuilder.Entity("Entity.User", b =>
                 {
                     b.Navigation("UsersRoles");
+                });
+
+            modelBuilder.Entity("Entity.VirtualPos", b =>
+                {
+                    b.Navigation("VirtualPosParameters");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,0 +1,49 @@
+﻿@using B2C.Data
+@using Business.Abstract
+@using CoreUI.Components.Pagenation
+@using B2C.Components.Products
+@using CoreUI.Data
+
+ <CardViewPage TItem="Product"  Data="pdata.Results"/>
+ <Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="pdata.PageSize" RowCount="pdata.RowCount" OnPageSizeChanged="pageSizeOnchanged" />
+
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "q")]
+    public string q { get; set; }
+
+    private MenuItemModel selectCategory { get; set; } = default!;
+    public string? Filter { get; set; } = default!;
+    public Dictionary<Guid, List<string>> PropertySet { get; set; } = default!;
+
+    protected PagedResult<Product> pdata = new();
+    protected async void pageSizeOnchanged(int pageSize)
+    {
+        pdata.PageSize = pageSize;
+        pdata.CurrentPage = 1;
+        pdata.Results = await ProductServices.GetAllAsync(Filter ?? string.Empty, null, selectCategory is null ? 0 : selectCategory.id, pdata.CurrentPage, pdata.PageSize);
+
+    }
+    [Inject] IProductServices ProductServices { get; set; } = default!;
+    protected async void PagerPageChanged(int page)
+    {
+
+        pdata.RowCount = await ProductServices.TotalCount(Filter ?? string.Empty, PropertySet, selectCategory is null ? 0 : selectCategory.id, pdata.CurrentPage, pdata.PageSize);
+        pdata.CurrentPage = page < 1 ? 1 : page;
+        pdata.Results = await ProductServices.GetAllAsync(Filter ?? string.Empty, PropertySet, selectCategory is null ? 0 : selectCategory.id, pdata.CurrentPage, pdata.PageSize);
+
+        StateHasChanged();
+
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            PagerPageChanged(pdata.CurrentPage);
+
+        }
+    }
+}
+

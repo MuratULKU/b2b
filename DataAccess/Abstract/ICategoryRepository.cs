@@ -2,14 +2,8 @@
 
 namespace DataAccess.Abstract
 {
-    public interface ICategoryRepository
+    public interface ICategoryRepository:IRepository<Category>
     {
-        List<Category> GetAll();
-        List<Category> Get(int parentref);
-        void Insert(Category category);
-        void Update(Category category);
-
-        Task<Category> GetByCode(string code);
-        Task<int> DeleteAll();
+       
     }
 }

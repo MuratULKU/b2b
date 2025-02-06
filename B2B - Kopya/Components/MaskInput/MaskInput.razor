@@ -1,0 +1,139 @@
+﻿@inject IJSRuntime JSRuntime
+@typeparam TValue
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+
+
+<input @ref="@Element" @attributes="Attributes" value="@_value" @onchange="@OnChange" id="@GetId()"
+       oninput="@OnChange" />
+
+@code {
+    /// <summary>
+    /// Gets a reference to the HTML element rendered by the component.
+    /// </summary>
+    public ElementReference Element { get; set; }
+
+
+
+    /// <summary>
+    /// Gets or sets the unique identifier.
+    /// </summary>
+    /// <value>The unique identifier.</value>
+    public string UniqueID { get; set; }
+    /// <summary>
+    /// Gets the unique identifier.
+    /// </summary>
+    /// <returns>Returns the <c>id</c> attribute (if specified) or generates a random one.</returns>
+    ///
+    /// <summary>
+    /// Specifies additional custom attributes that will be rendered by the component.
+    /// </summary>
+    /// <value>The attributes.</value>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> Attributes { get; set; }
+    protected string GetId()
+    {
+        if (Attributes != null && Attributes.TryGetValue("id", out var id) && !string.IsNullOrEmpty(Convert.ToString(@id)))
+        {
+            return $"{@id}";
+        }
+
+        return UniqueID;
+    }
+
+    protected override void OnInitialized()
+    {
+        UniqueID = Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("/", "-").Replace("+", "-").Substring(0, 10);
+    }
+    //2. class
+    /// <summary>
+    /// The value
+    /// </summary>
+    protected TValue _value;
+
+    /// <summary>
+    /// Gets or sets the value.
+    /// </summary>
+    /// <value>The value.</value>
+    [Parameter]
+    public TValue Value
+    {
+        get => _value;
+        set
+        {
+            if (EqualityComparer<TValue>.Default.Equals(_value, value)) return;
+            _value = value;
+            ValueChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<TValue> ValueChanged { get; set; }
+
+
+    /// <summary>
+    /// Handles the <see cref="E:Change" /> event.
+    /// </summary>
+    /// <param name="args">The <see cref="ChangeEventArgs"/> instance containing the event data.</param>
+
+    protected async Task OnChange(ChangeEventArgs args)
+    {
+        // await JSRuntime.InvokeVoidAsync("eval", $"Ulku.mask('{GetId()}', '{Mask}', '{Pattern}', '{CharacterPattern}')");
+
+        _value = (TValue)Convert.ChangeType(args.Value, typeof(TValue));
+        await Change.InvokeAsync(_value);
+        await ValueChanged.InvokeAsync(_value);
+
+    }
+
+
+
+    /// <summary>
+    /// Gets or sets the change.
+    /// </summary>
+    /// <value>The change.</value>
+    [Parameter]
+    public EventCallback<TValue> Change { get; set; }
+
+    [Parameter]
+    public long? MaxLength { get; set; }
+
+    /// <summary>
+    /// Gets or sets the mask.
+    /// </summary>
+    /// <value>The mask.</value>
+    [Parameter]
+    public string Mask { get; set; }
+
+    /// <summary>
+    /// Gets or sets the pattern that will be used to replace all invalid characters with regular expression.
+    /// </summary>
+    /// <value>The invalid characters pattern.</value>
+    [Parameter]
+    public string Pattern { get; set; }
+
+    /// <summary>
+    /// Gets or sets the pattern that will be used to match all valid characters with regular expression. If both Pattern and CharacterPattern are set CharacterPattern will be used.
+    /// </summary>
+    /// <value>The valid characters pattern.</value>
+    [Parameter]
+    public string CharacterPattern { get; set; }
+
+    /// <summary>
+    /// Handles the <see cref="E:Change" /> event.
+    /// </summary>
+    /// <param name="args">The <see cref="ChangeEventArgs"/> instance containing the event data.</param>
+
+    protected async override void OnAfterRender(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("Ulku.newMask", Element, Mask, Pattern, CharacterPattern);
+        }
+    }
+
+
+
+}

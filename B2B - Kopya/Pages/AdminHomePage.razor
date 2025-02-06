@@ -1,0 +1,73 @@
+﻿@using Business.Abstract;
+<div class="row">
+    <div class="col-md-6">
+        <div class="shadow-lg p-3 mb-5 bg-white rounded text-center">Günlük Çekilen KK
+            <hr />
+            <div class="row">
+                <div class="col-md-4 text-left">Çekilen Kredi Kartları </div>
+                <div class="col-md-8 text-right">@_paymentService.GetTotalAmount(DateTime.Now.Date).ToString("N2") TL</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 text-left">Toplam Çekilen KK </div>
+                <div class="col-md-8 text-right">@_paymentService.GetTotalAmount().ToString("N2") TL</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="shadow-lg p-3 mb-5 bg-white rounded text-center">Sepetteki Ürün Toplamı
+            <hr />
+            <div class="row">
+                <div class="col-md-6 text-left">Bugün Girilen Sepet Tutarı </div>
+                <div class="col-md-6 text-right">@_orderService.GetTotalAomut(DateTime.Now.Date).ToString("N2") TL</div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 text-left">Toplam Girilen Sepet Tutarı </div>
+                <div class="col-md-6 text-right">@_orderService.GetTotalAomut(Convert.ToDateTime("01.01.2020")).ToString("N2") TL</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="shadow-lg p-3 mb-5 bg-white rounded text-center">Son 5 Gün Çekilen Kredi Kartı
+            <hr />
+            @for (int i = 0; i < 4; i++)
+            {
+                var date = DateTime.Now.Date.AddDays(-i).Date;
+                <div class="row">
+                    <div class="col-md-4 text-left">@date.Date.ToString("dd.MM.yyyy")</div>
+                    <div class="col-md-8 text-right">@_paymentService.GetTotalAmount(date).ToString("N2") TL</div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="shadow-lg p-3 mb-5 bg-white rounded text-center">Son 5 Gün Girilen Sipariş
+            <hr />
+            @for (int i = 0; i < 4; i++)
+            {
+                var date = DateTime.Now.Date.AddDays(-i).Date;
+                <div class="row">
+                    <div class="col-md-4 text-left">@date.Date.ToString("dd.MM.yyyy") </div>
+                    <div class="col-md-8 text-right">@_orderService.GetTotalAomut(date).ToString("N2") TL</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Inject]
+    IPaymentService _paymentService { get; set; }
+
+    [Inject]
+    IOrderService _orderService { get; set; }
+
+    }
+
+
+
+
+
+

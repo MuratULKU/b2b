@@ -1,0 +1,36 @@
+﻿@page "/companylist"
+@using Business.Abstract
+@using CoreUI.Components.DataGrid
+@using Entity
+@inject ICompanyService companyManager
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <DataGrid TItem="Company" Items="companies" SelectedItemChanged="selectedCompanyChanged">
+                <Columns>
+                    <Column Caption="Firma Kodu" Field="@nameof(Company.ProgramCode)" />
+                    <Column Caption="Firma Adı" Field="@nameof(Company.Name)" />
+                </Columns>
+            </DataGrid>
+        </div>
+        <div class="col-6">
+            <CompanyCardPage company="selectedCompany"/>
+        </div>
+    </div>
+   
+</div>
+
+@code {
+    private List<Company> companies { get; set; } = default!;
+    private Company selectedCompany { get; set; } = default!;
+
+    private void selectedCompanyChanged(Company company)
+    {
+        selectedCompany = company;
+        StateHasChanged();
+    }
+    protected override async void OnInitialized()
+    {
+        companies = await companyManager.GetAllAsync(0, 10);
+    }
+}

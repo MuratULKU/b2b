@@ -15,7 +15,8 @@ namespace _3DPayment.Request
         public string LanguageIsoCode { get; set; }
         public string CustomerIpAddress { get; set; }
         public BankNames BankName { get; set; }
-
+        public string CardNumber { get; set; }
+        public decimal Amount { get; set; }
         public Dictionary<string, string> BankParameters { get; set; } = new Dictionary<string, string>();
 
     }

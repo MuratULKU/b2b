@@ -1,0 +1,91 @@
+﻿@typeparam TValue
+<div class="number-int">
+    @if (ButtonVisible)
+    {
+        <button class="down" onclick="@down">-</button>
+    }
+    <input class="form-control number-text" type="tel" pattern="[0-9\.]" placeholder="1" min="@MinValue" value="@GetFormattedValue()" id="@GetId" onchange="@change" onfocus="this.select()" />
+    @if (ButtonVisible)
+    {
+        <button class="up" onclick="@up">+</button>
+    }
+</div>
+
+@code {
+    public string UniqueID { get; set; }
+
+
+    [Parameter] public TValue MinValue { get; set; }
+    [Parameter] public TValue Value { get; set; }
+    [Parameter]
+    public EventCallback<TValue> Change { get; set; }
+    [Parameter]
+    public EventCallback<TValue> ValueChanged { get; set; }
+    [Parameter] public string DisplayValue { get; set; }
+
+    [Parameter] public bool ButtonVisible {get;set;}
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> Attributes { get; set; }
+    protected string GetId()
+    {
+        if (Attributes != null && Attributes.TryGetValue("id", out var id) && !string.IsNullOrEmpty(Convert.ToString(@id)))
+        {
+            return $"{@id}";
+        }
+
+        return UniqueID;
+    }
+
+    protected override void OnInitialized()
+    {
+        UniqueID = Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("/", "-").Replace("+", "-").Substring(0, 10);
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
+
+
+    private void change(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out double newValue))
+        {
+            Value = (TValue)(object)newValue;
+            Change.InvokeAsync(Value);
+        }
+    }
+
+    private string GetFormattedValue()
+    {
+        if (!string.IsNullOrEmpty(DisplayValue))
+        {
+            // Format değeri DisplayValue parametresine göre döndür
+            return Convert.ToDouble(Value).ToString(DisplayValue);
+        }
+        else
+        {
+            // Eğer DisplayValue yoksa, sadece değeri döndür
+            return Value.ToString();
+        }
+    }
+
+    private void down()
+    {
+        double newValue = Convert.ToDouble(Value) - 1;
+        if (newValue >= Convert.ToDouble(MinValue))
+        {
+            Value = (TValue)(object)newValue;
+            Change.InvokeAsync(Value);
+        }
+    }
+    private void up()
+    {
+        double newValue = Convert.ToDouble(Value) + 1;
+
+        Value = (TValue)(object)newValue;
+        Change.InvokeAsync(Value);
+
+    }
+}

@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Core.Abstract;
 using DataAccess.Abstract;
 using Entity;
 using System;
@@ -12,45 +13,59 @@ namespace Business.Concrete
 {
     public class FirmParamManager : IFirmParamService
     {
-        private readonly IFirmParamRepository _firmParamRepository;
+        private readonly IUnitofWork _unitOfWork;
 
-        public FirmParamManager(IFirmParamRepository firmParamRepository)
+        public FirmParamManager(IUnitofWork unitOfWork)
         {
-            _firmParamRepository = firmParamRepository;
+            _unitOfWork = unitOfWork;
         }
 
-        public FirmParam Create(FirmParam firmParam)
+        public Task<IResult> Create(FirmParam firmParam)
         {
-            return _firmParamRepository.Create(firmParam);
+            return _unitOfWork.FirmParam.AddAsync(firmParam);
         }
 
-        public FirmParam Delete(FirmParam firmParam)
+        public Task<IResult> Delete(FirmParam firmParam)
         {
-            return _firmParamRepository.Delete(firmParam);
+            return _unitOfWork.FirmParam.Delete(firmParam);
         }
 
-        public object Get(int no)
+        public async  Task<FirmParam> Get(int no)
         {
-            return _firmParamRepository.Get(no);
+           var result = await _unitOfWork.FirmParam.SingleOrDefaultAsync(x=>x.No == no);
+            return result.Data;
         }
 
-        public List<FirmParam> GetAll()
+        public async Task<List<FirmParam>> GetAll()
         {
-            return _firmParamRepository.GetAll();
+            var result = await _unitOfWork.FirmParam.GetAllAsync();
+            return result.Data;
         }
 
-        public FirmParam Update(FirmParam firmParam)
+        public async Task<IResult> Update(FirmParam firmParam)
         {
-            return _firmParamRepository.Update(firmParam);
+            var result = await  _unitOfWork.FirmParam.UpdateAsync(firmParam);
+            await _unitOfWork.CommitAsync();
+            return result;
         }
+
 
         public string ToString(int no)
         {
-            return Encoding.UTF8.GetString((byte[])Get(no));
+            var result = Encoding.UTF8.GetString((byte[])(Get(no)).Result.Value);
+            return result;
         }
         public bool ToBoolean(int no)
         {
-            return Convert.ToBoolean(ToString(no));
+            var firmParam = Get(no);
+            if (firmParam != null)
+            {
+                if(ToString(no) == "1")
+                    return true;
+                return false;
+           
+            }
+            throw new InvalidOperationException("Value cannot be converted to boolean.");
         }
 
         public int ToInteger(int no)

@@ -1,4 +1,5 @@
-﻿using Entity;
+﻿using Core.Abstract;
+using Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,12 @@ namespace Business.Abstract
 {
     public interface IVirtualPosService
     {
-        VirtualPos CreateVirtualPos(VirtualPos virtualPos);
-        VirtualPos DeleteVirtualPos(VirtualPos virtualPos);
-        VirtualPos UpdateVirtualPos(VirtualPos virtualPos);
-        Task<List<VirtualPos>> GetVirtualPosAsync();
-        Task<VirtualPos> GetByBankCode(int id, bool isBusiness);
+        Task<IResult> CreateVirtualPos(VirtualPos virtualPos);
+        Task<IResult> DeleteVirtualPos(VirtualPos virtualPos);
+        Task<IResult> UpdateVirtualPos(VirtualPos virtualPos);
+        Task<VirtualPos> GetByBrandId(Guid id);
         Task<VirtualPos> GetVirtualPosAsync(Guid virtualPosId);
-       Task<List<VirtualPos>> GetByBrandCode(int brandCode);
+        Task<IDataResult<List<VirtualPosParameter>>> GetVirtualPosParameters(Guid bankId);
+        Task<List<VirtualPos>> GetVirtualListsAsync();
     }
 }

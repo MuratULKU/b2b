@@ -1,0 +1,321 @@
+﻿    @page "/cart"
+
+@using B2B.Components.Confirm
+@using B2B.Components.Login;
+@using B2B.Components.SanalMagazaUI.InputNumber
+@using B2B.Data;
+@using B2B.Models;
+@using Business.Abstract;
+@using Business.Concrete;
+@using DataAccess.Abstract;
+@using Entity;
+@using Newtonsoft.Json.Linq;
+@using System.Net.Http.Headers;
+@using Newtonsoft.Json;
+@using System.Text;
+@inject IOrderService orderService
+@inject UserManager userService
+@inject IFirmParamService firmParamService
+@inject IProductRepository _productRepository
+@inject NavigationManager navManager
+@inject NotificationService _notification
+
+
+@attribute [Authorize]
+@if (ordFiche != null)
+{
+    <div class="container">
+        <div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="image">Görsel</th>
+                        <th class="code">Kodu</th>
+                        <th class="name">Açıklama</th>
+                        <th class="stok">Stok</th>
+                        <th class="vat">KDV</th>
+                        <th class="aount">Miktar</th>
+                        <th class="price">Birim Fiyat</th>
+                        <th class="total">Tutar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in ordFiche.Lines)
+                    {
+                        <tr>
+                            <td class="col-image image"><img width="50px" src="@item.Product.ToImage()" /></td>
+                            <td class="code">@item.Product.Code</td>
+                            <td class="name">@item.Product.Name</td>
+                            <td class="text-right stok">@((MarkupString)item.AvailableStock.ToAvaliableAmount((int)ShowParameter.FirstOrDefault(x => x.Key == "StockAmountShow").Value, (int)ShowParameter.FirstOrDefault(x => x.Key == "StockWarningAmount").Value))</td>
+                            <td class="text-right vat">@item.Product.SellVat</td>
+                            <td class="text-right amount">
+                                <InputIntNumber @bind-Value="@item.Amount"
+                                                Change="@((e)=>change(e,item))"></InputIntNumber>
+                            </td>
+                            <td class="text-right price">@item.Price.ToString("N2")  @item.Currency.CurrencySymbol</td>
+                            <td class="text-right total">@item.Total.ToString("N2")  @item.Currency.CurrencySymbol</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="row">
+                <div class="col-md-7" style="margin-top:20px;">
+                    <label>Açıklama</label>
+                    <input class="form-control" type="text" maxlength="50" @bind-value="explanation">
+                    <label>Ödeme Şekli</label>
+                    <B2B.Components.SelectList.SelectList Items="paymentMethots" DisplayField="Name" ValueField="Id" SelectedChanged="@((e)=>PaymentChange(Convert.ToInt32(e)))" />
+                </div>
+                <div class="col-md-5">
+                    <table class="table">
+                        <thead>
+                            <tr class="text-left">
+                                <th class="text-left">Alt Toplam</th>
+                                <th class="text-left">Tutar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="width:200px;">
+                                <td class="text-left">Ara Toplam</td>
+                                <td class="text-right">@ordFiche.Lines.Sum(x=>x.Total).ToString("N2") @ordFiche.Currency.CurrencySymbol</td>
+                            </tr>
+                            <tr style="width:200px;">
+                                <td class="text-left">Toplam Iskonto</td>
+                                <td class="text-right">@ordFiche.Lines.Sum(x=>x.Distdisc).ToString("N2") @ordFiche.Currency.CurrencySymbol</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Vergi Tutarı</td>
+                                <td class="text-right">@ordFiche.Lines.Sum(x=>x.VatAmnt).ToString("N2") @ordFiche.Currency.CurrencySymbol</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Genel Toplam</td>
+                                <td class="text-right">@ordFiche.Lines.Sum(x=>x.VatMatrah + x.VatAmnt).ToString("N2") @ordFiche.Currency.CurrencySymbol</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="row">
+                <div class="col-7">
+                    <button class="btn btn-primary" onclick="@basketUpdate">Sepeti Güncelle</button>
+                    <button class="btn btn-primary" onclick="@BasketDelete">Sepeti Boşalt</button>
+                </div>
+                <div class="col-5" style="text-align:right;">
+                    <Button Color="Blazorise.Color.Success" Clicked="@SendData" Disabled="@completedButton">Siparişi Tamamla</Button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container">
+        <label class="text-center">Sepet Boş</label>
+    </div>
+}
+
+<Confirm @ref="ConfirmRef" />
+
+
+@code {
+    private OrdFiche ordFiche;
+
+    private Confirm ConfirmRef;
+    private string explanation = string.Empty;
+
+    private List<PaymentMethot> paymentMethots = new();
+    private int selectedPaymetMethot = 1;
+    private bool completedButton = false;
+    private ClCard clcard;
+    HttpClient _httpClient = new HttpClient();
+
+
+
+    private void PaymentChange(int value)
+    {
+        selectedPaymetMethot = value;
+        if (firmParamService.ToBoolean(26))
+        {
+            if (value == 2)
+            {
+                completedButton = true;
+                if (clcard != null)
+                {
+                    if ((clcard.CreditLimit - (clcard.OrdRiskTotal + clcard.OrdSuggRiskTotal)) - (clcard.Debit - clcard.Credit) >= ordFiche.Total)
+                        completedButton = false;
+                    else
+                    {
+                        _notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Risk Limiti Yetersiz.", Detail = "", Duration = 5000 });
+                    }
+                }
+                else
+                    _notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Açık Hesap Sipariş Kabul Edemiyoruz.", Detail = "", Duration = 5000 });
+            }
+            else
+            {
+                completedButton = false;
+            }
+        }
+    }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    [CascadingParameter]
+    private Dictionary<string, object> ShowParameter { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        userService.UserManagerAsync(authenticationState.Result.User);
+        //ordFiche = orderService.GetFiche(false, userService.User.Id);
+        completedButton = firmParamService.ToBoolean(16); //bakım modu kontrolu
+        List<ProductAmount> amount = new();
+        var stokcode = ordFiche?.Lines?.Select(x => x.Product.Code).ToArray();
+        if (stokcode?.Length > 0)
+        {
+            if (_httpClient.BaseAddress == null)
+            {
+                using StreamReader openStream = new StreamReader("appsettings.json");
+                string json = openStream.ReadToEnd();
+                dynamic appsetting = JObject.Parse(json);
+                _httpClient.BaseAddress = appsetting.ApiService.Url;
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            }
+            StringContent content = new StringContent(JsonConvert.SerializeObject(stokcode), Encoding.UTF8, "application/json");
+            try
+            {
+                var httpResponseMessage =
+                       await _httpClient.PostAsync($"api/ProductsAmount", content);
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    var response = await httpResponseMessage.Content.ReadAsStringAsync();
+                    amount = JsonConvert.DeserializeObject<List<ProductAmount>>(response);
+                }
+
+                var response1 = await _httpClient.GetAsync($"/api/client/GetRisk?id={userService.User.AccountCode}");
+                if (response1.IsSuccessStatusCode)
+                    clcard = response1.Content.ReadFromJsonAsync<ClCard>().Result;
+            }
+            catch
+            {
+
+            }
+
+        }
+        if (ordFiche != null)
+        {
+            foreach (var basket in ordFiche?.Lines) //daha sonra servise taşınacak
+            {
+                double price = basket.Product.PriceLists[0].IncVat == 1 ? basket.Product.PriceLists[0].Price / (1 + ((double)basket.Product.SellVat / 100)) : basket.Product.PriceLists[0].Price;
+                if (basket.Price != price)
+                {
+                    completedButton = true;
+                    basket.Price = price;
+                    basket.Total = basket.Price * basket.Amount;
+                    basket.Distdisc = basket.Total * basket.Discper /100;
+                    basket.VatMatrah = basket.Total - basket.Distdisc;
+                    basket.VatAmnt = basket.VatMatrah * basket.Vat / 100;
+                }
+                if(completedButton)
+                {
+                    ConfirmRef.BodyText = "Fiyatı Değişen Ürünler Var Sepeti Güncelleyin";
+                    ConfirmRef.Show();
+                    StateHasChanged();
+                }
+                //hata veriyor sunucuda
+                if (amount?.Count > 0)
+                    basket.AvailableStock = amount.FirstOrDefault(x => x.Code == basket.Product.Code).OnHand;
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        paymentMethots.Add(new PaymentMethot { Id = 1, Name = "Açık Hesap" });
+        paymentMethots.Add(new PaymentMethot { Id = 2, Name = "Kredi Kartı" });
+    }
+
+    private async void BasketDelete(MouseEventArgs e)
+    {
+        ConfirmRef.BodyText = "Sepetteki Tüm Ürünler Silinecek Onaylıyormusunuz.?";
+        var con = await ConfirmRef.ShowAsync();
+        if(con)
+        {
+            orderService.DeleteOrderFiche(ordFiche);
+            ordFiche =await orderService.GetOrderFiche(0, userService.User.Id);
+            StateHasChanged();
+        }
+    }
+
+
+    private void basketUpdate()
+    {
+        for (int i = 0; i < ordFiche.Lines.Count; i++)
+        {
+            if (ordFiche.Lines[i].Amount == 0)
+            {
+                orderService.DeleteLine(ordFiche.Lines[i]);
+            }
+        }
+        ordFiche.GrossTotal = ordFiche.Lines.Sum(x => x.Total);
+        ordFiche.TotalDiscounted = ordFiche.Lines.Sum(x => x.Distdisc);
+        ordFiche.TotalVat = ordFiche.Lines.Sum(x => x.VatAmnt);
+        ordFiche.Total = ordFiche.Lines.Sum(x => x.VatMatrah + x.VatAmnt);
+        orderService.UpdateBasket(ordFiche);
+        completedButton = false;
+        StateHasChanged();
+    }
+
+    private void change(double e, OrdLine basket)
+    {
+        basket.Amount = e;
+        basket.Total = basket.Amount * basket.Price;
+        basket.Distdisc = basket.Total * basket.Discper / 100;
+        basket.VatMatrah = basket.Total - basket.Distdisc;
+        basket.VatAmnt = basket.VatMatrah * basket.Vat / 100;
+        completedButton = true;
+
+    }
+
+
+    private async void ConfirmDeleteBasket(bool confirm)
+    {
+        if (confirm)
+        {
+            orderService.DeleteOrderFiche(ordFiche);
+            ordFiche = await orderService.GetOrderFiche(0, userService.User.Id);
+        }
+    }
+
+
+    private void SendData()
+    {
+        if (selectedPaymetMethot == 2)
+        {
+            navManager.NavigateTo($"/payment/{ordFiche.Id}");
+        }
+        else
+        {
+
+            completedButton = true;
+            ordFiche.Send = 1;
+            ordFiche.Date_ = DateTime.Now.Date;
+            ordFiche.Explanation = explanation;
+            orderService.UpdateBasket(ordFiche);
+            explanation = string.Empty;
+            navManager.NavigateTo("/products");
+            HttpClient _httpClient = new HttpClient();
+            _httpClient.Timeout = TimeSpan.FromSeconds(300);
+            using StreamReader openStream = new StreamReader("appsettings.json");
+            string json = openStream.ReadToEnd();
+            dynamic appsetting = JObject.Parse(json);
+            _httpClient.BaseAddress = appsetting.ApiService.Url;
+           // backorder.SentData(_httpClient);
+        }
+    }
+
+
+}

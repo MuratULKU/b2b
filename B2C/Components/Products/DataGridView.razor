@@ -1,0 +1,111 @@
+﻿@* @using Business.Abstract
+@using Business.Concrete
+@using CoreUI.Components.Base
+@using CoreUI.Components.NotificationService
+@using B2C.Components.CartPanel
+@using Entity
+@using Core.Extantaion
+@using Microsoft.AspNetCore.Components.Authorization
+@typeparam TItem where TItem : Product
+@inject NavigationManager navManager
+@inject IFirmParamService firmParamService
+@inject SessionManager sessionManager
+@inject CartService cartPanel
+@inject NotificationService notification
+<table class="table center">
+
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col" class="col-image">Görsel</th>
+            <th scope="col" class="code">Kodu</th>
+            <th scope="col" class="col-product">Açıklama</th>
+            <th scope="col" class="col-amount">Stok</th>
+            <th scope="col" class="col-price">Özel Fiyat</th>
+            <th scope="col" class="col-price">KDVli Fiyat</th>
+            <th scope="col" class="col-operation">Sip. Miktar</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Data)
+        {
+            <tr>
+                 <td class="col-image" onclick="@(()=>trClick(item.Code))"><img width="50px" src="@item.ToImage()" /></td>
+                <td class="code" onclick="@(()=>trClick(item.Code))" style="cursor:pointer">@item.Code</td>
+                <td class="col-product">
+                    @item.Name
+                    @if (firmParamService.ToBoolean(28)  && item.ProducerCode != string.Empty)
+                    {
+                        <p class="hidden">Üretici Kodu : @item.ProducerCode</p>
+                    }
+                    @if (firmParamService.ToBoolean(29) && item.StGrupCode != string.Empty)
+                    {
+                        <p class="hidden ml-2">Grup Kodu : @item.StGrupCode</p>
+                    }
+                @if (firmParamService.ToBoolean(30) && item.SpeCode != string.Empty)
+                    {
+                        <p class="hidden ml-2">Özel Kod1 : @item.SpeCode</p>
+                    }
+                @if (firmParamService.ToBoolean(31) && item.SpeCode2 != string.Empty)
+                    {
+                        <p class="hidden ml-2">Özel Kod3 : @item.SpeCode2</p>
+                    }
+                @if (firmParamService.ToBoolean(32) && item.SpeCode3 != string.Empty)
+                    {
+                        <p class="hidden ml-2">Özel Kod3 : @item.SpeCode3</p>
+                    }
+                @if (firmParamService.ToBoolean(33) && item.SpeCode4 != string.Empty)
+                    {
+                        <p class="hidden ml-2">Özel Kod4 : @item.SpeCode4</p>
+                    }
+                @if (firmParamService.ToBoolean(34) && item.SpeCode5 != string.Empty)
+                    {
+                        <p class="hidden ml-2">Özel Kod5 : @item.SpeCode5</p>
+                    } 
+                </td>
+
+                <td class="col-amount">@((MarkupString)item.ToMiktar1(firmParamService.ToInteger(23), firmParamService.ToInteger(24)))</td>
+                <td class="col-price text-right">@item.ToFiyat1(Discount)</td>
+                <td class="col-price text-right">@item.ToFiyat2(Discount)</td> 
+                <td class="col-operation">
+                    <div>
+                        <input type="number" value="@item.OrderAmount" @oninput="@((e)=>item.OrderAmount = Convert.ToDouble(e.Value))" />
+                         <button class="shop-image-button" type="button" onclick="@(()=>clickAddProduct(item))">
+                            <span class="oi oi-cart shop-image" aria-hidden="true"></span>
+                        </button> 
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@code {
+    [Parameter]
+    public IEnumerable<TItem> Data { get; set; } = default!;
+    [EditorRequired]
+    [Parameter]
+    public Guid UserId { get; set; } = default!;
+
+    public double Discount { get; set; } = 0;
+
+    private void clickAddProduct(Product Data)
+    {
+        // sessionManager.AddCart(Data); bu sadece kart tipinde çalışacak
+
+       cartPanel.AddCart(Data, 1);
+        // if(result.Exception != null)
+        //     notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = result.Exception.InnerException.InnerException.InnerException.ToString(), Duration = 5000 });
+    }
+
+    private void trClick(string code)
+    {
+        navManager.NavigateTo($"/product?code={code}", true);
+    }
+
+    protected override void OnInitialized()
+    {
+      
+        base.OnInitialized();
+    }
+}
+ *@

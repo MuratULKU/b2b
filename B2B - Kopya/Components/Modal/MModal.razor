@@ -1,0 +1,71 @@
+﻿@using B2B.Components.Utilities
+@inherits UlkuComponentBase
+<div @ref="@ElementRef" id="@ElementId" class="@ClassNames" style="@StyleNames" tabindex="-1" @attributes="@Attributes">
+    <div class="modal-dialog @scrollable @verticallyCentered @modalSize @DialogCssClass">
+        <div class="modal-content">
+            @if (isVisible)
+            {
+                @if (!string.IsNullOrWhiteSpace(Title) || HeaderTemplate != null || ShowCloseButton)
+                {
+                    <div class="modal-header  @HeaderCssClass">
+                        @if (!string.IsNullOrWhiteSpace(Title))
+                        {
+                            <h5 class="modal-title">@Title</h5>
+                        }
+                        else if (HeaderTemplate != null)
+                        {
+                            @HeaderTemplate
+                        }
+
+                        @if (ShowCloseButton)
+                        {
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="HideAsync">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        }
+                    </div>
+                }
+
+                @if (childComponent is not null)
+                {
+                    <div class="modal-body @BodyCssClass">
+                        <DynamicComponent Type="@childComponent" Parameters="@parameters"/>
+                    </div>
+                }
+                else if (!string.IsNullOrWhiteSpace(Message))
+                {
+                    <div class="modal-body @BodyCssClass">
+                        @Message
+                    </div>
+                }
+                else if (BodyTemplate != null)
+                {
+                    <div class="modal-body @BodyCssClass">
+                        @BodyTemplate
+                    </div>
+                }
+
+                @if (FooterTemplate != null)
+                {
+                    <div class="modal-footer @FooterCssClass">
+                        @FooterTemplate
+                    </div>
+                }
+                else if (showFooterButton)
+                {
+                    <div class="modal-footer @FooterCssClass">
+                        <button class="@footerButtonCSSClass" color="@footerButtonColor"  aria-label="Close">@footerButtonCancelText</button>
+                        <button class="@footerButtonCSSClass" color="@footerButtonColor"  aria-label="Save">@footerButtonSaveText</button>
+                    </div>
+                }
+                
+            }
+        </div>
+    </div>
+
+</div>
+
+@if (showBackdrop)
+{
+    <div class="modal-backdrop modal-backdrop-confirmation fade show"></div>
+}

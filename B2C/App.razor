@@ -1,0 +1,22 @@
+﻿@using B2C.Components.UserPanel
+@using CoreUI.Components.Base
+@inject NavigationManager NavigationManager
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly">
+        
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    <RedirectToLogin ReturnUrl="@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)" />
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <RedirectToLogin/> 
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

@@ -1,0 +1,203 @@
+﻿@page "/prefix"
+@using B2B.Components.Confirm
+@using B2B.Components.SelectList
+@using Business.Abstract;
+@using Core.Abstract;
+
+@using Entity;
+@using static B2B.Components.FirmParameter.FirmParamPage;
+@inject ICreditCardService creditCardRepository
+@inject IBankCardService bankCardService
+@inject ICreditCardPrefixService creditCardService
+@inject NotificationService notification
+<div Class="container">
+    <div class="row">
+        <div class="col-6">
+            <label>Prefix Kodu</label>
+
+        </div>
+        <div class="col-6">
+            <input class="form-conrol" type="text" @bind-value="searchText" />
+            <button class="btn-secondary" onclick="@newPrefix">Yeni</button>
+            <button class="btn-primary" onclick="@SearchPrefix">Ara</button>
+        </div>
+        <br />
+        <hr />
+        @if (creditCardPrefix != null)
+        {
+            <div class="row">
+                <div class="col-6">
+                    <label>Banka Adı</label>
+                </div>
+                <div class="col-6">
+                    <SelectList TItem="BankCard" Items="bankCards" Selected="selectedCreditCard.BankCardId" DisplayField="Name" ValueField="Id" SelectedChanged="bankCardChange" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label>Kredi Kartı Adı</label>
+                </div>
+                <div class="col-6">
+                    <SelectList TItem="CreditCard" Items="creditCards" Selected="creditCardPrefix.CreditCardId" DisplayField="Name" ValueField="Id" SelectedChanged="creditCardChange" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label>Kredi Kartı Özellik Adı</label>
+                </div>
+                <div class="col-6">
+                    <SelectList TItem="CardBrand" Items="brandCards" Selected="selectedCreditCard.CardBrandId" DisplayField="Name" ValueField="Id" SelectedChanged="(e)=>selectedBrandId = new Guid(e.ToString())" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label>Business</label>
+                </div>
+                <div class="col-6">
+                    <SelectList TItem="EvetHayır" Items="stateList" Selected="isBusiness" DisplayField="Name" ValueField="State" SelectedChanged="(e)=>isBusiness= e.ToString()" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label>Aktif</label>
+                </div>
+                <div class="col-6">
+                    <SelectList TItem="EvetHayır" Items="stateList" Selected="isActive" DisplayField="Name" ValueField="State" SelectedChanged="(e)=>isActive = e.ToString()" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label>Taksit</label>
+                </div>
+                <div class="col-6">
+                    <SelectList TItem="EvetHayır" Items="stateList" Selected="isInstalment" DisplayField="Name" ValueField="State" SelectedChanged="(e)=>isInstalment = e.ToString()" />
+                </div>
+            </div>
+            <button class="btn-danger" style="max-width:100px;" onclick="@deletePrefix">Sil</button>
+            <button class="btn-primary" style="max-width:100px;" onclick="@savePrefix">Kaydet</button>
+
+        }
+    </div>
+</div>
+<Confirm @ref="confirm" />
+@code {
+    private string searchText = "";
+    private CreditCardPrefix creditCardPrefix { get; set; } = default!;
+    private List<CardBrand> brandCards { get; set; } = default!;
+    private List<BankCard> bankCards { get; set; } = default!;
+    private List<CreditCard> creditCards { get; set; } = default!;
+    private CreditCard selectedCreditCard { get; set; } = default!;
+    private Guid selectedBankCardId { get; set; }
+    private Guid selectedBrandId { get; set; }
+    private Guid selectedCreditCardId { get; set; }
+    private List<EvetHayır> stateList = new();
+    private string isBusiness;
+    private string isActive;
+    private string isInstalment;
+    private Confirm confirm;
+   
+    protected async override void OnInitialized()
+    {
+        bankCards = await bankCardService.GetAllBank();
+
+        brandCards = await bankCardService.GetCardBrand();
+
+        if (creditCardPrefix != null)
+        {
+            var creditcard = await bankCardService.GetBankbyCode(creditCardPrefix.BankCode);
+            creditCards = creditcard.CreditCards;
+        }
+        
+        stateList.Add(new EvetHayır() { Name = "Hayır", State = false });
+        stateList.Add(new EvetHayır() { Name = "Evet", State = true });
+    }
+
+    private void newPrefix()
+    {
+        creditCardPrefix = new();
+        selectedCreditCard = new();
+    }
+
+    private async void SearchPrefix()
+    {
+      
+        if (searchText.Length == 6)
+            creditCardPrefix = await creditCardService.GetByPrefix(searchText.Replace(" ", string.Empty).Substring(0, 6));
+        else if (searchText.Length == 8)
+            creditCardPrefix = await creditCardService.GetByPrefix(searchText.Replace(" ", string.Empty).Substring(0, 8));
+        else
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Prefix 6 veya 8 karakter olmalı", Duration = 5000 });
+        if (creditCardPrefix != null)
+        {
+            selectedCreditCard = await  bankCardService.GetCreditCardByPrefix(creditCardPrefix.Prefix.ToString(), true);
+            creditCards = await creditCardRepository.GetBankCreditCard(selectedCreditCard.Bank.Id);
+            isBusiness = creditCardPrefix.Business.ToString();
+            isActive = creditCardPrefix.Active.ToString();
+            isInstalment = creditCardPrefix.isInstallment.ToString();
+        }
+        StateHasChanged();
+    }
+
+    private async void savePrefix()
+    {
+        creditCardPrefix.Prefix = searchText;
+        bool onay = true;
+        if (creditCardPrefix.Id != Guid.Empty) 
+        {
+            onay = await confirm.ShowAsync("Değiştirme Onayı", $"{creditCardPrefix.Prefix} Nolu Kayıt Değiştirlecektir. Onaylıyor musunuz.");
+        }
+        if (selectedCreditCardId != Guid.Empty)
+        {
+            creditCardPrefix.CreditCardId = selectedCreditCardId;
+            selectedCreditCard = await creditCardRepository.Get(selectedCreditCardId);
+        }
+        if (selectedCreditCard != null && selectedCreditCard.Bank != null)
+        {
+            creditCardPrefix.BankCode = selectedCreditCard.Bank.BankCode;
+            creditCardPrefix.BrandCode = selectedCreditCard.BrandCode;
+        }
+       
+
+        if (onay)
+        {
+            creditCardPrefix.Business = Convert.ToBoolean(isBusiness);
+            creditCardPrefix.Active = Convert.ToBoolean(isActive);
+            creditCardPrefix.isInstallment = Convert.ToBoolean(isInstalment);
+            var result = await creditCardService.Update(creditCardPrefix);
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+        }
+
+        SearchPrefix();
+       
+    }
+
+    private async void deletePrefix()
+    {
+        var result = await confirm.ShowAsync("Silme Onay", $"{creditCardPrefix.Prefix} Kayıt Silinecek");
+        if (result)
+        {
+            var delresult = await creditCardService.Delete(creditCardPrefix);
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Hata", Detail = delresult.Message, Duration = 5000 });
+        }
+    }
+
+    private async void bankCardChange(object e)
+    {
+        selectedBankCardId = new Guid(e.ToString());
+        creditCards = await creditCardRepository.GetBankCreditCard(selectedBankCardId);
+        selectedCreditCard = creditCards.Find(x => x.BankCardId == selectedBankCardId);
+        brandCards.Find(x => x.Id == selectedCreditCard.CardBrandId);
+        StateHasChanged();
+    }
+
+    private async void creditCardChange(object e)
+    {
+        if (e != null)
+        {
+            selectedCreditCardId = Guid.Parse(e.ToString());
+            selectedCreditCard = await creditCardRepository.Get(selectedCreditCardId);
+            brandCards.Find(x => x.Id == selectedCreditCard.CardBrandId);
+        }
+
+    }
+}

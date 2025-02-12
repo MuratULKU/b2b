@@ -1,59 +1,60 @@
 ﻿@typeparam TItem
 <div class="row">
-    <div class="col-pagination" style="margin:auto;display:flex">
-        @if (Datagrid.TotalCount > 1)
-        {
-            <ul class="pagination">
-                <li class="first @(HasPreviousPage?null:"disabled")" style="cursor:pointer">
-                    <a class="page-link" onclick="@(() => PageOnChanged(1))">
-                        İlk
-                    </a>
-                </li>
-                <li class="prev @(HasPreviousPage?null:"disabled")" style="cursor:pointer">
-                    <a class="page-link" onclick="@(() => PageOnChanged(Datagrid.CurrentPage -1))">
-                        Onceki
-                    </a>
-                </li>
+    @if (PageCount > 1)
+    {
+        <div class="col-pagination" style="margin:auto;display:flex">
+          
+                <ul class="pagination">
+                    <li class="first @(HasPreviousPage?null:"disabled")" style="cursor:pointer">
+                        <a class="page-link" onclick="@(() => PageOnChanged(1))">
+                            İlk
+                        </a>
+                    </li>
+                    <li class="prev @(HasPreviousPage?null:"disabled")" style="cursor:pointer">
+                        <a class="page-link" onclick="@(() => PageOnChanged(Datagrid.CurrentPage -1))">
+                            Onceki
+                        </a>
+                    </li>
 
-                @for (var i = StartIndex; i <= FinishIndex; i++)
-                {
-                    var currentIndex = i;
-                    @if (i == Datagrid.CurrentPage)
+                    @for (var i = StartIndex; i <= FinishIndex; i++)
                     {
-                        <li class="page-item active" style="cursor:pointer">
-                            <a class="page-link" onclick="@(() => PageOnChanged(currentIndex))">
-                                <span>@i</span>
-                            </a>
-                        </li>
+                        var currentIndex = i;
+                        @if (i == Datagrid.CurrentPage)
+                        {
+                            <li class="page-item active" style="cursor:pointer">
+                                <a class="page-link" onclick="@(() => PageOnChanged(currentIndex))">
+                                    <span>@i</span>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item" style="cursor:pointer">
+                                <a class="page-link" onclick="@(() => PageOnChanged(currentIndex))">
+                                    <span>@i</span>
+                                </a>
+                            </li>
+                        }
                     }
-                    else
-                    {
-                        <li class="page-item" style="cursor:pointer">
-                            <a class="page-link" onclick="@(() => PageOnChanged(currentIndex))">
-                                <span>@i</span>
-                            </a>
-                        </li>
-                    }
-                }
-                <li class="last @(HasNextPage?null:"disabled")" style="cursor:pointer">
-                    <a class="page-link" style="cursor:pointer"
-                       onclick="@(() => PageOnChanged(Datagrid.CurrentPage+1))">
-                        Sonraki
-                    </a>
-                </li>
-                <li class="lastend @(HasNextPage?null:"disabled")" style="cursor:pointer">
-                    <a class="page-link" style="cursor:pointer"
-                       onclick="@(() => PageOnChanged(PageCount))">
-                        Son
-                    </a>
-                </li>
-            </ul>
+                    <li class="last @(HasNextPage?null:"disabled")" style="cursor:pointer">
+                        <a class="page-link" style="cursor:pointer"
+                           onclick="@(() => PageOnChanged(Datagrid.CurrentPage+1))">
+                            Sonraki
+                        </a>
+                    </li>
+                    <li class="lastend @(HasNextPage?null:"disabled")" style="cursor:pointer">
+                        <a class="page-link" style="cursor:pointer"
+                           onclick="@(() => PageOnChanged(PageCount))">
+                            Son
+                        </a>
+                    </li>
+                </ul>
 
 
 
-        }
-    </div>
-
+            
+        </div>
+    }
     <div class="col-page-count">
         <div class="justify-content-md-start" style="width:150px;display:inline-flex;margin:0px;padding:0px;">
             <select value="@Datagrid._rowsperpage" style="width:75px;" class="form-select" role="button" onchange="@(PerRowPageOnChange)">

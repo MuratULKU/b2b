@@ -2,27 +2,30 @@
 
 namespace PSS.Components.UserPanel
 {
-  public class UserIdentityProcessor : IUserIdentityProcessor
-{
-    private readonly AuthenticationStateProvider _authenticationStateAsync;
-
-    public UserIdentityProcessor(AuthenticationStateProvider authenticationStateAsync)
+    public class UserIdentityProcessor : IUserIdentityProcessor
     {
-        this._authenticationStateAsync = authenticationStateAsync;
-    }
+        private readonly AuthenticationStateProvider AuthStateProvider;
 
-    public async Task<string?> GetCurrentUserId()
-    {
-        var authstate = await this._authenticationStateAsync.GetAuthenticationStateAsync();
-
-        if (authstate == null)
+        public UserIdentityProcessor(AuthenticationStateProvider authenticationStateAsync)
         {
-            return null;
+            AuthStateProvider = authenticationStateAsync;
         }
 
-        var user = authstate.User;
+        public async Task<Guid> GetCurrentUserId()
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
 
-        return user.FindFirst(u => u.Type.Contains("sid"))?.Value;
+            if (authState == null)
+            {
+                return Guid.Empty;
+            }
+
+            var user = authState.User;
+
+            var result = user.FindFirst(u => u.Type.Contains("sid"))?.Value;
+            if (result != null)
+                return Guid.Parse(result);
+            return Guid.Empty;
+        }
     }
-}
 }

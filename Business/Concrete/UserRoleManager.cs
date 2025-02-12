@@ -33,6 +33,7 @@ namespace Business.Concrete
         public async Task<IResult> DeleteRole(UserRole role)
         {
             var result = await _unitOfWork.UserRole.Delete(role);
+            await _unitOfWork.CommitAsync();
             if (result.Status == ResultStatus.Success)
                 return new Result(ResultStatus.Success, "UserRole Deleted");
             return new Result(ResultStatus.Error, "UserRole not Deleted");
@@ -46,7 +47,7 @@ namespace Business.Concrete
 
         public async Task<UserRole> GetUserRole(Guid id)
         {
-           var result = await _unitOfWork.UserRole.GetByIdAsync(id);
+           var result = await _unitOfWork.UserRole.SingleOrDefaultAsync(x => x.Id == id);
             return result.Data;
         }
 

@@ -1,13 +1,13 @@
 ﻿@page "/product"
 @using Core.Extantaion;
 @using CoreUI.Components.Base
-@using PSS.Components.CartPanel
+
 @using DataAccess.Abstract
 @using Entity
 
 @inject IProductRepository _productRepository
 @inject SessionManager sessionManager
-@inject CartService cartPanel
+
 <div class="container">
 @if (product != null)
 {

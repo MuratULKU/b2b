@@ -18,7 +18,7 @@ namespace Business.Concrete
 {
     public class OrderManager : IOrderService,IDisposable
     {
-        public List<OrdFiche> Basket { get; set; } = new();
+      
 
         private readonly IUnitofWork _unitOfWork;
        
@@ -133,7 +133,7 @@ namespace Business.Concrete
 
         public async Task<List<OrdFiche>> GetOrderFiche(int trCode, byte send)
         {
-            var result = await _unitOfWork.OrdFiche.Find(x => x.TrCode == trCode && x.Send == send,includes: x=>x.Include(x=>x.Lines));
+            var result = await _unitOfWork.OrdFiche.Find(x => x.TrCode == trCode && x.Send == send,includes: x=>x.Include(x=>x.Lines).Include(x=>x.User));
             return result.Data;
         }
 

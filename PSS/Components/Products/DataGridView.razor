@@ -3,7 +3,7 @@
 @using Business.SingletonServices
 @using CoreUI.Components.Base
 @using CoreUI.Components.NotificationService
-@using PSS.Components.CartPanel
+
 @using Entity
 @using Core.Extantaion
 @using Microsoft.AspNetCore.Components.Authorization
@@ -11,7 +11,7 @@
 @inject NavigationManager navManager
 @inject FirmParameter firmParamService
 @inject SessionManager sessionManager
-@inject CartService cartPanel
+
 @inject NotificationService notification
 <table class="table center">
 
@@ -70,10 +70,10 @@
                 <td class="col-price text-right">@item.ToFiyat2(Discount)</td> 
                 <td class="col-operation">
                     <div>
-                        <input type="number" value="@item.OrderAmount" @oninput="@((e)=>item.OrderAmount = Convert.ToDouble(e.Value))" />
-                         <button class="shop-image-button" type="button" onclick="@(()=>clickAddProduct(item))">
+                        <input class="col-amount-input" type="number" value="@item.OrderAmount" @oninput="@((e)=>item.OrderAmount = Convert.ToDouble(e.Value))" />
+                        <button class="shop-image-button" type="button" onclick="@(()=>clickAddProduct(item))">
                             <span class="oi oi-cart shop-image" aria-hidden="true"></span>
-                        </button> 
+                        </button>
                     </div>
                 </td>
             </tr>

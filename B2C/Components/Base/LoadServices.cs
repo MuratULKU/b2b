@@ -41,7 +41,7 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<IUserRoleRepository, UserRoleRepository>();
             serviceCollection.AddScoped<IRoleRepository, RoleRepository>();
             serviceCollection.AddScoped<IRoleService, RoleManager>();
-            serviceCollection.AddScoped<FirmParamService, FirmParamManager>();
+            serviceCollection.AddScoped<FirmParamManager, FirmParamManager>();
             serviceCollection.AddScoped<IPaymentRepository, PaymentRepository>();
             serviceCollection.AddScoped<IClientRepository, ClientRepository>();
             serviceCollection.AddScoped<IDocumentNoRepository, DocumentNoRepository>();
@@ -73,6 +73,7 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<IProductAmountService, ProductAmountManager>();
             serviceCollection.AddScoped<IClientCardService, ClientCardManager>();
             serviceCollection.AddScoped<IDocumentNoService, DocumentNoManager>();
+            serviceCollection.AddScoped<IFirmParamService, FirmParamManager>();
             return serviceCollection;
         }
     }

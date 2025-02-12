@@ -1,4 +1,4 @@
 ﻿public interface IUserIdentityProcessor
 {
-    Task<string?> GetCurrentUserId();
+    Task<Guid> GetCurrentUserId();
 }

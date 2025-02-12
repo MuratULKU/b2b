@@ -97,5 +97,13 @@ namespace Business.Concrete
             if(result == 1)   { return true; }
             return false;
         }
+
+        public async Task<bool> Delete(Company company)
+        {
+            await _unitOfWork.Company.Delete(company);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1) { return true; }
+            return false;
+        }
     }
 }

@@ -1,0 +1,214 @@
+﻿@page "/userlist"
+@using Business.Abstract
+@using Entity
+@inject IUserService userService
+@inject IRoleService roleService
+@inject IUserRoleService userRoleService
+@inject ICompanyService companyService
+@inject IUserIdentityProcessor userIdentity
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <DataGrid TItem="User" Items="users" Virtualize="true" Pager TotalCount="@users.Count" SelectedItemChanged="selectUser">
+                <Columns>
+                    <Column Caption="Kodu" Field="@nameof(User.Username)" />
+                </Columns>
+                <ButtonRowTemplate>
+                    <button class="btn btn-success" style="width:130px;" onclick="@AddUser">Ekle</button>
+                    <input class="btn btn-primary" style="width:130px;" disabled="@(selecetedUser == null ? true:false)" onclick="@ChangeUser" value="Değiştir" />
+                    <input class="btn btn-danger" style="width:130px;" disabled="@(selecetedUser == null ? true:false)" onclick="@DeleteUser" value="sil" />
+                </ButtonRowTemplate>
+            </DataGrid>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">Kullanıcı Adı</div>
+                <div class="col-sm-6"><input class="form-control" @bind-value="selecetedUser.Username" /></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">Kullanıcı Şifresi</div>
+                <div class="col-sm-6"><input class="form-control" @bind-value="selecetedUser.Password" /></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">Mail Adrresi</div>
+                <div class="col-sm-6"><input class="form-control" @bind-value="selecetedUser.Email" /></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">Şirket</div>
+                <div class="col-sm-6">
+                    <SelectList TItem="Company" Items="companies" DisplayField="Name" ValueField="Id" @bind-Selected="ChangedCompany">
+
+                    </SelectList>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">Logo Satıcı Kodu</div>
+                <div class="col-sm-6"><input class="form-control" @bind-value="selecetedUser.AccountCode" /></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">Satıcı Adı ve Soyadı</div>
+                <div class="col-sm-6"><input class="form-control" @bind-value="selecetedUser.AccountName" /></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6"></div>
+                <div class="col-sm-6"></div>
+            </div>
+            <div class="row">
+                <h3>Kullanıcı Role Tanımları</h3>
+                <div col-sm-8>
+                    <SelectList TItem="Role" Items="roles" DisplayField="RoleName" ValueField="Id" @bind-Selected="ChangedUserRole" />
+                </div>
+                <div col-sm-4>
+                    <input type="button" class="btn btn-success" value="Role Ekle" onclick="@(()=>AddUserRole())" />
+                </div>
+            </div>
+            <div class="row">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Bölün Adı</th>
+                            <th>Operasyon</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (selecetedUser.UsersRoles != null)
+                        {
+                            @foreach (var item in selecetedUser.UsersRoles)
+                            {
+                                <tr>
+                                    <td>@item.Role.RoleName</td>
+                                    <td><button class="btn-danger" value="@item.Id" @onclick="()=>DeleteRole(item.Id)">Sil</button></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      
+    </div>
+</div>
+@code {
+    private List<User> users { get; set; }
+    private User selecetedUser { get; set; } = new();
+    private List<Role> roles { get; set; } = default!;
+    private Guid selectRoleId { get; set; }
+    private List<Company> companies { get; set; }
+    private Guid companyId { get; set; } = new();
+    protected override async void OnInitialized()
+    {
+        users = await userService.GetAllUser();
+        roles = roleService.GetAllRole().Result.Data;
+        companies = companyService.GetAll(0, 10);
+        StateHasChanged();
+    }
+    private async void selectUser(User user)
+    {
+        selecetedUser = user;
+        companyId = companies.FirstOrDefault(c => c.Id == selecetedUser.CompanyId).Id;
+        selecetedUser.UsersRoles = userRoleService.GetAll(selecetedUser.Id).Result;
+    }
+
+    private object ChangedUserRole
+    {
+        get
+        {
+            return selectRoleId;
+        }
+        set
+        {
+            if (Guid.TryParse(value.ToString(), out Guid guid))
+                selectRoleId = guid;
+        }
+    }
+
+    private object ChangedCompany
+    {
+        get
+        {
+            return companyId;
+        }
+        set
+        {
+            if (Guid.TryParse(value.ToString(), out Guid guid))
+                companyId = guid;
+
+
+        }
+
+    }
+
+    private async void AddUserRole()
+    {
+        UserRole userRole = new UserRole
+            {
+                Id = Guid.NewGuid(),
+                UserId = selecetedUser.Id,
+                RoleId = selectRoleId,
+                CreateDate = DateTime.Now,
+                UpdateDate = DateTime.Now,
+                CreateUser = await userIdentity.GetCurrentUserId(),
+                UpdateUser = await userIdentity.GetCurrentUserId()
+            };
+        await userRoleService.AddRole(userRole);
+        StateHasChanged();
+    }
+
+    private async void AddUser()
+    {
+        selecetedUser.Id = Guid.NewGuid();
+        selecetedUser.CreateDate = DateTime.Now;
+        selecetedUser.UpdateDate = DateTime.Now;
+        selecetedUser.CreateUser = await userIdentity.GetCurrentUserId();
+        selecetedUser.UpdateUser = await userIdentity.GetCurrentUserId();
+        selecetedUser.CompanyId = companyId;
+
+        UserRole userRole = new UserRole
+            {
+                Id = Guid.NewGuid(),
+                UserId = selecetedUser.Id,
+                RoleId = selectRoleId,
+                CreateDate = selecetedUser.CreateDate,
+                UpdateDate = selecetedUser.UpdateDate,
+                CreateUser = selecetedUser.CreateUser,
+                UpdateUser = selecetedUser.UpdateUser
+            };
+        await userService.AddUser(selecetedUser);
+        await userRoleService.AddRole(userRole);
+
+
+        StateHasChanged();
+    }
+
+    private async void DeleteUser()
+    {
+        if (selecetedUser != null)
+        {
+            await userService.DeleteUser(selecetedUser);
+            StateHasChanged();
+        }
+
+    }
+    private async void DeleteRole(Guid userRoleId)
+    {
+        var userRole = await userRoleService.GetUserRole(userRoleId);
+        if (userRole != null)
+            await userRoleService.DeleteRole(userRole);
+        StateHasChanged();
+    }
+
+    private async void ChangeUser()
+    {
+        if (selecetedUser != null)
+        {
+            selecetedUser.UpdateDate = DateTime.Now;
+            selecetedUser.UpdateUser = await userIdentity.GetCurrentUserId();
+            selecetedUser.CompanyId = companyId;
+            await userService.UpdateUser(selecetedUser);
+            StateHasChanged();
+        }
+
+    }
+
+
+}

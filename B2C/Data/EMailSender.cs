@@ -3,6 +3,7 @@ using System.Net.Mail;
 using System.Net;
 
 using Business.Abstract;
+using Business.SingletonServices;
 
 
 namespace SendEMail
@@ -15,7 +16,7 @@ namespace SendEMail
         private readonly string userName;
         private readonly string password;
         
-        public EMailSender(FirmParamService mailParamService)
+        public EMailSender(FirmParameter mailParamService)
         {
             this.host = mailParamService.ToString(11);
             this.port = Convert.ToInt32(mailParamService.ToString(12));

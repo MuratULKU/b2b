@@ -1,15 +1,14 @@
 ﻿@page "/firmparam"
 
 @using Business.Abstract;
-@using Business.SingletonServices
 @using CoreUI.Components.DataGrid
 @using CoreUI.Components.SelectList
 @using Entity
 @using System.Text;
 @using System.Reflection
 @attribute [Authorize(Roles = "Admin")]
-@inject Business.SingletonServices.FirmParameter firmParamService
-@inject IVirtualPosService virtualPosService
+@inject IFirmParamService firmParamService
+
 <div class="container">
     <div class="row">
         <div class="col-sm-6">
@@ -323,7 +322,7 @@
 
     protected async override void OnInitialized()
     {
-        firmParamList = firmParamService.FirmParameters;
+        firmParamList = firmParamService.GetAll().Result;
         stateList.Add(new EvetHayır() { Name = "Hayır", State = false });
         stateList.Add(new EvetHayır() { Name = "Evet", State = true });
         viewList.Add(new ViewMode() { Name = "Kart Mode", Mode = 0 });
@@ -333,7 +332,7 @@
     }
     protected async override Task OnParametersSetAsync()
     {
-         virtualPosList = await virtualPosService.GetVirtualListsAsync();
+         
     }
 
 

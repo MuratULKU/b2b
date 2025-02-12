@@ -77,12 +77,7 @@
     private int rowPerPage { get; set; } = 10;
     [Parameter]
     public int state { get; set; }
-    protected async override Task OnInitializedAsync()
-    {
-       
-
-    }
-
+   
     protected async override void OnParametersSet()
     {
         Guid userId = await userIdentity.GetCurrentUserId();

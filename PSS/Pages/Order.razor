@@ -1,5 +1,6 @@
 ﻿@page "/order"
 @using Business.Abstract
+@using Core.Enum
 @using CoreUI.Components.TabControl
 @using CoreUI.Components.DataGrid
 @using Entity
@@ -25,7 +26,11 @@
                         @clientCardService.GetByCode(@context.Item.ClientCode).Result.Name
                     </CellTemplate>
                 </Column>
-                <Column Caption="Dokuman Kodu" Field="@nameof(OrdFiche.Docode)" />
+                <Column Caption="Plasiyer Kodu">
+                    <CellTemplate>
+                        @context.Item.User.AccountName
+                    </CellTemplate>
+                </Column>
                 <Column Caption="Fiş No" Field="@nameof(OrdFiche.FicheNo)" />
                 <Column Caption="Toplam" TextAlign="TextAlignmet.Right">
                     <CellTemplate>
@@ -44,7 +49,7 @@
                 </Column>
                 <Column Caption="Onay">
                     <CellTemplate>
-                        @(context.Item.Send == 1 ? "Onaylandı" : "Onaylanmadı")
+                        @((OrderState)context.Item.Send)
                     </CellTemplate>
                 </Column>
             </Columns>
@@ -74,7 +79,7 @@
     private async void RowCountChange(int e)
     {
         pageCount = e;
-        ordFiches = await orderService.GetOrderFiche(2, 0, pageCount);
+        ordFiches = await orderService.GetOrderFiche(1, 0, pageCount);
     }
 
     private void OrderOK()
@@ -91,14 +96,14 @@
 
     private async void SelectedPageChange(int value)
     {
-        ordFiches = await orderService.GetOrderFiche(2, value, pageCount);
+        ordFiches = await orderService.GetOrderFiche(1, value, pageCount);
         StateHasChanged();
     }
 
     protected async override void OnInitialized()
     {
-        dataGridTotalCount = await orderService.GetOrderFicheCount(2);
-        ordFiches = await orderService.GetOrderFiche(2, 0, pageCount);
+        dataGridTotalCount = await orderService.GetOrderFicheCount(1);
+        ordFiches = await orderService.GetOrderFiche(1, 0, pageCount);
     }
 
 

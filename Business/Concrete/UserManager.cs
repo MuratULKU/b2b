@@ -23,8 +23,9 @@ namespace Business.Concrete
 
         public async Task<IResult> AddUser(User user)
         {
-            var result = await _unitOfWork.User.AddAsync(user);
-            if (result.Status == ResultStatus.Success)
+            await _unitOfWork.User.AddAsync(user);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
                 return new Result(ResultStatus.Success, "User Added Successfully");
             return new Result(ResultStatus.Error, "User not Added");
 
@@ -32,8 +33,9 @@ namespace Business.Concrete
 
         public async Task<IResult> DeleteUser(User user)
         {
-            var result = await _unitOfWork.User.UpdateAsync(user);
-            if (result.Status == ResultStatus.Success)
+            await _unitOfWork.User.Delete(user);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
                 return new Result(ResultStatus.Success, "User Deleted Successfully");
             return new Result(ResultStatus.Error, "User not Deleted");
         }
@@ -53,7 +55,7 @@ namespace Business.Concrete
         public async Task<User> GetUser(Guid id)
         {
             var result = await _unitOfWork.User.GetByIdAsync(id);
-          return result.Data;
+            return result.Data;
         }
 
         public async Task<User> GetUserMail(string mail)
@@ -73,8 +75,9 @@ namespace Business.Concrete
 
         public async Task<IResult> UpdateUser(User user)
         {
-            var result = await _unitOfWork.User.UpdateAsync(user);
-            if (result.Status == ResultStatus.Success)
+            await _unitOfWork.User.UpdateAsync(user);
+            var result = await _unitOfWork.CommitAsync();
+            if (result== 1)
                 return new Result(ResultStatus.Success, "User Updated Successfuly");
             return new Result(ResultStatus.Error, "User Not Updated Successfuly");
 

@@ -6,7 +6,7 @@
 @using CoreUI.Data
 @using Entity
 @using Microsoft.EntityFrameworkCore
-@using PSS.Components.CartPanel
+
 
 @inject IClientCardService clientCardManager
 @inject IUserIdentityProcessor _userIdentityProcessor
@@ -335,8 +335,10 @@
                     UpdateUser = UserId,
                     CreateUser = UserId,
                     UserId = UserId,
-                    TrCode = 1,
+                    CompanyId =_user.CompanyId?? Guid.Empty,
+                    TrCode = 3,
                     CurrencyId = 1 //döviz kuru seçildiğinde değişecek
+                   
                 };
 
 
@@ -431,7 +433,7 @@
     {
         if (firstRender)
         {
-            UserId = Guid.Parse(await _userIdentityProcessor.GetCurrentUserId());
+            UserId = await _userIdentityProcessor.GetCurrentUserId();
             _user = userService.GetUser(UserId).Result;
             if (id != Guid.Empty)
             {

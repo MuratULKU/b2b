@@ -6,7 +6,7 @@
 @using CoreUI.Data
 @using Entity
 @using Microsoft.EntityFrameworkCore
-@using PSS.Components.CartPanel
+
 
 @inject IClientCardService clientCardManager
 @inject IUserIdentityProcessor _userIdentityProcessor
@@ -28,7 +28,7 @@
                         <input class="@newClient ? btn-primary:btn btn-secondary" type="button" value="Yeni Müşteri" @onclick="@(()=>newClient=true)"/>
                    </div>
                     <label>Müşteri</label>
-                    <SelectList TItem="Client" Items="_clientList" DisplayField="Name" ValueField="Id" @bind-Selected="ChangedClient" />
+                        <SelectList Items="_clientList" DisplayField="Name" ValueField="Id" @bind-Selected="ChangedClient" />
                     <label>Vergi No</label>
                     <input class="form-control" type="tel" @bind-value="_client.VKN" />
                     <label>Vergi Dairesi</label>
@@ -251,7 +251,8 @@
                     UpdateUser = UserId,
                     CreateUser = UserId,
                     UserId = UserId,
-                    TrCode = 2,
+                    TrCode = 1,
+                    CompanyId = _user.CompanyId ?? Guid.Empty,
                     CurrencyId = 1 //döviz kuru seçildiğinde değişecek
                 };
 
@@ -343,7 +344,7 @@
     {
         if (firstRender)
         {
-            UserId = Guid.Parse(await _userIdentityProcessor.GetCurrentUserId());
+            UserId = await _userIdentityProcessor.GetCurrentUserId();
             _user = userService.GetUser(UserId).Result;
             if (id != Guid.Empty)
             {

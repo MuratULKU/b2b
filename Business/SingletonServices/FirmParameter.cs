@@ -1,7 +1,9 @@
 ﻿using Business.Abstract;
 using Business.Concrete;
+using Core.Abstract;
 using Core.Concrete;
 using DataAccess.Abstract;
+using DataAccess.Concrete;
 using Entity;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -34,14 +36,20 @@ namespace Business.SingletonServices
         }
         public async void Set(int no, object value)
         {
-          
+            using var scope = _serviceProvider.CreateScope();
+            _firmParamService = scope.ServiceProvider.GetRequiredService<IFirmParamService>();
             var firmparam = await _firmParamService.Get(no);
 
             firmparam.Value = ASCIIEncoding.ASCII.GetBytes(value.ToString());
 
             await _firmParamService.Update(firmparam);
         }
-
+        public async Task<IResult> Update(FirmParam firmParam)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            _firmParamService = scope.ServiceProvider.GetRequiredService<IFirmParamService>();
+            return await _firmParamService.Update(firmParam);
+        }
         public string ToString(byte[] bytes)
         {
             return Encoding.UTF8.GetString(bytes);

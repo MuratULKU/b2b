@@ -5,6 +5,7 @@ using B2C.Data;
 using B2C.Views.Payment;
 
 using Business.Abstract;
+using Business.SingletonServices;
 using DataAccess.Abstract;
 using Entity;
 using Microsoft.AspNetCore.Mvc;
@@ -25,9 +26,9 @@ namespace B2C.Controllers
         private readonly IPaymentService _paymentService;
         private readonly IHtmlHelper _htmlHelper;
         private readonly IPaymentProviderFactory _paymentProviderFactory;
-        private readonly FirmParamService _firmParamService;
+        private readonly FirmParameter _firmParamService;
         private readonly ILogger<PaymentTransaction> _logger;
-        public PaymentController(IPaymentService paymentService, IVirtualPosService bankService, IHtmlHelper htmlHelper, IPaymentProviderFactory paymentProviderFactory, FirmParamService firmParamService,ILogger<PaymentTransaction> logger)
+        public PaymentController(IPaymentService paymentService, IVirtualPosService bankService, IHtmlHelper htmlHelper, IPaymentProviderFactory paymentProviderFactory, FirmParameter firmParamService,ILogger<PaymentTransaction> logger)
         {
             _paymentService = paymentService;
             _bankService = bankService;

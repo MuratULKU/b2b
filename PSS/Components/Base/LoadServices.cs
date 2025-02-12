@@ -6,7 +6,7 @@ using CoreUI.Components.Base;
 using CoreUI.Components.Utilities;
 using DataAccess.Abstract;
 using DataAccess.Concrete;
-using PSS.Components.CartPanel;
+
 
 
 
@@ -19,8 +19,7 @@ namespace B2C.Components.Base
             serviceCollection.AddSingleton<BootstrapClassProvider>();
             serviceCollection.AddScoped<SessionManager>();
             serviceCollection.AddScoped<IIdGenerator, IdGenerator>();
-            serviceCollection.AddScoped<CartService>();
-         
+        
             return serviceCollection;
         }
 
@@ -34,7 +33,7 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<ICategoryRepository, CategoryRepository>();
             serviceCollection.AddScoped<IOrdFicheRepository, OrdFicheRepository>();
             serviceCollection.AddScoped<IDocumentNoRepository, DocumentNoRepository>();
-
+            serviceCollection.AddScoped<ICompanyRepository, CompanyRepository>();
             return serviceCollection;
         }
         public static IServiceCollection AddBusinessService(this IServiceCollection serviceCollection)
@@ -48,6 +47,7 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<IOrderService,OrderManager>();
             serviceCollection.AddScoped<IFirmParamService,FirmParamManager>();
             serviceCollection.AddScoped<IDocumentNoService,DocumentNoManager>();
+            serviceCollection.AddScoped<ICompanyService, CompanyManager>();
             return serviceCollection;
         }
     }

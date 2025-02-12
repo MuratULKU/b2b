@@ -7,7 +7,7 @@ namespace CoreUI.Components.DataGrid
     {
         [CascadingParameter] public DataGrid<TItem> Datagrid { get; set; }
 
-       
+
         private int PageCount;
         protected int StartIndex { get; private set; } = 1;
         protected int FinishIndex { get; private set; } = 3;
@@ -19,6 +19,7 @@ namespace CoreUI.Components.DataGrid
 
         protected override void OnParametersSet()
         {
+            PageCount = (int)Math.Ceiling((double)Datagrid.TotalCount / (double)Datagrid.RowCount);
             int visiblePages = Math.Min(5, PageCount);
 
             StartIndex = (int)Math.Max(1, Math.Ceiling((decimal)(Datagrid.CurrentPage - (visiblePages / 2))));
@@ -26,7 +27,7 @@ namespace CoreUI.Components.DataGrid
 
             var delta = 5 - (FinishIndex - StartIndex + 1);
             StartIndex = Math.Max(1, StartIndex - delta);
-            PageCount = (int)Math.Ceiling((double)Datagrid.TotalCount / (double)Datagrid._rowsperpage);
+           
             base.OnParametersSet();
         }
 
@@ -34,7 +35,6 @@ namespace CoreUI.Components.DataGrid
         {
             if (Datagrid != null)
             {
-               
                 Datagrid.PagerStateHasChangedEvent += StateHasChanged;
                 await Datagrid.SetRowsPerPageAsync(Datagrid._rowsperpage);
             }
@@ -53,8 +53,9 @@ namespace CoreUI.Components.DataGrid
             if (Datagrid != null)
             {
                 PageCount = (int)Math.Ceiling((double)Datagrid.TotalCount / Convert.ToDouble(e.Value));
-                PageOnChanged(1);
+               
                 await Datagrid.SetRowsPerPageAsync(Convert.ToInt32(e.Value));
+                 PageOnChanged(1);
             }
         }
 

@@ -14,15 +14,16 @@ namespace DataAccess.Concrete
         public async Task<OrdFiche> GetOrderFiche(int Logicalref)
         {
             return await base.dbContext.Set<OrdFiche>()
-                   .FirstOrDefaultAsync(x=>x.LogicalRef == Logicalref);
-          
+                   .FirstOrDefaultAsync(x => x.LogicalRef == Logicalref);
+
         }
 
         public async Task<List<OrdFiche>> GetOrderFiche(int TrCode, int CurrentPage, int PageSize)
         {
             return await base.dbContext.Set<OrdFiche>()
+                .Include(x => x.User)
                   .Include(x => x.Lines)
-                  .ThenInclude(x=>x.Product)
+                  .ThenInclude(x => x.Product)
           .Where(x => x.TrCode == TrCode)
           .OrderByDescending(x => x.Date_)
           .Skip(CurrentPage * PageSize)

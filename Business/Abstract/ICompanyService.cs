@@ -17,5 +17,6 @@ namespace Business.Abstract
         Task<bool> Insert(Company company);
         Task<bool> Insert(Company company, User user, UserRole userRole);
         Task<bool> Update(Company client);
+        Task<bool> Delete(Company company);
     }
 }

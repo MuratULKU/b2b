@@ -1,4 +1,5 @@
 ﻿@page "/success/{guid}"
+@using Business.SingletonServices
 @using Microsoft.AspNetCore.Components.Rendering
 @using Business.Abstract;
 @using Business.Concrete;
@@ -9,7 +10,7 @@
 
 @attribute [Authorize]
 @inject IPaymentService paymentManager
-@inject FirmParamService firmParam
+@inject FirmParameter firmParam
 @inject IOrderService orderService
 @inject UserManager userService
 @inject IJSRuntime JSRuntime

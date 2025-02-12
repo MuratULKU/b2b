@@ -3,6 +3,7 @@
 using B2C.Components.Base;
 using B2C.Components.UserPanel;
 using Business.Concrete;
+using Business.SingletonServices;
 using CoreUI.BackOrder;
 using CoreUI.Components.NotificationService;
 
@@ -34,7 +35,7 @@ builder.Services.AddBusinessService();
 builder.Services.AddScoped<IUnitofWork, UnitofWork>();
 //back order service
 
-builder.Services.AddSingleton<FirmParameterService>();
+builder.Services.AddSingleton<FirmParameter>();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddBackOrederServices();
 builder.Services.AddHostedService<BackOrder>();

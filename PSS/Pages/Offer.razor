@@ -32,7 +32,11 @@
                     @clientCardService.GetByCode(@context.Item.ClientCode).Result.Name
                 </CellTemplate>
             </Column>
-            <Column Caption="Dokuman Kodu" Field="@nameof(OrdFiche.Docode)" />
+                <Column Caption="Plasiyer Kodu">
+                    <CellTemplate>
+                        @context.Item.User.AccountName
+                    </CellTemplate>
+                </Column>
             <Column Caption="Fiş No" Field="@nameof(OrdFiche.FicheNo)" />
             <Column Caption="Toplam" TextAlign="TextAlignmet.Right">
                 <CellTemplate>
@@ -88,7 +92,7 @@
     private async void RowCountChange(int e)
     {
         pageCount = e;
-        ordFiches = await orderService.GetOrderFiche(1, 0, pageCount);
+        ordFiches = await orderService.GetOrderFiche(3, 0, pageCount);
     }
 
     private void OrderOK()
@@ -117,7 +121,7 @@
 
     private async void SelectedPageChange(int value)
     {
-        ordFiches = await orderService.GetOrderFiche(1, value, pageCount);
+        ordFiches = await orderService.GetOrderFiche(3, value, pageCount);
         StateHasChanged();
     }
 
@@ -133,8 +137,8 @@
 
     protected async override void OnInitialized()
     {
-        dataGridTotalCount =await orderService.GetOrderFicheCount(1);
-        ordFiches = await orderService.GetOrderFiche(1, 0, pageCount);
+        dataGridTotalCount =await orderService.GetOrderFicheCount(3);
+        ordFiches = await orderService.GetOrderFiche(3, 0, pageCount);
         if(id != Guid.Empty)
         {
             ordFiche = ordFiches.FirstOrDefault(x => x.Id == id);

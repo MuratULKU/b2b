@@ -1,0 +1,152 @@
+﻿@page "/companylist"
+@using Business.Abstract
+@using Entity
+@using CoreUI.Components.DataGrid
+@inject ICompanyService companyService
+@inject IUserIdentityProcessor userIdentity
+<div class="container">
+    <div class="row">
+        <div class="col-sm-5">
+            <DataGrid TItem="Company" Items="companies" SelectedItemChanged="selectedCompanyChanged">
+                <Columns>
+                    <Column Caption="Firma No" Field="@nameof(Company.ProgramCode)" />
+                    <Column Caption="Firma Adı" Field="@nameof(Company.Name)" />
+                </Columns>
+                <ButtonRowTemplate>
+                    <button class="btn btn-success" style="width:130px;" onclick="@AddFirm">Ekle</button>
+                    <button class="btn btn-primary" style="width:130px;" disabled="@(company == null ? true:false)" onclick="@ChangeFirm">Değiştir</button>
+                    <button class="btn btn-danger" style="width:130px;" disabled="@(company == null ? true:false)" onclick="@DeleteFirm">Sil</button>
+                </ButtonRowTemplate>
+            </DataGrid>
+        </div>
+
+        <div class="col-sm-7">
+            <form>
+                <div class="row" style="margin-top:10px;">
+                    <div class="col-sm-5">
+                        Firma No
+                    </div>
+                    <div class="col-sm-7">
+                        <input class="form-control" @bind-value="company.ProgramCode" type="text" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        Dönem No
+                    </div>
+                    <div class="col-sm-7">
+                        <input class="form-control" @bind-value="company.PeriodCode" type="text" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        Firma Adı
+                    </div>
+                    <div class="col-sm-7">
+                        <input class="form-control" @bind-value="company.Name" type="text" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        Adres 1
+                    </div>
+                    <div class="col-sm-7">
+                        <input class="form-control" @bind-value="company.Address1" type="text" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        Adres 2
+                    </div>
+                    <div class="col-sm-7">
+                        <input class="form-control" @bind-value="company.Address2" type="text" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        İlçe
+                    </div>
+                    <div class="col-sm-7">
+                        <input class="form-control" @bind-value="company.Town" type="text" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        Şehir
+                    </div>
+                    <div class="col-sm-7">
+                        <input class="form-control" @bind-value="company.City" type="text" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        Telefon 1
+                    </div>
+                    <div class="col-sm-7">
+                        <input class="form-control" @bind-value="company.TelNo1" type="text" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        Tel 2
+                    </div>
+                    <div class="col-sm-7">
+                        <input class="form-control" @bind-value="company.TelNo2" type="text" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        Mail
+                    </div>
+                    <div class="col-sm-7">
+                        <input class="form-control" @bind-value="company.Mail" type="email" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private List<Company> companies { get; set; }
+    private Company company { get; set; } = new();
+    private Guid userId;
+    protected override async void OnInitialized()
+    {
+        companies = companyService.GetAll(0, 10);
+        userId = await userIdentity.GetCurrentUserId();
+    }
+    private void selectedCompanyChanged(Company company)
+    {
+        this.company = company;
+        StateHasChanged();
+    }
+
+    private void AddFirm()
+    {
+        company.Id = Guid.NewGuid();
+        company.CreateDate = DateTime.Now;
+        company.UpdateDate = DateTime.Now;
+        company.CreateUser = userId;
+        company.UpdateUser = userId;
+        companyService.Insert(company);
+    }
+    private void ChangeFirm()
+    {
+        if (company != null)
+        {
+            company.UpdateDate = DateTime.Now;
+            company.UpdateUser = userId;
+            companyService.Update(company);
+        }
+    }
+    private void DeleteFirm()
+    {
+        if (company != null)
+        {
+            companyService.Delete(company);
+        }
+
+    }
+}

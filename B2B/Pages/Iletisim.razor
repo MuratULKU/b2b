@@ -2,7 +2,7 @@
 @using Business.Abstract;
 @using CoreUI.Components.NotificationService
 @using SendEMail;
-@inject IFirmParamService firmParamService
+@inject Business.SingletonServices.FirmParameter firmParamService
 @inject NotificationService notification
 <div class="layout">
     <div class="row">
@@ -56,7 +56,7 @@
     private async void SendMessage()
     {
 
-        EMailSender es = new SendEMail.EMailSender(firmParamService);
+        EMailSender es = new SendEMail.EMailSender(firmParamService.FirmParameters);
         await es.SendEmailAsync(@firmParamService.ToString(7), "Web Sitesi Gelen Mesaj", $"{mail} {namesurname} {message}");
         mail = "";
         namesurname = "";

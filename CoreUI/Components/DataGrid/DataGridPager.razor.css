@@ -5,7 +5,9 @@
     justify-content: space-between;
     align-items: center;
 }
-
+.disabled {
+    cursor: default !important;
+}
 /* Yalnızca pagination için kullanılan özel bir row class'ı */
 .pagination-row {
     display: flex;

@@ -7,10 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\3DPayment\SanalMagaza.CCPayment.csproj" />
-    <ProjectReference Include="..\Business\Business.csproj" />
     <ProjectReference Include="..\CoreUI\CoreUI.csproj" />
-    <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

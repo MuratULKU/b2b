@@ -90,7 +90,7 @@ namespace DataAccess.Concrete
                 query = includes(query);
             }
 
-            return await query.SingleOrDefaultAsync(predicate);
+                return await query.SingleOrDefaultAsync(predicate);
         }
 
 

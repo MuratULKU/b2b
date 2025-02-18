@@ -78,7 +78,7 @@
 
             @if (Pager)
             {
-                <DataGridPager TItem="TItem" />
+                <DataGridPager TItem="TItem"  TotalCount="@TotalCount"/>
             }
             @if (ButtonRowTemplate != null)
             {

@@ -45,8 +45,11 @@ namespace Business.Concrete
         public async Task<IResult> Update(FirmParam firmParam)
         {
             var result = await  _unitOfWork.FirmParam.UpdateAsync(firmParam);
-            await _unitOfWork.CommitAsync();
-            return result;
+            var r = await _unitOfWork.CommitAsync();
+            if (r == 1)
+                return result;
+            else
+                return result;
         }
 
 

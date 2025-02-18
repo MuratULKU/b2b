@@ -148,7 +148,7 @@ namespace B2C.Controllers
             }
 
             bankRequest.BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), payment.VirtualPos.BankCard.SystemName);
-            IPaymentProvider provider = _paymentProviderFactory.Create(bankRequest.BankName);
+            IPaymentProvider provider = _paymentProviderFactory.Create((VirtualPosSystem)payment.VirtualPos.VirtualPosSystem);
 
             //set callback url
             bankRequest.CallbackUrl = new Uri($"{Request.GetHostUrl(false)}{Url.RouteUrl("Callback", new { paymentId = payment.OrderNumber })}");
@@ -209,7 +209,7 @@ namespace B2C.Controllers
             //create provider
             //todo banka bilgisi sistemden gelecek
             bankRequest.BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), payment.VirtualPos.BankCard.SystemName);
-            IPaymentProvider provider = _paymentProviderFactory.Create(bankRequest.BankName);
+            IPaymentProvider provider = _paymentProviderFactory.Create((VirtualPosSystem)payment.VirtualPos.VirtualPosSystem);
             VerifyGatewayRequest verifyRequest = new VerifyGatewayRequest
             {
                 BankName = bankRequest.BankName,

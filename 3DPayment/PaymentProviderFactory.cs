@@ -11,6 +11,18 @@ namespace _3DPayment
 {
     public class PaymentProviderFactory:IPaymentProviderFactory
     {
+        private static readonly Dictionary<VirtualPosSystem, Type> _vposProviderTypes = new Dictionary<VirtualPosSystem, Type>
+        {
+            {VirtualPosSystem.NestPay, typeof(NestPayPaymentProvider) },
+            {VirtualPosSystem.Innova, typeof(InnovaPaymentProvider) },
+            {VirtualPosSystem.GET724, typeof(VakifbankPaymentProvider) },
+            {VirtualPosSystem.InterVPOS, typeof(DenizbankPaymentProvider) },
+            {VirtualPosSystem.PayFor, typeof(FinansbankPaymentProvider) },
+            {VirtualPosSystem.GVP, typeof(GarantiPaymentProvider) },
+            {VirtualPosSystem.KuveytTurk, typeof(KuveytTurkPaymentProvider) },
+            {VirtualPosSystem.Posnet, typeof(PosnetPaymentProvider) },
+        };
+
         private static readonly Dictionary<BankNames, Type> _providerTypes = new Dictionary<BankNames, Type>
         {
             //NestPay(AkBank, IsBankasi, HalkBank, ZiraatBankasi, TurkEkonomiBankasi, IngBank, TurkiyeFinans, AnadoluBank, HSBC, SekerBank)
@@ -59,6 +71,15 @@ namespace _3DPayment
                 throw new NotSupportedException("Bank not supported");
 
             Type type = _providerTypes[bankName];
+            return ActivatorUtilities.CreateInstance(_serviceProvider, type) as IPaymentProvider;
+        }
+
+        public IPaymentProvider Create(VirtualPosSystem posSystem)
+        {
+            if (!_vposProviderTypes.ContainsKey(posSystem))
+                throw new NotSupportedException("Bank not supported");
+
+            Type type = _vposProviderTypes[posSystem];
             return ActivatorUtilities.CreateInstance(_serviceProvider, type) as IPaymentProvider;
         }
 

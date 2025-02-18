@@ -10,6 +10,25 @@
 @inject NotificationService notification
 @attribute [Authorize]
 <div class="container">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="col-sm-6">
+                <label>İlk Tarih</label>
+                <input type="date" @bind="@firstDate" class="form-control" />
+
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="col-sm-6">
+                <label>Son Tarih</label>
+                <input type="date" @bind="@lastDate" class="form-control" />
+
+            </div>
+        </div>
+        <div class="col-sm-2">
+       @*      <input class="form-control btn btn-success" type="submit" onclick="@(()=>GetExtre(_currentPage,_rowsPerPage))" /> *@
+        </div>
+    </div>
     <DataGrid TItem="OrdFiche" Items="ordFiches" Pager TotalCount="@TotalCount" SelectedPageChange="SelecetedPageChanged" 
         RowCount="rowPerPage" SelectedItemChanged="ChangedSelecetedItem" RowsPerPage="RowPerPageChanged" >
         <Columns>
@@ -71,26 +90,29 @@
     </DataGrid>
 </div>
 @code {
+    private DateTime? firstDate { get; set; }
+    private DateTime? lastDate { get; set; }
     private List<OrdFiche> ordFiches { get; set; } = default!;
     private List<OrdLine> ordLines { get; set; } = default!;
     private int TotalCount { get; set; }
+    private Guid userId{ get; set; }
+    private Company company{ get; set; }
     private int rowPerPage { get; set; } = 10;
     [Parameter]
     public int state { get; set; }
-   
-    protected async override void OnParametersSet()
+
+    protected async override void OnInitialized()
     {
         Guid userId = await userIdentity.GetCurrentUserId();
-        if (userId == Guid.Empty)
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Sipariş Numarası Oluşturlamadı.", Duration = 5000 });
-        Company company = await companyService.GetByUserId(userId);
+        company = await companyService.GetByUserId(userId);
         TotalCount = await orderService.GetOrderFicheCount(company.Id, state);
         SelecetedPageChanged(0);
     }
+
+   
+
     private async void SelecetedPageChanged(int page)
     {
-        Guid userId = await userIdentity.GetCurrentUserId();
-        Company company = await companyService.GetByUserId(userId);
         ordFiches = await orderService.GetOrderFiche(company.Id,state, page, rowPerPage);
         //StateHasChanged();
         await InvokeAsync(StateHasChanged); // UI yeniden yüklemeye zorla

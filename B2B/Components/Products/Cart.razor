@@ -135,11 +135,11 @@
         }
     }
 
-    private void ApprovingOrder()
+    private async void ApprovingOrder()
     {
         cartService.OrderSend();
         notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Kayıt Tamamlandı.", Detail = "Sipariş Kayıt Edildi.", Duration = 2000 });
-        navManager.NavigateTo("/products");
+        navManager.NavigateTo($"/confirmorder/{cartService._ordFiche.Id}");
     }
 
 }

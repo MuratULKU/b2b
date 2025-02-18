@@ -79,6 +79,8 @@ namespace CoreUI.Components.DataGrid
         {
             return item => typeof(TItem).GetProperty(columnName)?.GetValue(item, null);
         }
+
+      
         internal List<TItem> CurrentPageItems 
         {
             get

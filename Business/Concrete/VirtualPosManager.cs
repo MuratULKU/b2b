@@ -66,6 +66,10 @@ namespace Business.Concrete
           return await _unitOfWork.VirtualPoses.SingleOrDefaultAsync(x => x.CardBrandId == id, x => x.Include(x=>x.BankCard));
            
         }
+        public async Task<VirtualPos> GetByBankId(Guid id)
+        {
+            return await _unitOfWork.VirtualPoses.SingleOrDefaultAsync(x => x.BankCardId == id, x => x.Include(x => x.BankCard));
+        }
 
         public async Task<List<VirtualPos>> GetVirtualListsAsync()
         {

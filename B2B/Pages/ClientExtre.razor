@@ -1,0 +1,95 @@
+﻿@page "/extre"
+@using B2B.Data
+@using Business.Abstract
+@using CoreUI.Components.DataGrid
+
+@using System.Text.Json
+@using CoreUI.Data
+@using Entity
+@inject IUserIdentityProcessor userIdenetity
+@inject IConfiguration configuration
+@inject ICompanyService companyService
+@inject ILogger<ConfirmOrder> _logger
+<div class="container">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="col-sm-6">
+                <label>İlk Tarih</label>
+                <input type="date" @bind="@firstDate" class="form-control"/>
+             
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="col-sm-6">
+                <label>Son Tarih</label>
+                <input type="date" @bind="@lastDate" class="form-control" />
+             
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <input class="form-control btn btn-success" type="submit" onclick="@(()=>GetExtre(_currentPage,_rowsPerPage))" />
+         </div>
+    </div>
+    <div>
+        <DataGrid TItem="ClientFiche" Items="clientFiches" Pager TotalCount="totalCount" RowsPerPage="rowsPerPageChange" SelectedPageChange="selectedPageChange">
+            <Columns>
+                <Column Caption="Tarih" Field="@nameof(ClientFiche.Date)" />
+                <Column Caption="Fiş Türü" Field="@nameof(ClientFiche.TrCode)" />
+                <Column Caption="Fiş Türü" Field="@nameof(ClientFiche.TrString)" />
+                <Column Caption="Açıklama" Field="@nameof(ClientFiche.LineExp)" />
+                <Column Caption="Borç" Field="@nameof(ClientFiche.Debit)" TextAlign="TextAlignmet.Right" />
+                <Column Caption="Alacak" Field="@nameof(ClientFiche.Credit)" TextAlign="TextAlignmet.Right" />
+                <Column Caption="Bakiye" Field="@nameof(ClientFiche.Balance)" TextAlign="TextAlignmet.Right" />
+            </Columns>
+        </DataGrid>
+    </div>
+</div>
+@code {
+    private Guid userId { get; set; }
+    private DateTime? firstDate { get; set; }
+    private DateTime? lastDate { get; set; }
+    private int _currentPage { get; set; } = 0;
+    private int _rowsPerPage { get; set; } = 10;
+    List<ClientFiche> clientFiches = new List<ClientFiche>();
+    private int totalCount{ get; set; }
+    protected override async void OnInitialized()
+    {
+        userId = await userIdenetity.GetCurrentUserId();
+        lastDate = Convert.ToDateTime(DateTime.Now.Date);
+        firstDate = DateTime.Now.AddMonths(-1).Date;
+        StateHasChanged();
+    }
+
+
+
+    private async void GetExtre(int currentPage,int pageSize)
+    {
+        HttpClient _httpClient = new HttpClient();
+        _httpClient.BaseAddress = new Uri(configuration.GetSection("ApiService").GetSection("Url").Value);
+        Company company = await companyService.GetByUserId(userId);
+        try
+        {  //'http://localhost:5050/api/v1/Client/extre?code=3&startDate=01.01.2025&endDate=12.31.2025&currentPage=1&pageSize=10'
+            var httpResponseMessage =
+              await _httpClient.GetAsync($"/api/v1/client/extre?code={company.ProgramCode}&startDate={firstDate?.ToString("MM.dd.yyyy")}&endDate={lastDate?.ToString("MM.dd.yyyy")}&currentPage={currentPage}&pageSize={pageSize}");
+            var response =  httpResponseMessage.Content.ReadFromJsonAsync<PageResult<ClientFiche>>().Result;
+            totalCount = response.TotalCount;
+            clientFiches = response.Items;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex.Message);
+        }
+    }
+
+    private async void rowsPerPageChange(int rowsPerPage)
+    {
+        _rowsPerPage = rowsPerPage;
+        GetExtre(_currentPage, _rowsPerPage);
+    }
+    private void selectedPageChange(int currentPage)
+    {
+        _currentPage = currentPage;
+        GetExtre(_currentPage, _rowsPerPage);
+    }
+}

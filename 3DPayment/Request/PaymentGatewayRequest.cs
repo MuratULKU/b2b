@@ -24,6 +24,7 @@ namespace _3DPayment.Request
         public bool CommonPaymentPage { get; set; }
         public Uri CallbackUrl { get; set; }
         public BankNames BankName { get; set; }
+        public VirtualPosSystem VPosSystem { get; set; }    
 
         public Dictionary<string, string> VirtualPosParameters { get; set; } = new Dictionary<string, string>();
     }

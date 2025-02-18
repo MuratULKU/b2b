@@ -10,6 +10,8 @@
 @using CoreUI.Components.NotificationService
 @using CoreUI.Components.SelectList
 @using Entity
+@using System.ComponentModel
+@using _3DPayment
 @inject IBankCardService bankCardService
 @inject ICardBrandService brandCradService
 @inject IVirtualPosService virtualPosService
@@ -37,6 +39,17 @@
             </div>
             <div class="col-8">
                 <SelectList TItem="CardBrand" Items="brandCardList" DisplayField="Name" ValueField="Id" @bind-Selected="ParamValueBrand"></SelectList>
+            </div>
+            <div class="col-4">
+                <label>Pos Sistemi</label>
+            </div>
+            <div class="col-8">
+                <select class="form-control" @bind="virtualPos.VirtualPosSystem">
+                    @foreach (var method in vPosSystem)
+                    {
+                        <option value="@((int)method)">@GetEnumDescription(method)</option>
+                    }
+                </select>
             </div>
             <div class="col-4">
                 <label>Muhasebe Kodu</label>
@@ -90,7 +103,14 @@
     private List<CardBrand> brandCardList { get; set; } = default!;
 
     private VirtualPosParameter virtualPosParameter { get; set; } = default!;
+    private List<VirtualPosSystem> vPosSystem = Enum.GetValues(typeof(VirtualPosSystem)).Cast<VirtualPosSystem>().ToList();
 
+    private string GetEnumDescription(Enum value)
+    {
+        var field = value.GetType().GetField(value.ToString());
+        var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute));
+        return attribute?.Description ?? value.ToString();
+    }
 
     // [SupplyParameterFromQuery]
     [Parameter]
@@ -136,6 +156,7 @@
 
     }
 
+    
     private void CheckboxChanged(ChangeEventArgs e)
     {
         virtualPos.SinglePayment = Convert.ToBoolean(e.Value);

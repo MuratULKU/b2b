@@ -2,6 +2,7 @@
 @page "/orderDetail/{id:guid}"
 
 @using Business.Abstract
+@using CoreUI.Components.InputNumber
 @using CoreUI.Components.NotificationService
 @using CoreUI.Data
 @using Entity
@@ -115,12 +116,14 @@
                                     <td scope="row">@_count</td>
                                     <td>@cartitem.Product?.Code</td>
                                     <td>@cartitem.Product?.Name</td>
-                                    <td class="text-end">@cartitem.Amount.ToString("N2")</td>
+                                    <td class="text-end" width="80px">
+                                        <InputMNumber TValue="double" Value="@cartitem.Amount" Change="@((e)=>AmountChange(e,cartitem))" />
+                                    </td>
                                     <td>@cartitem.Unit</td>
-                                    <td class="text-end">@cartitem.Price.ToString("N2")</td>
-                                    <td class="text-end">@cartitem.Distdisc.ToString("N2")</td>
+                                    <td class="text-end"><InputMNumber TValue="double" Value="@cartitem.Price" Change="@((e)=>PriceChange(e,cartitem))" DisplayValue="N2" /></td>
+                                    <td class="text-end"><InputMNumber TValue="double" Value="@cartitem.Discper" Change="@((e)=>DiscountChange(e,cartitem))" DisplayValue="N2" /></td>
                                     <td class="text-end">@cartitem.VatAmnt.ToString("N2")</td>
-                                    <td class="text-end">@cartitem.Total.ToString("N2")</td>
+                                    <td class="text-end"><InputMNumber TValue="double" Value="@cartitem.Total" Change="@((e)=>TotalChange(e,cartitem))" DisplayValue="N2" /></td>
                                     <td><input type="button" class="btn btn-danger" onclick="@(()=>{RemoveLine(cartitem);StateHasChanged(); })" value="Sil" /></td>
                                 </tr>
 
@@ -155,14 +158,28 @@
                         <label class="text-center">Sepet Özeti</label>
                     </div>
                     <div class="card-body">
-                        @if (_ordFiche?.Lines?.Count > 0)
+                        @if (_ordFiche.Lines?.Count > 0)
                         {
-                            <label>Toplam : </label>
-                            <label>@_ordFiche.Lines.Sum(x => x.Total).ToString("N2") TL</label>
+                            <div class="row">
+                                <label class="col-6">Ara Toplam: </label>
+                                <span class="col-6 text-end">@_ordFiche.GrossTotal.ToString("N2") TL</span>
+                            </div>
+                            <div class="row">
+                                <label class="col-6">Iskonto: </label>
+                                <span class="col-6 text-end">@_ordFiche.TotalDiscounted.ToString("N2") TL</span>
+                            </div>
+                            <div class="row">
+                                <label class="col-6">Vergi: </label>
+                                <span class="col-6 text-end">@_ordFiche.TotalVat.ToString("N2") TL</span>
+                            </div>
+                            <div class="row">
+                                <label class="col-6">Toplam: </label>
+                                <span class="col-6 text-end">@_ordFiche.Total.ToString("N2") TL</span>
+                            </div>
                         }
                     </div>
                     <div class="card-footer text-end">
-                        <input type="button" class="btn btn-success" onclick="@SaveChanged" value="Odeme" />
+                        <input type="button" class="btn btn-success" onclick="@(()=>SaveChanged())" value="Kaydet" />
                     </div>
                 </div>
             </div>
@@ -354,6 +371,66 @@
                 StateHasChanged();
             }
         }
+    }
+
+    private void Sum()
+    {
+        _ordFiche.GrossTotal = Math.Round(_ordFiche.Lines.Sum(x => x.Total), 2);
+        _ordFiche.TotalDiscounted = Math.Round(_ordFiche.Lines.Sum(x => x.Distdisc), 2);
+        _ordFiche.TotalVat = Math.Round(_ordFiche.Lines.Sum(x => x.VatAmnt), 2);
+        _ordFiche.Total = Math.Round(_ordFiche.Lines.Sum(x => x.Total - x.Distdisc + x.VatAmnt), 2);
+        _ordFiche.UpdateDate = DateTime.Now;
+        _ordFiche.UpdateUser = _user.Id;
+    }
+
+    private void AmountChange(double e, OrdLine ordLine)
+    {
+        ordLine.Amount = e;
+        ordLine.Total = ordLine.Amount * ordLine.Price;
+        ordLine.Distdisc = ordLine.Total * ordLine.Discper / 100;
+        ordLine.VatMatrah = ordLine.Total - ordLine.Distdisc;
+        ordLine.VatAmnt = ordLine.VatMatrah * ordLine.Vat / 100;
+        ordLine.UpdateUser = _user.Id;
+        ordLine.UpdateDate = DateTime.Now;
+        Sum();
+
+    }
+
+    private void PriceChange(double e, OrdLine ordLine)
+    {
+        ordLine.Price = e;
+        ordLine.Total = ordLine.Amount * ordLine.Price;
+        ordLine.Distdisc = ordLine.Total * ordLine.Discper / 100;
+        ordLine.VatMatrah = ordLine.Total - ordLine.Distdisc;
+        ordLine.VatAmnt = ordLine.VatMatrah * ordLine.Vat / 100;
+        ordLine.UpdateUser = _user.Id;
+        ordLine.UpdateDate = DateTime.Now;
+        Sum();
+
+    }
+
+    private void DiscountChange(double e, OrdLine ordLine)
+    {
+        ordLine.Discper = e;
+        ordLine.Distdisc = ordLine.Total * ordLine.Discper / 100;
+        ordLine.VatMatrah = ordLine.Total - ordLine.Distdisc;
+        ordLine.VatAmnt = ordLine.VatMatrah * ordLine.Vat / 100;
+        ordLine.UpdateUser = _user.Id;
+        ordLine.UpdateDate = DateTime.Now;
+        Sum();
+    }
+
+    private void TotalChange(double e, OrdLine ordLine)
+    {
+        ordLine.Total = e;
+        ordLine.Price = ordLine.Total / ordLine.Amount;
+        ordLine.Distdisc = ordLine.Total * ordLine.Discper / 100;
+        ordLine.VatMatrah = ordLine.Total - ordLine.Distdisc;
+        ordLine.VatAmnt = ordLine.VatMatrah * ordLine.Vat / 100;
+        ordLine.UpdateUser = _user.Id;
+        ordLine.UpdateDate = DateTime.Now;
+        Sum();
+
     }
 
     private Guid UserId { get; set; }

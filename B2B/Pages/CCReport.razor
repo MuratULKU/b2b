@@ -10,49 +10,72 @@
 @inject IPaymentProviderFactory paymentProviderFactory
 
 <div class="container">
-    <DataGrid TItem="PaymentTransaction" Items="paymentList" Pager Virtualize="true" RowCount="RowsCount" RowsPerPage="ChangedRowPerPage"
-              SelectedItemChanged="selectedItemChange" TotalCount="paymentList.Count">
-        <Columns>
-            <Column Caption="Tarih" Field="@nameof(PaymentTransaction.CreateDate)" Width="150" />
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="col-sm-6">
+                <label>İlk Tarih</label>
+                <input type="date" @bind="@firstDate" class="form-control" />
 
-            <Column Caption="Tutar" Field="@nameof(PaymentTransaction.TotalAmount)" Width="100" TextAlign="TextAlignmet.Right" />
-            <Column Caption="KK Sahibi" Field="@nameof(PaymentTransaction.CardHolderName)" Width="200" />
-            <Column Caption="KK No" Field="@nameof(PaymentTransaction.MaskedCardNumber)" Width="200" />
-            <Column Caption="Banka Mesajı" Field="@nameof(PaymentTransaction.BankErrorMessage)" Width="200" />
-            <Column Caption="Ödeme Tarihi" Field="@nameof(PaymentTransaction.PaidDate)" Width="150" />
-            <Column Caption="Banka Cevabı" Field="@nameof(PaymentTransaction.Status)" Width="150" />
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="col-sm-6">
+                <label>Son Tarih</label>
+                <input type="date" @bind="@lastDate" class="form-control" />
 
-        </Columns>
-        <DetailRowTemplate>
+            </div>
+        </div>
+        <div class="col-sm-2">
+         @*    <input class="form-control btn btn-success" type="submit" onclick="@(()=>GetExtre())" /> *@
+        </div>
+    </div>
+    <div>
+        <DataGrid TItem="PaymentTransaction" Items="paymentList" Pager Virtualize="true" RowCount="RowsCount" RowsPerPage="ChangedRowPerPage"
+                  SelectedItemChanged="selectedItemChange" TotalCount="paymentList.Count">
+            <Columns>
+                <Column Caption="Tarih" Field="@nameof(PaymentTransaction.CreateDate)" Width="150" />
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>İşlem No</th>
-                        <th>Referans No</th>
-                        <th>Kullanıcı Adı</th>
-                        <th>Şirket</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td width="250px">@paymentTransaction.TransactionNumber</td>
-                        <td width="200px">@paymentTransaction.ReferenceNumber</td>
-                        <td width="200px">@paymentTransaction.User.Username</td>
-                        <td width="200px">@paymentTransaction.Company.Name</td>
-                    </tr>
-                </tbody>
-            </table>
+                <Column Caption="Tutar" Field="@nameof(PaymentTransaction.TotalAmount)" Width="100" TextAlign="TextAlignmet.Right" />
+                <Column Caption="KK Sahibi" Field="@nameof(PaymentTransaction.CardHolderName)" Width="200" />
+                <Column Caption="KK No" Field="@nameof(PaymentTransaction.MaskedCardNumber)" Width="200" />
+                <Column Caption="Banka Mesajı" Field="@nameof(PaymentTransaction.BankErrorMessage)" Width="200" />
+                <Column Caption="Ödeme Tarihi" Field="@nameof(PaymentTransaction.PaidDate)" Width="150" />
+                <Column Caption="Banka Cevabı" Field="@nameof(PaymentTransaction.Status)" Width="150" />
 
-        </DetailRowTemplate>
-        <ButtonRowTemplate>
-            <input class="btn btn-primary" value="Kontrol" onclick="@CheckPayment" />
-        </ButtonRowTemplate>
-    </DataGrid>
+            </Columns>
+            <DetailRowTemplate>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>İşlem No</th>
+                            <th>Referans No</th>
+                            <th>Kullanıcı Adı</th>
+                            <th>Şirket</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td width="250px">@paymentTransaction.TransactionNumber</td>
+                            <td width="200px">@paymentTransaction.ReferenceNumber</td>
+                            <td width="200px">@paymentTransaction.User.Username</td>
+                            <td width="200px">@paymentTransaction.Company.Name</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </DetailRowTemplate>
+            <ButtonRowTemplate>
+                <input class="btn btn-primary" value="Kontrol" disabled="@(paymentTransaction == null?true:false)" onclick="@CheckPayment" />
+            </ButtonRowTemplate>
+        </DataGrid>
+    </div>
 </div>
 
 @code {
     [Parameter] public Guid id { get; set; } = default!;
+    private DateTime? firstDate { get; set; }
+    private DateTime? lastDate { get; set; }
     private PaymentTransaction paymentTransaction { get; set; }
     private List<PaymentTransaction> paymentList { get; set; } = default!;
     private int RowsCount { get; set; } = 20;
@@ -87,7 +110,7 @@
                 BankParameters = virtualPos.VirtualPosParameters.ToDictionary(key => key.Key, value => value.Value),
                 BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), virtualPos.BankCard.SystemName)
             };
-        IPaymentProvider provider = paymentProviderFactory.Create(paymentDetailRequest.BankName);
+        IPaymentProvider provider = paymentProviderFactory.Create((VirtualPosSystem)virtualPos.VirtualPosSystem);
         var result = await provider.PaymentDetailRequest(paymentDetailRequest);
         if (result.Paid)
         {
@@ -96,13 +119,13 @@
             if (result.CardNumber != null && result.CardNumber != string.Empty)
                 paymentTransaction.MaskedCardNumber = result.CardNumber;
             paymentTransaction.BankErrorMessage = result.BankMessage;
-            paymentService.Update(paymentTransaction);
+            await paymentService.Update(paymentTransaction);
         }
         else
         {
             paymentTransaction.Status = PaymentStatus.Failed;
             paymentTransaction.BankErrorMessage = result.ErrorMessage;
-            paymentService.Update(paymentTransaction);
+            await paymentService.Update(paymentTransaction);
         }
     }
 }

@@ -174,7 +174,7 @@
     public CreditCard creditCard = default!;
     private bool currencyDisable { get; set; } = false;
     public decimal Total;
-    private VirtualPos vPos = default!;
+    private List<VirtualPos> vPosList = new();
     private bool btndisabled;
     private User user { get; set; } = default!;
     private Company company { get; set; } = default!;
@@ -220,7 +220,7 @@
         int totalError = 0;
         if (Total < 1)
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Tuar 0 dan büyük olmalı.", Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Tutar 0 dan büyük olmalı.", Duration = 5000 });
             Task.Delay(10 + totalError);
             totalError += 1;
         }
@@ -289,30 +289,86 @@
     private async void LoadInstalment()
     {
         installmentViewModel.Clear();
-        if (vPos != null && vPos.BankCardId == creditCard.BankCardId && vPos.SinglePayment)
+        if (creditCard != null)
         {
-            installmentViewModel.Add(
-           new()
-               {
-                   Text = "Tek Çekim",
-                   Amount = Total.ToString("N2") + " TL",
-                   AmountValue = Total,
-                   TotalAmount = Total.ToString("N2") + " TL",
-                   TotalAmountValue = Total,
-                   VirtualPos = vPos,
-                   BankName = vPos.BankCard.Name
-               });
+            VirtualPos virtualPos = await virtualPosService.GetByBankId(creditCard.BankCardId);
+            if (virtualPos == null)
+            {
+                virtualPos = await virtualPosService.GetByBrandId(creditCard.CardBrandId);
+            }
+            if (virtualPos != null)
+            {
+                if (virtualPos.SinglePayment)
+                {
+                    installmentViewModel.Add(
+                          new()
+                              {
+                                  Text = "Tek Çekim",
+                                  Amount = Total.ToString("N2") + " TL",
+                                  AmountValue = Total,
+                                  TotalAmount = Total.ToString("N2") + " TL",
+                                  TotalAmountValue = Total,
+                                  VirtualPos = virtualPos,
+                                  BankName = virtualPos.BankCard.Name
+                              });
+                }
+                else
+                {
+                    VirtualPos cPos = await virtualPosService.GetVirtualPosAsync(Guid.Parse(firmParam.ToString(10)));
+
+                    if (cPos != null && !installmentViewModel.Any())
+                    {
+                        installmentViewModel.Add(
+                   new()
+                       {
+                           Text = "Tek Çekim",
+                           Amount = Total.ToString("N2") + " TL",
+                           AmountValue = Total,
+                           TotalAmount = Total.ToString("N2") + " TL",
+                           TotalAmountValue = Total,
+                           VirtualPos = cPos,
+                           BankName = cPos.BankCard.Name
+                       });
+                    }
+                    else
+                    {
+                        notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
+                    }
+                }
+
+                foreach (var installment in creditCard.Installments)
+                {
+
+                    decimal installmentAmount = Total;
+                    decimal installmentTotalAmount = installmentAmount;
+
+                    if (installment.InstallmentRate > 0)
+                    {
+                        installmentTotalAmount = Math.Round(Total + ((Total * installment.InstallmentRate) / 100), 2, MidpointRounding.AwayFromZero);
+                    }
+
+                    installmentAmount = Math.Round(installmentTotalAmount / installment.Installment, 2, MidpointRounding.AwayFromZero);
+
+                    installmentViewModel.Add(new InstallmentViewModel.InstallmentRate
+                        {
+                            Text = $"{installment.Installment} Taksit",
+                            Installment = installment.Installment,
+                            Rate = installment.InstallmentRate,
+                            Amount = installmentAmount.ToString("N2") + " TL",
+                            AmountValue = installmentAmount,
+                            TotalAmount = installmentTotalAmount.ToString("N2") + " TL",
+                            TotalAmountValue = installmentTotalAmount,
+                            VirtualPos = virtualPos,
+                            BankName = virtualPos.BankCard.Name
+                        });
+                }
+            }
         }
         else
         {
-            if (string.IsNullOrWhiteSpace(firmParam.ToString(10)))
-            {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
-                return;
-            }
-
             VirtualPos cPos = await virtualPosService.GetVirtualPosAsync(Guid.Parse(firmParam.ToString(10)));
-            if (cPos != null)
+
+            if (cPos != null && !installmentViewModel.Any())
             {
                 installmentViewModel.Add(
            new()
@@ -330,197 +386,172 @@
             {
                 notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
             }
+
         }
+    }       
+ 
 
-        if (creditCard != null && vPos != null)
-        {
-            foreach (var installment in creditCard.Installments)
-            {
+   
 
-                decimal installmentAmount = Total;
-                decimal installmentTotalAmount = installmentAmount;
-
-                if (installment.InstallmentRate > 0)
-                {
-                    installmentTotalAmount = Math.Round(Total + ((Total * installment.InstallmentRate) / 100), 2, MidpointRounding.AwayFromZero);
-                }
-
-                installmentAmount = Math.Round(installmentTotalAmount / installment.Installment, 2, MidpointRounding.AwayFromZero);
-
-                installmentViewModel.Add(new InstallmentViewModel.InstallmentRate
-                    {
-                        Text = $"{installment.Installment} Taksit",
-                        Installment = installment.Installment,
-                        Rate = installment.InstallmentRate,
-                        Amount = installmentAmount.ToString("N2") + " TL",
-                        AmountValue = installmentAmount,
-                        TotalAmount = installmentTotalAmount.ToString("N2") + " TL",
-                        TotalAmountValue = installmentTotalAmount,
-                        VirtualPos = vPos,
-                        BankName = vPos.BankCard.Name
-                    });
-
-            }
-        }
-        // installmentGrid.Reload();
-    }
+    
 
     private async void CardNumberChanged(string e)
+{
+    cardNumber = e;
+    if (e.Length == 1)
     {
-        cardNumber = e;
-        if (e.Length == 1)
-        {
-            // switch (e.Substring(0, 1))
-            // {
-            //     case "3":
-            //         await JS.InvokeVoidAsync("Ulku.loadicon", "amex");
-            //         break;
-            //     case "4":
-            //         await JS.InvokeVoidAsync("Ulku.loadicon", "visa");
-            //         break;
-            //     case "5":
-            //         await JS.InvokeVoidAsync("Ulku.loadicon", "mastercard");
-            //         break;
-            //     case "9":
-            //         await JS.InvokeVoidAsync("Ulku.loadicon", "troy");
-            //         break;
-            // }
+    // switch (e.Substring(0, 1))
+    // {
+    //     case "3":
+    //         await JS.InvokeVoidAsync("Ulku.loadicon", "amex");
+    //         break;
+    //     case "4":
+    //         await JS.InvokeVoidAsync("Ulku.loadicon", "visa");
+    //         break;
+    //     case "5":
+    //         await JS.InvokeVoidAsync("Ulku.loadicon", "mastercard");
+    //         break;
+    //     case "9":
+    //         await JS.InvokeVoidAsync("Ulku.loadicon", "troy");
+    //         break;
+    // }
 
-        }
-        if (e.Length > 6)
-        {
+    }
+    if (e.Length > 6)
+    {
 
 
-            vPos = null;
-            creditCard = null;
-            creditCardPrefix = null;
 
-            CreditCardPrefix dataResultPrefix = await creditCardPrefixService.GetByPrefix(e.Replace(" ", string.Empty).Substring(0, 6));
-            if (dataResultPrefix == null)
-            {
-                if (e.Length > 8)
-                    dataResultPrefix = await creditCardPrefixService.GetByPrefix(e.Replace(" ", string.Empty).Substring(0, 8));
-            }
-            if (dataResultPrefix != null)
-            {
-                creditCardPrefix = dataResultPrefix;
-                creditCard = await creditCardService.GetCreditCardByPrefix(creditCardPrefix.Prefix.ToString(), true);
-                vPos = await virtualPosService.GetByBrandId(creditCard.CardBrandId);
+    creditCard = null;
+    creditCardPrefix = null;
 
-            }
-            LoadInstalment();
-        }
+    CreditCardPrefix dataResultPrefix = await creditCardPrefixService.GetByPrefix(e.Replace(" ", string.Empty).Substring(0, 6));
+    if (dataResultPrefix == null)
+    {
+        if (e.Length > 8)
+            dataResultPrefix = await creditCardPrefixService.GetByPrefix(e.Replace(" ", string.Empty).Substring(0, 8));
+    }
+    if (dataResultPrefix != null)
+    {
+        creditCardPrefix = dataResultPrefix;
+        creditCard = await creditCardService.GetCreditCardByPrefix(creditCardPrefix.Prefix.ToString(), true);
+        //vPosList = await virtualPosService.GetByBrandId(creditCard.CardBrandId);
 
-
+    }
+    LoadInstalment();
     }
 
 
+}
 
-    private void TotalChange(decimal value)
+
+
+private void TotalChange(decimal value)
+{
+    if (Total.Equals(value))
+    return;
+    Total = value;
+    if (vPosList != null)
+    LoadInstalment();
+
+
+}
+
+private async void payment()
+{
+    try
     {
-        if (Total.Equals(value))
-            return;
-        Total = value;
-        LoadInstalment();
-
-
+    btndisabled = false;
+    if (OrderId == Guid.Empty)
+    {
+        OrderId = Guid.NewGuid();
     }
-
-    private async void payment()
+    if (!checkPaymentForm())
+        return;
+    if (company == null)
+        throw new Exception("Şirket Bilgileri Olmayan Kullanıcı Bu İşlemi Yapamaz");
+    if (selectInstallment != null)
     {
-        try
+        PaymentViewModel paymentViewModel = new PaymentViewModel()
+            {
+                VirtualPosId = selectInstallment.VirtualPos.Id,
+                CardHolderName = cardHolderName,
+                CardNumber = cardNumber.Replace(" ", string.Empty),
+                ExpireMonth = Convert.ToInt32(expiryDate.Substring(0, 2)),
+                ExpireYear = Convert.ToInt32(expiryDate.Substring(3, 2)),
+                CvvCode = Ccv2Code,
+                CardType = "5",
+                Installment = selectInstallment.Installment,
+                TotalAmount = selectInstallment.TotalAmountValue,
+                OrderId = OrderId,
+                UserId = user.Id,
+                Explanation = explanation,
+                CompanyId = company.Id
+
+            };
+
+
+
+        httpClient.DefaultRequestHeaders.Clear();
+        if (httpClient.BaseAddress == null)
+            httpClient.BaseAddress = new Uri(navManager.BaseUri);
+
+        var viewModelJson = new StringContent(
+     JsonSerializer.Serialize(paymentViewModel),
+     Encoding.UTF8,
+     Application.Json);
+        using var httpResponseMessage =
+               await httpClient.PostAsync(@"/Payment/Index", viewModelJson);
+
+
+        httpResponseMessage.EnsureSuccessStatusCode();
+
+        var result = await httpResponseMessage.Content.ReadAsStringAsync();
+        returnModel resultMessage = JsonSerializer.Deserialize<returnModel>(result);
+        if (resultMessage.gatewayUrl != string.Empty)
         {
-            btndisabled = false;
-            if (OrderId == Guid.Empty)
-            {
-                OrderId = Guid.NewGuid();
-            }
-            if (!checkPaymentForm())
-                return;
-            if (company == null)
-                throw new Exception("Şirket Bilgileri Olmayan Kullanıcı Bu İşlemi Yapamaz");
-            if (selectInstallment != null)
-            {
-                PaymentViewModel paymentViewModel = new PaymentViewModel()
-                    {
-                        VirtualPosId = selectInstallment.VirtualPos.Id,
-                        CardHolderName = cardHolderName,
-                        CardNumber = cardNumber.Replace(" ", string.Empty),
-                        ExpireMonth = Convert.ToInt32(expiryDate.Substring(0, 2)),
-                        ExpireYear = Convert.ToInt32(expiryDate.Substring(3, 2)),
-                        CvvCode = Ccv2Code,
-                        CardType = "5",
-                        Installment = selectInstallment.Installment,
-                        TotalAmount = selectInstallment.TotalAmountValue,
-                        OrderId = OrderId,
-                        UserId = user.Id,
-                        Explanation = explanation,
-                        CompanyId = company.Id
-
-                    };
-
-
-
-                httpClient.DefaultRequestHeaders.Clear();
-                if (httpClient.BaseAddress == null)
-                    httpClient.BaseAddress = new Uri(navManager.BaseUri);
-
-                var viewModelJson = new StringContent(
-             JsonSerializer.Serialize(paymentViewModel),
-             Encoding.UTF8,
-             Application.Json);
-                using var httpResponseMessage =
-                       await httpClient.PostAsync(@"/Payment/Index", viewModelJson);
-
-
-                httpResponseMessage.EnsureSuccessStatusCode();
-
-                var result = await httpResponseMessage.Content.ReadAsStringAsync();
-                returnModel resultMessage = JsonSerializer.Deserialize<returnModel>(result);
-                if(resultMessage.gatewayUrl != string.Empty)
-                {
-                    string iframesrc = resultMessage.gatewayUrl;
-                    await JS.InvokeVoidAsync("iframe.ac", resultMessage);
-                    await JS.InvokeAsync<VerifyGatewayResult>("iframe.kapat", "/Payment/Completed/");
-                }
-                else
-                {
-                    throw new Exception(resultMessage.message);
-                }
-
-            }
-            else
-            {
-                throw new Exception("Ödeme Planı Seçilmemiş.");
-            }
+            string iframesrc = resultMessage.gatewayUrl;
+            await JS.InvokeVoidAsync("iframe.ac", resultMessage);
+            await JS.InvokeAsync<VerifyGatewayResult>("iframe.kapat", "/Payment/Completed/");
         }
-        catch (Exception ex)
+        else
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message, Duration = 5000 });
-        }
-        finally
-        {
-            btndisabled = true;
+            throw new Exception(resultMessage.message);
         }
 
     }
-
-    protected void onfocus()
+    else
     {
-        cardFace = "back";
+        throw new Exception("Ödeme Planı Seçilmemiş.");
+    }
+    }
+    catch (Exception ex)
+    {
+    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message, Duration = 5000 });
+    }
+    finally
+    {
+    btndisabled = true;
     }
 
-    protected void onblur()
-    {
-        cardFace = "";
+}
 
-    }
+protected void onfocus()
+{
+    cardFace = "back";
+}
 
-    public class returnModel
-    {
-        public string gatewayUrl { get; set; }
-        public string message { get; set; }
+protected void onblur()
+{
+    cardFace = "";
 
-    }
+}
+
+public class returnModel
+{
+    public string gatewayUrl { get; set; }
+    public string message { get; set; }
+
+}
 
 }

@@ -122,7 +122,7 @@ namespace CoreUI.Controllers
 
             bankRequest.CallbackUrl = new Uri($"{Request.Scheme}://{Request.Host}/api/payment/callback/{payment.OrderNumber}");
 
-            var provider = _paymentProviderFactory.Create((_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), payment.VirtualPos.BankCard.SystemName));
+            var provider = _paymentProviderFactory.Create((VirtualPosSystem)payment.VirtualPos.VirtualPosSystem);
             var gatewayResult = await provider.ThreeDGatewayRequest(bankRequest);
 
             if (!gatewayResult.Success)
@@ -148,7 +148,7 @@ namespace CoreUI.Controllers
             if (bankRequest == null)
                 return BadRequest(new { errorMessage = "Banka isteği hatalı" });
 
-            var provider = _paymentProviderFactory.Create((_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), payment.VirtualPos.BankCard.SystemName));
+            var provider = _paymentProviderFactory.Create((VirtualPosSystem)payment.VirtualPos.VirtualPosSystem);
             var verifyRequest = new VerifyGatewayRequest
             {
                 BankName = bankRequest.BankName,

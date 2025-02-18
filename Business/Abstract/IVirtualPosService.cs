@@ -14,6 +14,7 @@ namespace Business.Abstract
         Task<IResult> DeleteVirtualPos(VirtualPos virtualPos);
         Task<IResult> UpdateVirtualPos(VirtualPos virtualPos);
         Task<VirtualPos> GetByBrandId(Guid id);
+        Task<VirtualPos> GetByBankId(Guid id);
         Task<VirtualPos> GetVirtualPosAsync(Guid virtualPosId);
         Task<IDataResult<List<VirtualPosParameter>>> GetVirtualPosParameters(Guid bankId);
         Task<List<VirtualPos>> GetVirtualListsAsync();

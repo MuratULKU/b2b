@@ -11,7 +11,7 @@ namespace Entity
     {
         public Guid BankCardId { get; set; }
         public Guid CardBrandId { get; set; }
-
+        public  int VirtualPosSystem { get;set; }  = 0;
         public string? Name { get; set; }
         public BankCard? BankCard { get; set; }
         public string? AccountCode { get; set; } //muhasebe banka hesap kodu

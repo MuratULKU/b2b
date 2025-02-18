@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,5 +32,7 @@ namespace Entity
         public Currency? Currency { get; set; }
         public Guid CompanyId { get; set; } = Guid.Empty;
         public Company Company { get; set; } = default!;
+        [NotMapped]
+        public string Salesman => User != null ? User.AccountCode : "";
     }
 }

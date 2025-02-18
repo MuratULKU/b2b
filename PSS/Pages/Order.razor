@@ -11,7 +11,9 @@
 @inject NavigationManager navManager
 <div class="container">
     <div class="offer">
-        <input class="btn btn-primary" type="button" value="Yeni Sipariş" onclick="@(()=>NewOrderButtonClick())" />
+        <input class="btn btn-success" type="button" value="Yeni Sipariş" onclick="@(()=>NewOrderButtonClick())" />
+        <input class="btn btn-danger" type="button" value="Değiştir" disabled="@((ordFiche == null || ordFiche?.Send != 0)? true:false)" onclick="@(()=>ChangeOrdFiche())" />
+        <input class="btn btn-primary" type="button" value="Onay" disabled="@((ordFiche == null || ordFiche?.Send != 0) ? true:false)" onclick="@(()=>OrderOK())" />
         <DataGrid TItem="OrdFiche" Items="ordFiches" @bind-SelectedItem="ordFiche" TotalCount="dataGridTotalCount"
                   Pager SelectedPageChange="@SelectedPageChange" RowCount="pageCount" RowsPerPage="RowCountChange">
             <Columns>
@@ -53,11 +55,7 @@
                     </CellTemplate>
                 </Column>
             </Columns>
-            <ButtonRowTemplate>
-                <input class="btn btn-primary" value="Değiştir" disabled="@(ordFiche == null ? true:false)" onclick="@ChangeOrdFiche" />
-                <input class="btn btn-primary" value="Onay" disabled="@(ordFiche == null ? true:false)" onclick="@OrderOK" />
-
-            </ButtonRowTemplate>
+         
 
         </DataGrid>
     </div>

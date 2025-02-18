@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace B2B.Data
 {
-    public class CartService
+    public class CartService:IDisposable
     {
         private readonly IProductServices productServices;
         private readonly IOrderService orderService;
@@ -188,7 +188,14 @@ namespace B2B.Data
             if (_ordFiche == null) return;
             _ordFiche.Send = 1;
             await orderService.Save(_ordFiche);
+          
         }
 
+        public void Dispose()
+        {
+           _ordFiche = null;
+            company = null;
+            user = null;
+        }
     }
 }

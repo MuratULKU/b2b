@@ -6,8 +6,9 @@ namespace CoreUI.Components.DataGrid
     public partial class DataGridPager<TItem> : ComponentBase, IDisposable
     {
         [CascadingParameter] public DataGrid<TItem> Datagrid { get; set; }
-
-
+        [Parameter] public int TotalCount { get; set; }
+        public Action? PagerStateHasChangedEvent { get; set; }
+       
         private int PageCount;
         protected int StartIndex { get; private set; } = 1;
         protected int FinishIndex { get; private set; } = 3;
@@ -19,7 +20,8 @@ namespace CoreUI.Components.DataGrid
 
         protected override void OnParametersSet()
         {
-            PageCount = (int)Math.Ceiling((double)Datagrid.TotalCount / (double)Datagrid.RowCount);
+           
+            PageCount = (int)Math.Ceiling((double)TotalCount / (double)Datagrid.RowCount);
             int visiblePages = Math.Min(5, PageCount);
 
             StartIndex = (int)Math.Max(1, Math.Ceiling((decimal)(Datagrid.CurrentPage - (visiblePages / 2))));
@@ -29,6 +31,11 @@ namespace CoreUI.Components.DataGrid
             StartIndex = Math.Max(1, StartIndex - delta);
            
             base.OnParametersSet();
+        }
+
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
         }
 
         protected override async Task OnInitializedAsync()

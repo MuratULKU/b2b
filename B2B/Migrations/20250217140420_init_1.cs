@@ -151,6 +151,7 @@ namespace B2C.Migrations
                     TelNo2 = table.Column<string>(type: "TEXT", nullable: false),
                     Mail = table.Column<string>(type: "TEXT", nullable: false),
                     ProgramCode = table.Column<string>(type: "TEXT", nullable: false),
+                    PeriodCode = table.Column<string>(type: "TEXT", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreateUser = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -253,6 +254,7 @@ namespace B2C.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     BankCardId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CardBrandId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    VirtualPosSystem = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     AccountCode = table.Column<string>(type: "TEXT", nullable: true),
                     SinglePayment = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -339,6 +341,7 @@ namespace B2C.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     LogicalRef = table.Column<int>(type: "INTEGER", nullable: false),
+                    Active = table.Column<short>(type: "INTEGER", nullable: false),
                     Code = table.Column<string>(type: "TEXT COLLATE NOCASE", nullable: true),
                     Name = table.Column<string>(type: "TEXT COLLATE NOCASE", nullable: true),
                     Name2 = table.Column<string>(type: "TEXT", nullable: true),
@@ -831,26 +834,26 @@ namespace B2C.Migrations
                 columns: new[] { "Id", "CreateDate", "CreateUser", "RoleName", "UpdateDate", "UpdateUser" },
                 values: new object[,]
                 {
-                    { new Guid("361080bc-cdc5-411c-bab2-e55983a0c952"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7777), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "Sales", new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7778), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3") },
-                    { new Guid("3ff11bb0-e84b-4ad0-97d7-564f6da064a1"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7777), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "Bank", new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7777), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3") },
-                    { new Guid("5214148c-b160-49ec-89de-4e0fe37c8299"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7772), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "B2C", new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7772), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3") },
-                    { new Guid("8b49a3a5-f378-49ab-988d-c3695af90f72"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7774), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "Payment", new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7774), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3") },
-                    { new Guid("ac2527f1-5769-42d8-9710-9076ca347c5d"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7776), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "UserReport", new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7776), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3") },
-                    { new Guid("b86d9b61-1972-4c8f-84e4-e228c00d8e6c"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7773), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "Managment", new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7773), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3") },
-                    { new Guid("be9901da-f04f-44cc-8129-f39921ad6500"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7764), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "User", new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7764), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3") },
-                    { new Guid("d05e1bb3-3383-4cb8-bc53-644b7bee8c1f"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7751), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "Admin", new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7758), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3") },
-                    { new Guid("f52cbb25-2911-4274-8118-34a45a382cdd"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7775), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "Dashboard", new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7775), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3") }
+                    { new Guid("0c6befb6-4f06-4b64-867a-d3b5260b16b4"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9082), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "B2C", new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9082), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed") },
+                    { new Guid("1ae4c956-fd17-4526-802a-da590c4ca196"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9066), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "Admin", new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9073), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed") },
+                    { new Guid("4460db98-861e-4bc1-8319-fb725a7e8059"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9101), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "Payment", new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9101), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed") },
+                    { new Guid("7afc5b58-ace1-4fb5-97c3-2db2ef72f7b8"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9102), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "Dashboard", new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9102), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed") },
+                    { new Guid("7c44cda9-7a92-46e4-9018-96339c76d170"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9108), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "Sales", new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9108), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed") },
+                    { new Guid("c3977c0b-b895-45c1-8b79-fe09f6961fa1"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9080), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "User", new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9081), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed") },
+                    { new Guid("d3f67fb2-44ee-46c1-b93a-9ad53e8b5f93"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9100), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "Managment", new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9100), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed") },
+                    { new Guid("e92f81eb-8d59-44ea-b7d7-b65f8acdb692"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9103), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "UserReport", new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9103), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed") },
+                    { new Guid("eda64c65-df28-47ab-89f8-8088302f4464"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9104), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "Bank", new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9104), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed") }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "AccountCode", "AccountName", "Active", "CompanyId", "CreateDate", "CreateUser", "Discount", "Email", "Password", "UpdateDate", "UpdateUser", "Username" },
-                values: new object[] { new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "", null, null, null, new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7793), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), null, "murat@ulkubilgisayar.com", "Admin", new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7793), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), "Admin" });
+                values: new object[] { new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "", null, null, null, new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9126), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), null, "murat@ulkubilgisayar.com", "Admin", new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9126), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), "Admin" });
 
             migrationBuilder.InsertData(
                 table: "UserRoles",
                 columns: new[] { "RoleId", "UserId", "CreateDate", "CreateUser", "Id", "UpdateDate", "UpdateUser" },
-                values: new object[] { new Guid("d05e1bb3-3383-4cb8-bc53-644b7bee8c1f"), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7799), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3"), new Guid("c737c015-1146-469d-8fbe-ef83f7a3699a"), new DateTime(2025, 1, 27, 17, 47, 8, 178, DateTimeKind.Local).AddTicks(7800), new Guid("b6958f05-df58-4c21-a698-fe5aff764df3") });
+                values: new object[] { new Guid("1ae4c956-fd17-4526-802a-da590c4ca196"), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9133), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"), new Guid("d668d791-6728-4a6a-ad27-486716b102bf"), new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9133), new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_BankCards_BankCode",

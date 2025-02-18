@@ -1,0 +1,72 @@
+﻿@page "/confirmorder/{id:guid}"
+@using B2B.Data
+@using Business.Abstract
+@using CoreUI.BackOrder
+@using Entity
+@using Microsoft.Extensions.Configuration
+
+@using Newtonsoft.Json.Linq
+@using System.Net.Http.Headers
+@using System.Text
+@using System.Text.Json
+@inject IOrderService orderService
+@inject CartService cartService
+@inject IConfiguration configuration
+@inject ILogger<ConfirmOrder> _logger
+<div class="container">
+    @if(cartService._ordFiche != null)
+    {
+        <h3>Siparişiniz Tamamlandı.</h3>
+        <h3>@message</h3>
+    }
+    else
+    {
+        <h3>Sipariş Bilgisi Okunamadı. Lütfen Tekrar Deneyiniz.</h3>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid id { get; set; }
+    private string message { get; set; } = "";
+
+    protected async override void OnInitialized()
+    {
+
+        if(cartService._ordFiche.Id == id)
+        {
+            message = "Siparişiniz Başarılı Şekilde Kayıt Edildi.";
+            HttpClient _httpClient = new HttpClient();
+            _httpClient.BaseAddress = new Uri(configuration.GetSection("ApiService").GetSection("Url").Value);
+            List<OrdFiche> ordFiches = new List<OrdFiche>();
+            ordFiches.Add(cartService._ordFiche);
+            StringContent content = new StringContent(JsonSerializer.Serialize(ordFiches), Encoding.UTF8, "application/json");
+
+            try
+            {
+                var httpResponseMessage =
+                  await _httpClient.PostAsync($"/api/v1/Orders/order", content);
+                var response = await httpResponseMessage.Content.ReadAsStringAsync();
+                var responseResults = JsonSerializer.Deserialize<List<ResponseModel>>(response);
+                httpResponseMessage.EnsureSuccessStatusCode();
+                foreach (var result in responseResults)
+                {
+                    if (result.status == 1)
+                    {
+                        cartService._ordFiche.LogicalRef = result.logicalref;
+                        cartService._ordFiche.Send = 2;
+                    
+                        await orderService.Save(cartService._ordFiche);
+                    }
+                }
+                message = "Siparişiniz Başarlı Şekilde İletildi.";
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex.Message);
+            }
+           
+        }
+    }
+}

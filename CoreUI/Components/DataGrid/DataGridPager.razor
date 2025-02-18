@@ -1,6 +1,6 @@
 ﻿@typeparam TItem
 <div class="row">
-    @if (PageCount > 1)
+    @if (PageCount > 0 )
     {
         <div class="col-pagination" style="margin:auto;display:flex">
           
@@ -21,7 +21,7 @@
                         var currentIndex = i;
                         @if (i == Datagrid.CurrentPage)
                         {
-                            <li class="page-item active" style="cursor:pointer">
+                            <li class="page-item active">
                                 <a class="page-link" onclick="@(() => PageOnChanged(currentIndex))">
                                     <span>@i</span>
                                 </a>
@@ -73,6 +73,6 @@
     </div>
 </div>
 @code {
-
+   
 }
 

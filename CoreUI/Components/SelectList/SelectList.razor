@@ -29,12 +29,14 @@
     {
         if (firstRender && Items != null)
         {
-            var selectedItem = Items.First();
-            Selected = Text(selectedItem, ValueField);
-
+            if (Selected == null)
+            {
+                var selectedItem = Items.First();
+                Selected = Text(selectedItem, ValueField);
+            }
             // Seçili öğeyi ve nesneyi event olarak tetikle
             await SelectedChanged.InvokeAsync(Selected);
-            await SelectedItemChanged.InvokeAsync(selectedItem);
+            await SelectedItemChanged.InvokeAsync(SelectedItem);
         }
     }
 

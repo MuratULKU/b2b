@@ -110,7 +110,7 @@
                 if (!result)
                     throw new Exception("Client Code wrong");
             }
-            if(id != Guid.Empty)
+            if(id == Guid.Empty)
             {
                 user = new();
                 user.Id = Guid.NewGuid();

@@ -10,6 +10,7 @@
 @inject IConfiguration configuration
 @inject ICompanyService companyService
 @inject ILogger<ConfirmOrder> _logger
+@attribute [Authorize]
 <div class="container">
     <div class="row">
         <div class="col-sm-3">
@@ -55,8 +56,9 @@
     protected override async void OnInitialized()
     {
         userId = await userIdenetity.GetCurrentUserId();
-        lastDate = Convert.ToDateTime(DateTime.Now.Date);
+        lastDate = DateTime.Now.AddDays(1).AddSeconds(-1);
         firstDate = DateTime.Now.AddMonths(-1).Date;
+        GetExtre(1, _rowsPerPage);
         StateHasChanged();
     }
 

@@ -637,17 +637,17 @@
         "isBusinessCard":false,
         "brand":null
     },
-    {
-        "eftCode": "0010",
-        "bankName": "ZİRAAT BANKASI",
-        "prefixNo": "650274",
-        "network": "TROY",
-        "cardType": "C",
-        "isInstallment":false,
-        "brandName":null,
-        "isBusinessCard":false,
-        "brand":null
-    },
+  {
+    "eftCode": "0010",
+    "bankName": "ZİRAAT BANKASI",
+    "prefixNo": "650274",
+    "network": "TROY",
+    "cardType": "C",
+    "isInstallment": true,
+    "brandName": null,
+    "isBusinessCard": false,
+    "brand": "003"
+  },
     {
         "eftCode": "0010",
         "bankName": "ZİRAAT BANKASI",

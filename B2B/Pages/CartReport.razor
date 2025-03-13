@@ -1,16 +1,24 @@
 ﻿@page "/cartreport"
 @using Business.Abstract
+@using Core.Enum
 @using CoreUI.Components.DataGrid
 @using Entity
 @inject IOrderService orderService
+@attribute [Authorize]
 <div class="container">
-    <DataGrid TItem="OrdFiche" Items="cartList" RowCount="rowCount" Pager SelectedPageChange="selectedPageChange" SelectedItemChanged="selectedItemChange">
+    <DataGrid TItem="OrdFiche" Items="cartList" RowCount="rowCount" Pager SelectedPageChange="selectedPageChange" 
+        SelectedItemChanged="selectedItemChange" TotalCount="totalCount">
          <Columns>
             <Column Caption="Tarih" Field="@nameof(OrdFiche.Date_)" />
             <Column Caption="FişNo" Field="@nameof(OrdFiche.Docode)" />
             <Column Caption="Ara Toplam" Field="@nameof(OrdFiche.GrossTotal)" TextAlign="TextAlignmet.Right" />
             <Column Caption="Vergi" Field="@nameof(OrdFiche.TotalVat)" TextAlign="TextAlignmet.Right" />
             <Column Caption="Toplam" Field="@nameof(OrdFiche.Total)" TextAlign="TextAlignmet.Right" />
+            <Column Caption="Durum">
+                <CellTemplate>
+                    @((OrderState)context.Item.Send)
+                </CellTemplate>
+            </Column>
 
         </Columns>
         <DetailRowTemplate>
@@ -61,10 +69,13 @@
     private List<OrdFiche> cartList { get; set; }
     private OrdFiche ordFiche { get; set; } = default!;
     private List<OrdLine> ordLines { get; set; } = default!;
-    private int rowCount = 20;
+    private int rowCount = 10;
+    private int totalCount;
     protected override async void OnInitialized()
     {
+        totalCount = await orderService.GetOrderFicheCount(1);
         cartList = await orderService.GetOrderFiche(1, 0, rowCount);
+       
     }
     private async void selectedPageChange(int page)
     {

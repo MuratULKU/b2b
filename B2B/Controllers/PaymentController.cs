@@ -23,6 +23,8 @@ namespace B2B.Controllers
         private readonly IPaymentProviderFactory _paymentProviderFactory;
         private readonly IFirmParamService _firmParamService;
         private readonly ILogger<PaymentTransaction> _logger;
+
+
         public PaymentController(IPaymentService paymentService, IVirtualPosService bankService, IHtmlHelper htmlHelper, IPaymentProviderFactory paymentProviderFactory, IFirmParamService firmParamService, ILogger<PaymentTransaction> logger)
         {
             _paymentService = paymentService;
@@ -87,6 +89,9 @@ namespace B2B.Controllers
 
                 payment.MarkAsCreated();
 
+                var order =await  _paymentService.GetByOrderNumber(payment.OrderNumber);
+                if (order.Data != null)
+                    throw new Exception("Bu Sipariş Numarası Daha Önce Kullanılmış ve Bankadan Cevep Bekleniyor...");
                 //insert payment transaction
                 await _paymentService.Insert(payment);
 

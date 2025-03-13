@@ -13,6 +13,7 @@
 @inject CartService cartService
 @inject IConfiguration configuration
 @inject ILogger<ConfirmOrder> _logger
+@attribute [Authorize]
 <div class="container">
     @if(cartService._ordFiche != null)
     {

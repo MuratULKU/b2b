@@ -35,6 +35,7 @@ namespace DataAccess.EFCore
         public DbSet<ShipAdress> ShipAdresses { get; set; }
         public DbSet<Client> Clients { get; set; }  
         public DbSet<Company> Companies { get; set; }
+        public DbSet<ClFiche> ClFiches { get; set; }
         public RepositoryContext(DbContextOptions<RepositoryContext> options) : base(options)
         {
           

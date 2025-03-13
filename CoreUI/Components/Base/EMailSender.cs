@@ -9,29 +9,28 @@ namespace SendEMail
 {
     public class EMailSender
     {
-        private readonly string host;
-        private readonly int port;
-        private readonly bool enableSSL;
-        private readonly string userName;
-        private readonly string password;
+        private readonly string _host;
+        private readonly int _port;
+        private readonly bool _enableSSL;
+        private readonly string _userName;
+        private readonly string _password;
         
-        public  EMailSender(List<FirmParam> mailParamService)
+        public  EMailSender(string host, int port, bool enableSSl, string userNmae, string password)
         {
-            //this.host = await mailParamService.ToString(11);
-            //this.port = Convert.ToInt32(mailParamService.ToString(12));
-            //this.enableSSL = mailParamService.ToBoolean(13);
-            //this.userName = mailParamService.ToString(14);
-            //this.password = mailParamService.ToString(15);
-
+            _host = host;
+            _port = port;
+            _enableSSL = enableSSl;
+            _userName = userNmae;
+            _password = password;
         }
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            var mesaj = new MailMessage(userName, email, subject, htmlMessage);
+            var mesaj = new MailMessage(_userName, email, subject, htmlMessage);
             mesaj.IsBodyHtml = true;
             mesaj.Body = htmlMessage;
-            var smtpClient = new SmtpClient(host, port);
-            smtpClient.Credentials = new NetworkCredential(userName, password);
-            smtpClient.EnableSsl = enableSSL;
+            var smtpClient = new SmtpClient(_host, _port);
+            smtpClient.Credentials = new NetworkCredential(_userName, _password);
+            smtpClient.EnableSsl = _enableSSL;
             await smtpClient.SendMailAsync(mesaj);
         }
     }

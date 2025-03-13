@@ -53,8 +53,9 @@ body {
 
 .modal-body iframe {
     width: 100%;
-    height: 500px;
+    height: 600px;
     border: none;
+
 }
 
 /* Mobil uyumlu düzen */

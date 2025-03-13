@@ -54,7 +54,7 @@
                 <div class="col-4">
                     <h3>Firma Yetkilisi</h3>
                     <label>Adı</label>
-                    <inputclass ="form-control" type="text" @bind-value="_client.FirmExecutiveName" />
+                    <input class ="form-control" type="text" @bind-value="_client.FirmExecutiveName" />
                     <label>SoyAdı</label>
                     <input class="form-control" type="text" @bind-value="_client.FirmExecutiveSurName" />
                     <label>Telefon</label>
@@ -188,7 +188,7 @@
                         }
                     </div>
                     <div class="card-footer text-end">
-                        <input type="button" disabled="@(_ordFiche?.Lines==null?true:false)" class="btn btn-success" onclick="@SaveChanged" value="Odeme" />
+                        <input type="button" disabled="@(_ordFiche?.Lines==null?true:false)" class="btn btn-success" onclick="@SaveChanged" value="Kaydet" />
                     </div>
                 </div>
             </div>
@@ -218,8 +218,8 @@
 
     private void Sum()
     {
-        _ordFiche.GrossTotal = Math.Round(_ordFiche.Lines.Sum(x => x.Total), 2);
         _ordFiche.TotalDiscounted = Math.Round(_ordFiche.Lines.Sum(x => x.Distdisc), 2);
+        _ordFiche.GrossTotal = Math.Round(_ordFiche.Lines.Sum(x => x.Total), 2) - _ordFiche.TotalDiscounted;
         _ordFiche.TotalVat = Math.Round(_ordFiche.Lines.Sum(x => x.VatAmnt), 2);
         _ordFiche.Total = Math.Round(_ordFiche.Lines.Sum(x => x.Total - x.Distdisc + x.VatAmnt), 2);
         _ordFiche.UpdateDate = DateTime.Now;
@@ -284,9 +284,10 @@
         }
         set
         {
-            if (Guid.TryParse(value.ToString(), out Guid guid))
-                clientid = guid;
-            _client = clientCardManager.GetByGuid(clientid).Result;
+             if (Guid.TryParse(value.ToString(), out Guid guid))
+                 clientid = guid;
+             _client = clientCardManager.GetByGuid(clientid).Result ?? new();
+             if(_client != null)
             pageValid = true;
         }
 

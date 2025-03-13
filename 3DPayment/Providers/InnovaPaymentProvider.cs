@@ -42,7 +42,7 @@ namespace _3DPayment.Providers
                  * Master Card 200
                  * American Express 300
                 */
-                httpParameters.Add("BrandName", "200");
+                httpParameters.Add("BrandName", "100");
                 httpParameters.Add("VerifyEnrollmentRequestId", Guid.NewGuid().ToString("N"));//sipariş numarası
                 httpParameters.Add("SessionInfo", "1");//banka dökümanları sabit bir değer
                 httpParameters.Add("MerchantID", merchantId);

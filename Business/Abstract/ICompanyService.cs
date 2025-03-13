@@ -13,7 +13,7 @@ namespace Business.Abstract
         Task<Company> GetByUserId(Guid userId);
         List<Company> GetAll(int currentPage, int pageSize);
         Task<List<Company>> GetAllAsync(int CurrentPage, int PageSize);
-        Task<int> TotalCount(int CurrentPage, int PageSize);
+        Task<int> TotalCount();
         Task<bool> Insert(Company company);
         Task<bool> Insert(Company company, User user, UserRole userRole);
         Task<bool> Update(Company client);

@@ -63,12 +63,12 @@ namespace Business.Concrete
 
         public async Task<VirtualPos> GetByBrandId(Guid id)
         {
-          return await _unitOfWork.VirtualPoses.SingleOrDefaultAsync(x => x.CardBrandId == id, x => x.Include(x=>x.BankCard));
+          return await _unitOfWork.VirtualPoses.FirstOrDefaultAsync(x => x.CardBrandId == id && x.Active == false, x => x.Include(x=>x.BankCard));
            
         }
         public async Task<VirtualPos> GetByBankId(Guid id)
         {
-            return await _unitOfWork.VirtualPoses.SingleOrDefaultAsync(x => x.BankCardId == id, x => x.Include(x => x.BankCard));
+            return await _unitOfWork.VirtualPoses.SingleOrDefaultAsync(x => x.BankCardId == id && x.Active == false, x => x.Include(x => x.BankCard));
         }
 
         public async Task<List<VirtualPos>> GetVirtualListsAsync()

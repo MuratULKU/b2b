@@ -19,6 +19,7 @@
 @inject NavigationManager navManager
 @inject IUserIdentityProcessor userIdentity
 @inject NotificationService notification
+@attribute [Authorize]
 <div class="container">
     <div class="row">
         <div class="col-6">
@@ -62,6 +63,12 @@
             </div>
             <div class="col-4">
                 <input type="checkbox" checked="@virtualPos.SinglePayment" @oninput="CheckboxChanged" />
+            </div>
+            <div class="col-8">
+                <label>Pasif </label>
+            </div>
+            <div class="col-4">
+                <input type="checkbox" checked="@virtualPos.Active" @oninput="ActiveChanged" />
             </div>
             <div class="col-4">
             </div>
@@ -156,12 +163,15 @@
 
     }
 
-    
+
     private void CheckboxChanged(ChangeEventArgs e)
     {
         virtualPos.SinglePayment = Convert.ToBoolean(e.Value);
     }
-
+    private void ActiveChanged(ChangeEventArgs e)
+    {
+        virtualPos.Active = Convert.ToBoolean(e.Value);
+    }
     private async void AddParameter()
     {
         virtualPosParameter = new()

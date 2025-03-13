@@ -1,4 +1,5 @@
 ﻿@page "/success/{guid}"
+@using Business.SingletonServices
 @using Microsoft.AspNetCore.Components.Rendering
 @using Business.Abstract;
 @using Business.Concrete;
@@ -9,7 +10,7 @@
 
 @attribute [Authorize]
 @inject IPaymentService paymentManager
-@inject IFirmParamService firmParam
+@inject FirmParameter firmParam
 @inject IOrderService orderService
 @inject IUserIdentityProcessor userIdentity
 @inject IUserService userService
@@ -31,7 +32,7 @@
     private Task<AuthenticationState>? authenticationState { get; set; }
     protected async override void OnInitialized()
     {
-        payment = paymentManager.GetByOrderNumber(Guid.Parse(guid)).Result.Data;
+        payment = (await paymentManager.GetByOrderNumber(Guid.Parse(guid))).Data;
         if (payment == null)
             throw new Exception("Hatalı Sipariş Nuraması");
         var param = firmParam.Get(1);
@@ -45,10 +46,10 @@
         //     ordFiche.Explanation = ordFiche.Explanation ?? string.Empty; //null giderse api hata veriyor
         //     // orderService.UpdateBasket(ordFiche);
         // }
-         // EMailSender es = new EMailSender(firmParam);
-         // await es.SendEmailAsync(firmParam.ToString(7), "Kredi Kartı Tahsilat Maili", GenerateEmailContent());
-         // if (firmParam.ToString(7) != userService.User.Email)
-         //     await es.SendEmailAsync(userService.User.Email, "Kredi Kartı Tahsilat Maili",GenerateEmailContent());
+        EMailSender es = new EMailSender(firmParam.ToString(11), firmParam.ToInteger(12), firmParam.ToBoolean(13), firmParam.ToString(14), firmParam.ToString(15));
+          await es.SendEmailAsync(firmParam.ToString(7), "Kredi Kartı Tahsilat Maili", GenerateEmailContent());
+          if (payment.User != null || firmParam.ToString(7) != payment.User.Email)
+             await es.SendEmailAsync(payment.User.Email, "Kredi Kartı Tahsilat Maili",GenerateEmailContent());
 
     }
 

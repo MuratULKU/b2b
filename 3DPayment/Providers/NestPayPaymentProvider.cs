@@ -356,8 +356,7 @@ namespace _3DPayment.Providers
             string userName = request.BankParameters["userName"];
             string password = request.BankParameters["password"];
 
-            string requestXml = $@"<?xml version=""1.0"" encoding=""utf-8""?>
-                                    <CC5Request>
+            string requestXml = $@"<CC5Request>
                                         <Name>{userName}</Name>
                                         <Password>{password}</Password>
                                         <ClientId>{clientId}</ClientId>
@@ -367,8 +366,13 @@ namespace _3DPayment.Providers
                                         </Extra>
                                     </CC5Request>";
 
-            var response = await client.PostAsync(request.BankParameters["verifyUrl"], new StringContent(requestXml, Encoding.Latin1, "text/xml"));
-            string responseContent = await response.Content.ReadAsStringAsync();
+            var response = await client.PostAsync(request.BankParameters["verifyUrl"], new StringContent(requestXml, Encoding.UTF8, "text/xml"));
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            //teb bankası utf8 çevirmek gerekiyor
+            Encoding iso88599 = Encoding.GetEncoding("ISO-8859-9");
+            var responseBytes = await response.Content.ReadAsByteArrayAsync();
+            // Byte dizisini önce ISO-8859-9 olarak oku, sonra UTF-8'e çevir
+            string responseContent = Encoding.UTF8.GetString(Encoding.Convert(iso88599, Encoding.UTF8, responseBytes));
 
             var xmlDocument = new XmlDocument();
             xmlDocument.LoadXml(responseContent);

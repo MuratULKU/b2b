@@ -13,7 +13,9 @@
 @inject IUserIdentityProcessor userIdentity
 @inject NotificationService notification
 @inject IConfiguration _configuration
-
+@inject HttpClient _httpClient
+@inject NavigationManager navManager
+@attribute [Authorize]
 <EditForm Model="@company" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -59,15 +61,16 @@
     </div>
     <div class="mb-3">
         <label for="password" class="form-label">Şifre</label>
-        <InputText id="password" class="form-control" @bind-Value="password" />
+        <InputText id="password"  class="form-control" @bind-Value="password" />
     </div>
 
     <div class="mb-3">
         <label for="programCode" class="form-label">Program Code</label>
         <InputText id="programCode" class="form-control" @bind-Value="company.ProgramCode" />
     </div>
-
-    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="button" class="btn btn-success" onclick="@newCompany">Yeni</button>
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+    <button type="reset" class="btn btn-danger" onclick="@deleteCompany">Sil</button>
     @*   <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button> *@
 </EditForm>
 
@@ -80,19 +83,40 @@
     public Company company { get; set; } = default!;
     private User user { get; set; } = default!;
     public string password { get; set; } = default!;
-   
 
+    public void newCompany()
+    {
+        company = new Company();
+    }
 
+    public async void deleteCompany()
+    {
+        if(company.Id != Guid.Empty)
+        {
+            var users = (await userService.GetUsers(x => x.CompanyId == company.Id)).Data;
+            foreach (User user in users)
+            {
+                await userService.DeleteUser(user);
+            }
+            if(await companyService.Delete(company))
+            {
+                navManager.NavigateTo("/companylist", true);
+            }
+        }
+    }
 
     protected async override void OnInitialized()
     {
         if (id == Guid.Empty)
         {
             company = new Company();
-            company.Id = Guid.NewGuid();
         }
         else
+        {
             company = await companyService.Get(id);
+
+        }
+        _httpClient.BaseAddress = new Uri(_configuration.GetSection("ApiService").GetSection("Url").Value);
         base.OnInitialized();
     }
 
@@ -100,18 +124,26 @@
     {
         try
         {
-            HttpClient _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(_configuration.GetSection("ApiService").GetSection("Url").Value);
-            string url = $"/api/v1/client/check?code={company.ProgramCode}";
-            var response = await _httpClient.GetAsync(url);
-            if (response.IsSuccessStatusCode)
+
+
+            // string url = $"/api/v1/client/check?code={company.ProgramCode}";
+            // var response = await _httpClient.GetAsync(url);
+            // if (response.IsSuccessStatusCode)
+            // {
+            //     bool result = bool.Parse(await response.Content.ReadAsStringAsync());
+            //     if (!result)
+            //         throw new Exception("Client Code wrong");
+            // }
+
+
+            if (company.Id == Guid.Empty)
             {
-                bool result = bool.Parse(await response.Content.ReadAsStringAsync());
-                if (!result)
-                    throw new Exception("Client Code wrong");
-            }
-            if(id == Guid.Empty)
-            {
+                var userTest = await userService.GetUserMail(company.Mail);
+                if (userTest != null)
+                    throw new Exception("Kullanıcı Maili Daha Önce Başka Firmada Kullanılmış.");
+                company.Id = Guid.NewGuid();
+                company.CreateDate = DateTime.Now;
+                company.CreateUser = await userIdentity.GetCurrentUserId();
                 user = new();
                 user.Id = Guid.NewGuid();
                 user.CompanyId = company.Id;
@@ -119,21 +151,21 @@
                 user.Password = password;
                 user.Email = company.Mail;
                 user.CreateDate = DateTime.Now;
-                user.UpdateDate = DateTime.Now;
                 user.CreateUser = await userIdentity.GetCurrentUserId();
-                user.UpdateUser = await userIdentity.GetCurrentUserId();
+
                 UserRole userRole = new();
                 userRole.Id = Guid.NewGuid();
                 userRole.RoleId = roleService.GetRole("Managment").Result.Data.Id;
                 userRole.UserId = user.Id;
                 userRole.CreateUser = user.CreateUser;
-                userRole.UpdateUser = user.UpdateUser;
                 userRole.CreateDate = DateTime.Now;
-                userRole.UpdateDate = DateTime.Now;
+                userRole.CreateDate = DateTime.Now;
+              
                 var success = await companyService.Insert(company, user, userRole);
                 if (success)
                 {
                     notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Kayıt Tamamlandı.", Detail = "Firma Kayıt Edildi.", Duration = 2000 });
+                    navManager.NavigateTo("/companylist",true);
                 }
             }
             else
@@ -141,6 +173,7 @@
                 var success = await companyService.Update(company);
                 if (success)
                 {
+                    company.UpdateUser = await userIdentity.GetCurrentUserId();
                     notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Kayıt Tamamlandı.", Detail = "Firma Bilgileri Güncellendi.", Duration = 2000 });
                 }
             }
@@ -149,10 +182,10 @@
         {
             var errorDetail = ex.InnerException != null ? $"{ex.Message}\n{ex.InnerException.Message}" : ex.Message;
             notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Hata", Detail = errorDetail, Duration = 5000 });
-           
+
         }
 
-       
+
 
     }
 }

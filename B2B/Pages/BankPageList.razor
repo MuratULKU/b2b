@@ -4,6 +4,7 @@
 @using CoreUI.Components.DataGrid
 @using Entity
 @inject IBankCardService BankCardService
+@attribute [Authorize]
 <div class="container">
     <DataGrid TItem="BankCard" Items="BankCardList">
         <Columns>

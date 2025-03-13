@@ -11,7 +11,12 @@ h1:focus {
 a, .btn-link {
     color: #0071c1;
 }
-
+.circle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: inline-block;
+}
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;

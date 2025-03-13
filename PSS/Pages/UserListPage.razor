@@ -105,7 +105,7 @@
     private async void selectUser(User user)
     {
         selecetedUser = user;
-        companyId = companies.FirstOrDefault(c => c.Id == selecetedUser.CompanyId).Id;
+        companyId = user.CompanyId ?? Guid.Empty;
         selecetedUser.UsersRoles = userRoleService.GetAll(selecetedUser.Id).Result;
     }
 

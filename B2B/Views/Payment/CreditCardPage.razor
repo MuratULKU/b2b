@@ -363,6 +363,30 @@
                         });
                 }
             }
+            else
+            {
+                VirtualPos cPos = await virtualPosService.GetVirtualPosAsync(Guid.Parse(firmParam.ToString(10)));
+
+                if (cPos != null && !installmentViewModel.Any())
+                {
+                    installmentViewModel.Add(
+               new()
+                   {
+                       Text = "Tek Çekim",
+                       Amount = Total.ToString("N2") + " TL",
+                       AmountValue = Total,
+                       TotalAmount = Total.ToString("N2") + " TL",
+                       TotalAmountValue = Total,
+                       VirtualPos = cPos,
+                       BankName = cPos.BankCard.Name
+                   });
+                }
+                else
+                {
+                    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
+                }
+
+            }
         }
         else
         {
@@ -466,6 +490,7 @@ private async void payment()
     {
         OrderId = Guid.NewGuid();
     }
+
     if (!checkPaymentForm())
         return;
     if (company == null)

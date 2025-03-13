@@ -8,13 +8,15 @@
 @inject CartService cartService
 @inject IUserIdentityProcessor userIdentity
 @inject NotificationService notification
+@attribute [Authorize]
+
 <div class="container">
     <div class="findarea">
         <form @onsubmit="SearchEnter">
             <input class="findtext" type="text" placeholder="Arama" id="filter" name="filter" @bind-value="@Filter" />
             <input type="hidden" id="category" name="category" value="@selectCategory" />
-            <button class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit">
-            </button>
+            <input class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit" />
+           
         </form>
     </div>
 

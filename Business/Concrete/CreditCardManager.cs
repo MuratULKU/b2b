@@ -2,6 +2,7 @@
 using Core.Abstract;
 using DataAccess.Abstract;
 using Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace Business.Concrete
 
         public async Task<List<CreditCard>> GetAll()
         {
-            var result = await _unitOfWork.CreditCards.GetAllAsync();
+            var result = await _unitOfWork.CreditCards.GetAllAsync(x=>x.Include(x=>x.CardBrand));
             return result.Data;
         }
 
@@ -67,6 +68,11 @@ namespace Business.Concrete
             }
                
             return creditCard.Data;
+        }
+
+        public Task<List<CreditCard>> GetFiltered(string filter)
+        {
+           return _unitOfWork.CreditCards.GetFilteredAsync(x=>x.Name.StartsWith(filter),x=>x.Include(x=>x.CardBrand));
         }
 
         public async Task<IResult> UpdateCreditCard(CreditCard creditCard)

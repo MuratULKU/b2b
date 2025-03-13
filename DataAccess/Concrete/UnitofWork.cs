@@ -36,6 +36,7 @@ namespace DataAccess.Concrete
         private IUserRepository? _userRepository;
         private IRoleRepository? _roleRepository;
         private IUserRoleRepository? _userRoleRepository;
+        private IClFicheRepository _clFicheRepository;
         public UnitofWork(RepositoryContext context)
         {
             this._context = context;
@@ -83,6 +84,8 @@ namespace DataAccess.Concrete
         public IRoleRepository Role => _roleRepository = _roleRepository ?? new RoleRepository(_context);
 
         public IUserRoleRepository UserRole => _userRoleRepository = _userRoleRepository ?? new UserRoleRepository(_context);
+
+        public IClFicheRepository ClFiche => _clFicheRepository = _clFicheRepository ?? new ClFicheRepository(_context);
 
         // Commit changes asynchronously
         public async Task<int> CommitAsync()

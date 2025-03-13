@@ -21,12 +21,18 @@ using _3DPayment;
 using Business.SingletonServices;
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages().AddSessionStateTempDataProvider();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddSessionStateTempDataProvider();
+
+// TempData için Session'ý aktif etmelisin
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddDbContext<RepositoryContext>(
     options => options.UseSqlite(builder.Configuration.GetConnectionString("sqlConnection"), b => b.MigrationsAssembly("B2B")),
@@ -79,6 +85,8 @@ builder.Services.AddScoped<ICompanyService, CompanyManager>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService,PaymentManager>();
 builder.Services.AddScoped<IPaymentProviderFactory, PaymentProviderFactory>();
+builder.Services.AddScoped<IClFicheRepository,ClFicheRepository>();
+builder.Services.AddScoped<IClFicheService, ClFicheManager>();
 
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<UserRoleManager>();
@@ -93,7 +101,7 @@ builder.Services.AddScoped<IUnitofWork, UnitofWork>();
 
 
 
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<BackOrder>();
 
 
 var app = builder.Build();

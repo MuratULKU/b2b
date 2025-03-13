@@ -85,7 +85,7 @@ namespace Business.Concrete
             
         }
 
-        public async Task<int> TotalCount(int CurrentPage, int PageSize)
+        public async Task<int> TotalCount()
         {
             return await _unitOfWork.Company.RowCount();
         }

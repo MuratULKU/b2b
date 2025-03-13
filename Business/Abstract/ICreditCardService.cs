@@ -19,6 +19,6 @@ namespace Business.Abstract
         Task<IResult> DeleteCreditCard(CreditCard creditCard);
         Task<CreditCard> GetCreditCardByPrefix(string prefix,
            bool includeInstallments = false);
-
+        Task<List<CreditCard>> GetFiltered(string filter);
     }
 }

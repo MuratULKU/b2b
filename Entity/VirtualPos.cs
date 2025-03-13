@@ -15,6 +15,8 @@ namespace Entity
         public string? Name { get; set; }
         public BankCard? BankCard { get; set; }
         public string? AccountCode { get; set; } //muhasebe banka hesap kodu
+        public bool Active { get; set; }
+        public bool Priorty { get; set; }
         [NotMapped]
         public List<CardBrand> CardBrands { get; set; }
         [NotMapped]

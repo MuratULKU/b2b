@@ -3,9 +3,11 @@ using Core.Abstract;
 using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -65,9 +67,15 @@ namespace Business.Concrete
 
         }
 
-        public async Task<IDataResult<List<User>>> GetUsers(string Filter)
+        public async Task<List<UserRole>> GetUserRole(Guid id)
         {
-            var result = await _unitOfWork.User.GetAllAsync();
+           var result = await _unitOfWork.UserRole.Find(x => x.UserId == id,x=>x.Include(y=>y.Role));  
+            return result.Data;
+        }
+
+        public async Task<IDataResult<List<User>>> GetUsers(Expression<Func<User, bool>> predicate)
+        {
+            var result = await _unitOfWork.User.Find(predicate);
             if (result.Status == ResultStatus.Success)
                 return new DataResult<List<User>>(ResultStatus.Success, result.Data);
             return new DataResult<List<User>>(ResultStatus.Error, result.Data);

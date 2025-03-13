@@ -1,0 +1,73 @@
+﻿/* Genel Stil */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 10px;
+}
+
+/* Butonları yan yana hizala */
+.offer {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+    .offer input {
+        flex: 1;
+        min-width: 150px;
+        padding: 10px;
+        font-size: 16px;
+    }
+
+/* DataGrid için Responsive Tasarım */
+.DataGrid {
+    width: 100%;
+    overflow-x: auto;
+}
+
+    /* Tablo İçeriği */
+    .DataGrid table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .DataGrid th, .DataGrid td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+/* Küçük ekranlarda yatay kaydırma */
+@media screen and (max-width: 768px) {
+    .offer {
+        flex-direction: column;
+    }
+
+        .offer input {
+            width: 100%;
+        }
+
+    .DataGrid th, .DataGrid td {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
+/* Mobil cihazlar için */
+@media screen and (max-width: 480px) {
+    .DataGrid {
+        overflow-x: auto;
+    }
+
+        .DataGrid th, .DataGrid td {
+            font-size: 12px;
+            padding: 5px;
+        }
+
+    .offer input {
+        font-size: 14px;
+        padding: 8px;
+    }
+}

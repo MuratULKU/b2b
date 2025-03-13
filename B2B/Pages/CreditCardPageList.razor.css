@@ -1,0 +1,53 @@
+﻿/* Genel Stiller */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Arama alanı stilleri */
+.findarea {
+    margin-bottom: 20px;
+}
+
+.findtext {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* DataGrid tablolarını responsive yapmak için */
+.DataGrid {
+    width: 100%;
+    overflow-x: auto; /* Küçük ekranlarda yatay kaydırma */
+}
+
+/* Mobil uyumlu grid düzeni */
+@media (max-width: 768px) {
+    .row {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .col-7, .col-5 {
+        width: 100%;
+    }
+
+    .findtext {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .btn {
+        width: 100%;
+        font-size: 14px;
+    }
+}

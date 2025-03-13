@@ -29,8 +29,8 @@
     }
 
     .table th {
-        background-color: #1b6ec2; /* Başlıklar için mavi arka plan */
-        color: #ffffff; /* Başlık metni beyaz */
+       /* background-color: #1b6ec2;  Başlıklar için mavi arka plan */
+        /*color: #ffffff;*/ /* Başlık metni beyaz */
         font-weight: bold;
     }
 
@@ -146,4 +146,3 @@
             width: 50%;
         }
 }
-a

@@ -1,9 +1,11 @@
 ﻿@page "/iletisim"
 @using Business.Abstract;
+@using Business.SingletonServices
 @using CoreUI.Components.NotificationService
 @using SendEMail;
-@inject Business.SingletonServices.FirmParameter firmParamService
+@inject FirmParameter firmParamService
 @inject NotificationService notification
+
 <div class="container">
     <div class="row">
         <div class="layout-cell size-50">
@@ -56,7 +58,7 @@
     private async void SendMessage()
     {
 
-        EMailSender es = new SendEMail.EMailSender(firmParamService.FirmParameters);
+        EMailSender es = new SendEMail.EMailSender(firmParamService.ToString(11), firmParamService.ToInteger(12),firmParamService.ToBoolean(13), firmParamService.ToString(14),firmParamService.ToString(15));
         await es.SendEmailAsync(@firmParamService.ToString(7), "Web Sitesi Gelen Mesaj", $"{mail} {namesurname} {message}");
         mail = "";
         namesurname = "";

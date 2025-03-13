@@ -1,12 +1,18 @@
 ﻿@page "/companylist"
 @using Business.Abstract
+
 @using CoreUI.Components.DataGrid
 @using Entity
 @inject ICompanyService companyManager
+@inject NavigationManager navManager
+
+@attribute [Authorize]
 <div class="container">
+  
     <div class="row">
         <div class="col-6">
-            <DataGrid TItem="Company" Items="companies" SelectedItemChanged="selectedCompanyChanged">
+            <DataGrid TItem="Company" Items="companies" SelectedItemChanged="selectedCompanyChanged"
+                      Pager TotalCount="TotalCount" SelectedPageChange="selectedPageChange" RowCount="RowCount" RowsPerPage="rowsPerPage">
                 <Columns>
                     <Column Caption="Firma Kodu" Field="@nameof(Company.ProgramCode)" />
                     <Column Caption="Firma Adı" Field="@nameof(Company.Name)" />
@@ -23,7 +29,8 @@
 @code {
     private List<Company> companies { get; set; } = default!;
     private Company selectedCompany { get; set; } = default!;
-
+    private int TotalCount { get; set; }
+    private int RowCount { get; set; } = 10;
     private void selectedCompanyChanged(Company company)
     {
         selectedCompany = company;
@@ -31,6 +38,18 @@
     }
     protected override async void OnInitialized()
     {
-        companies = await companyManager.GetAllAsync(0, 10);
+        companies = await companyManager.GetAllAsync(0, RowCount);
+        TotalCount = await companyManager.TotalCount();
+       
+    }
+    private async void selectedPageChange(int page)
+    {
+        companies = await companyManager.GetAllAsync(page, RowCount);
+    }
+
+    private async void rowsPerPage(int rowCount)
+    {
+        RowCount = rowCount;
+        companies = await companyManager.GetAllAsync(0, RowCount);
     }
 }

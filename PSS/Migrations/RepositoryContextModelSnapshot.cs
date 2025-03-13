@@ -319,6 +319,63 @@ namespace B2C.Migrations
                     b.ToTable("CharVals");
                 });
 
+            modelBuilder.Entity("Entity.ClFiche", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("BankCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CardCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreateUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DocNo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LineExp")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<short>("ModulNr")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte>("Send")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Sing")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("TrCode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UpdateUser")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ClFiches");
+                });
+
             modelBuilder.Entity("Entity.Client", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1246,84 +1303,84 @@ namespace B2C.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("1ae4c956-fd17-4526-802a-da590c4ca196"),
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9066),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            Id = new Guid("154c31de-6e12-4bf2-b562-fbb29a014381"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5645),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             RoleName = "Admin",
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9073),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed")
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5653),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f")
                         },
                         new
                         {
-                            Id = new Guid("c3977c0b-b895-45c1-8b79-fe09f6961fa1"),
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9080),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            Id = new Guid("732d2d86-8b21-4aed-be2b-5bceff693f22"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5657),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             RoleName = "User",
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9081),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed")
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5658),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f")
                         },
                         new
                         {
-                            Id = new Guid("0c6befb6-4f06-4b64-867a-d3b5260b16b4"),
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9082),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            Id = new Guid("a37f433b-9f19-4056-ba94-728db4b8b090"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5659),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             RoleName = "B2C",
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9082),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed")
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5659),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f")
                         },
                         new
                         {
-                            Id = new Guid("d3f67fb2-44ee-46c1-b93a-9ad53e8b5f93"),
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9100),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            Id = new Guid("0269c087-74aa-4acf-b720-aa7c7c355ec9"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5667),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             RoleName = "Managment",
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9100),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed")
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5667),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f")
                         },
                         new
                         {
-                            Id = new Guid("4460db98-861e-4bc1-8319-fb725a7e8059"),
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9101),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            Id = new Guid("aaed0d31-7ddb-4a33-94e2-0d37c3260a41"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5668),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             RoleName = "Payment",
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9101),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed")
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5669),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f")
                         },
                         new
                         {
-                            Id = new Guid("7afc5b58-ace1-4fb5-97c3-2db2ef72f7b8"),
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9102),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            Id = new Guid("6efdf6c3-a293-4633-a979-6dc9f25e6a95"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5669),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             RoleName = "Dashboard",
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9102),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed")
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5670),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f")
                         },
                         new
                         {
-                            Id = new Guid("e92f81eb-8d59-44ea-b7d7-b65f8acdb692"),
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9103),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            Id = new Guid("7f80db1b-d827-412c-ab3a-3798aa680bef"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5670),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             RoleName = "UserReport",
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9103),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed")
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5671),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f")
                         },
                         new
                         {
-                            Id = new Guid("eda64c65-df28-47ab-89f8-8088302f4464"),
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9104),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            Id = new Guid("257f5382-d8c8-46c0-a645-886fdc26a376"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5671),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             RoleName = "Bank",
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9104),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed")
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5672),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f")
                         },
                         new
                         {
-                            Id = new Guid("7c44cda9-7a92-46e4-9018-96339c76d170"),
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9108),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            Id = new Guid("283ddc2a-bf49-4a36-b2e4-2e5d20f2f88f"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5672),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             RoleName = "Sales",
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9108),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed")
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5673),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f")
                         });
                 });
 
@@ -1467,14 +1524,14 @@ namespace B2C.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            Id = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             AccountCode = "",
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9126),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5691),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             Email = "murat@ulkubilgisayar.com",
                             Password = "Admin",
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9126),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5691),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
                             Username = "Admin"
                         });
                 });
@@ -1511,13 +1568,13 @@ namespace B2C.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
-                            RoleId = new Guid("1ae4c956-fd17-4526-802a-da590c4ca196"),
-                            CreateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9133),
-                            CreateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed"),
-                            Id = new Guid("d668d791-6728-4a6a-ad27-486716b102bf"),
-                            UpdateDate = new DateTime(2025, 2, 17, 17, 4, 20, 106, DateTimeKind.Local).AddTicks(9133),
-                            UpdateUser = new Guid("74b1c32e-277f-47e0-8321-e940732cb8ed")
+                            UserId = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
+                            RoleId = new Guid("154c31de-6e12-4bf2-b562-fbb29a014381"),
+                            CreateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5719),
+                            CreateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f"),
+                            Id = new Guid("705f90ed-d55c-41b8-8339-d83f238fa6e6"),
+                            UpdateDate = new DateTime(2025, 2, 21, 13, 15, 4, 606, DateTimeKind.Local).AddTicks(5719),
+                            UpdateUser = new Guid("645faecc-a2e3-4eda-aaa3-d7a4dd847b6f")
                         });
                 });
 

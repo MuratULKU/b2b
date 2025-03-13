@@ -18,6 +18,7 @@
 @inject NavigationManager navManager
 @inject NotificationService notification
 @inject ICompanyService companyService
+@attribute [Authorize]
 <div class="container">
     <div class="row">
         <div class="col-7 usercard">
@@ -49,14 +50,14 @@
                 <label>Firma Ünvanı</label>
             </div>
             <div class="col-7">
-               <SelectList TItem="Company" Items="company" Selected="selectedCompanyId" DisplayField="Name" ValueField="Id"/>
+                <SelectList TItem="Company" Items="company" Selected="selectedCompanyId" DisplayField="Name" ValueField="Id" SelectedChanged="(e)=>selectedCompanyId = new Guid(e.ToString())" />
             </div>
             <AuthorizeView Roles="Admin">
                 <div class="col-5">
                     <label>Kullanıcı Rolü</label>
                 </div>
                 <div class="col-7">
-                    <SelectList TItem="Role" Items="userRole" Selected="@selectedRole.ToString()" DisplayField="RoleName" ValueField="Id" SelectedChanged="(e)=>selectedRole = new Guid(e.ToString())" />
+                    <SelectList TItem="Role" Items="userRole" Selected="@selectedRole" DisplayField="RoleName" ValueField="Id" SelectedChanged="(e)=>selectedRole = new Guid(e.ToString())" />
                 </div>
                 <div class="col-5">
                     <label>İskonto Oranı</label>
@@ -80,7 +81,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (user.UsersRoles != null)
+                        @if (user?.UsersRoles != null)
                         {
                             @foreach (var item in user.UsersRoles)
                             {
@@ -107,32 +108,36 @@
     [SupplyParameterFromQuery]
     [Parameter]
     public Guid id { get; set; }
+
     private User user;
     private Guid selectedRole;
     private Guid selectedCompanyId;
     private List<Role> userRole;
     private List<Company> company;
-  
+
+
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
 
-    private async void Addrole(Guid RoleId)
+    private async Task Addrole(Guid RoleId)
     {
         UserRole userRole1 = new UserRole();
         userRole1.Id = Guid.NewGuid();
         userRole1.RoleId = RoleId;
         userRole1.UserId = user.Id;
+        userRole1.Role = null;
+        userRole1.User = null;
         await userRoleRepository.AddRole(userRole1);
         user = await userReposiyory.GetUser(id);
         StateHasChanged();
     }
 
-    private async void DeleteRole(Guid userRoleId)
+    private async Task DeleteRole(Guid userRoleId)
     {
         var userRole = await userRoleRepository.GetUserRole(userRoleId);
         if (userRole != null)
-            userRoleRepository.DeleteRole(userRole);
-        user = null;
+            await userRoleRepository.DeleteRole(userRole);
+
         var result = await userReposiyory.GetUser(id);
 
 
@@ -143,9 +148,13 @@
         if (id == Guid.Empty)
             user = new();
         else
+        {
             user = await userReposiyory.GetUser(id);
-        userRole = roleRepository.GetAllRole().Result.Data;
+            user.UsersRoles = userReposiyory.GetUserRole(id).Result;
+        }
+        userRole = (await roleRepository.GetAllRole()).Data;
         company = companyService.GetAllAsync(0,200).Result;
+        selectedCompanyId = user.CompanyId?? Guid.Empty;
     }
 
     private async void Save()
@@ -162,6 +171,8 @@
             userRole.RoleId = selectedRole;
             userRole.UserId = user.Id;
             await userReposiyory.AddUser(user);
+            userRole.Role = null;
+            userRole.User = null;
             var result = await userRoleRepository.AddRole(userRole);
             if (result.Status == ResultStatus.Success)
             {
@@ -176,9 +187,11 @@
         {
             user.UpdateDate = DateTime.Now;
             user.UpdateUser = userId;
+            user.CompanyId = selectedCompanyId;
             await userReposiyory.UpdateUser(user);
             UserRole userrole = user.UsersRoles.FirstOrDefault();
             userrole.RoleId = selectedRole;
+                        
             var result = await userRoleRepository.UpdateRole(userrole);
             if (result.Status == ResultStatus.Success)
             {
@@ -190,10 +203,11 @@
             }
         }
 
-        navManager.NavigateTo("/userlist");
+        navManager.NavigateTo($"/userlist?id={id}");
     }
     private void Back()
     {
-        navManager.NavigateTo("/userlist");
+
+        navManager.NavigateTo(id == Guid.Empty ? "/userlist" : $"/userlist?id={id}");
     }
 }

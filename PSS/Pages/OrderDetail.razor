@@ -216,10 +216,10 @@
         {
             if (Guid.TryParse(value.ToString(), out Guid guid))
                 clientid = guid;
-            _client = clientCardManager.GetByGuid(clientid).Result;
-            pageValid = true;
+            _client = clientCardManager.GetByGuid(clientid).Result ?? new();
+            if (_client != null)
+                pageValid = true;
         }
-
     }
     private void SaveChanged()
     {
@@ -375,8 +375,8 @@
 
     private void Sum()
     {
-        _ordFiche.GrossTotal = Math.Round(_ordFiche.Lines.Sum(x => x.Total), 2);
         _ordFiche.TotalDiscounted = Math.Round(_ordFiche.Lines.Sum(x => x.Distdisc), 2);
+        _ordFiche.GrossTotal = Math.Round(_ordFiche.Lines.Sum(x => x.Total), 2) - _ordFiche.TotalDiscounted;
         _ordFiche.TotalVat = Math.Round(_ordFiche.Lines.Sum(x => x.VatAmnt), 2);
         _ordFiche.Total = Math.Round(_ordFiche.Lines.Sum(x => x.Total - x.Distdisc + x.VatAmnt), 2);
         _ordFiche.UpdateDate = DateTime.Now;

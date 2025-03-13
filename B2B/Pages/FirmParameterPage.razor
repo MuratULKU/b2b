@@ -9,6 +9,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject IFirmParamService firmParamService
 @inject IVirtualPosService virtualPosService
+@attribute [Authorize]
 <div class="container">
     <div class="row">
         <div class="col-sm-6">

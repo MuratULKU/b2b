@@ -25,14 +25,14 @@ namespace Core.Extantaion
                 if (product.ProductAmounts != null && product.ProductAmounts.Count > 0 && product.ProductAmounts[0].OnHand > 0)
                 {
                     if (product.ProductAmounts[0].OnHand <= 0)
-                        returnText = $"<i class ='fa fa-circle' style='color:red'></i>";
+                        returnText = $"<i class ='circle' style='background-color:red'>";
                     else if (product.ProductAmounts[0].OnHand <= StockWarningAmount)
-                        returnText = $"<i class ='fa fa-circle' style='color:yellow'></i>";
+                        returnText = $"<i class ='circle' style='background-color:yellow'></i>";
                     else if (product.ProductAmounts[0].OnHand >= StockWarningAmount)
-                        returnText = $"<i class ='fa fa-circle' style='color:green'></i>";
+                        returnText = $"<i class ='circle' style='background-color:green'></i>";
                 }
                 else
-                    returnText = $"<i class ='fa fa-circle' style='color:red'></i>";
+                    returnText = $"<i class ='circle' style='background-color:red'>";
                 return returnText;
             }
             else

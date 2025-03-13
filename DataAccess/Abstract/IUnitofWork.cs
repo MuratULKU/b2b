@@ -35,6 +35,7 @@ namespace DataAccess.Abstract
         IUserRepository User { get; }
         IRoleRepository Role { get; }
         IUserRoleRepository UserRole { get; }
+        IClFicheRepository ClFiche { get; }
         public void BeginTransaction();
         public Task CommitTransactionAsync();
         public Task RollbackTransactionAsync();

@@ -10,7 +10,7 @@ namespace Core.Enum
     {
         Sepette,
         Bekleyen,
-        Gönderildi,
+        İletildi,
         İptal,
         Onaylandı,
         Sevk

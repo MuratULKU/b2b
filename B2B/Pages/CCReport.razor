@@ -2,46 +2,51 @@
 @page "/paymentreport/{id:guid}"
 @using Business.Abstract
 @using CoreUI.Components.DataGrid
+@using CoreUI.Components.NotificationService
 @using Entity
 @using _3DPayment
 @using _3DPayment.Request
 @inject IPaymentService paymentService
 @inject IVirtualPosService virtualPosService
 @inject IPaymentProviderFactory paymentProviderFactory
+@inject ICompanyService companyService
+@inject NotificationService notification
 
+@attribute [Authorize]
 <div class="container">
     <div class="row">
         <div class="col-sm-3">
             <div class="col-sm-6">
                 <label>İlk Tarih</label>
                 <input type="date" @bind="@firstDate" class="form-control" />
-
             </div>
         </div>
         <div class="col-sm-3">
             <div class="col-sm-6">
                 <label>Son Tarih</label>
                 <input type="date" @bind="@lastDate" class="form-control" />
-
             </div>
         </div>
         <div class="col-sm-2">
-         @*    <input class="form-control btn btn-success" type="submit" onclick="@(()=>GetExtre())" /> *@
+            <input class="form-control btn btn-success" type="submit" onclick="@(()=>GetExtre(0))" />
         </div>
     </div>
     <div>
-        <DataGrid TItem="PaymentTransaction" Items="paymentList" Pager Virtualize="true" RowCount="RowsCount" RowsPerPage="ChangedRowPerPage"
-                  SelectedItemChanged="selectedItemChange" TotalCount="paymentList.Count">
+        <DataGrid TItem="PaymentTransaction" Items="paymentList" Pager RowCount="RowsCount" RowsPerPage="ChangedRowPerPage"
+                  SelectedItemChanged="selectedItemChange" TotalCount="TotalCount" SelectedPageChange="selectPageChange">
             <Columns>
-                <Column Caption="Tarih" Field="@nameof(PaymentTransaction.CreateDate)" Width="150" />
-
+                <Column Caption="Tarih" Field="@nameof(PaymentTransaction.CreateDate)" Width="100" />
+                <Column Caption="Banka Adı" Width="100">
+                    <CellTemplate>
+                        @context.Item.VirtualPos.Name
+                    </CellTemplate>
+                </Column>
                 <Column Caption="Tutar" Field="@nameof(PaymentTransaction.TotalAmount)" Width="100" TextAlign="TextAlignmet.Right" />
                 <Column Caption="KK Sahibi" Field="@nameof(PaymentTransaction.CardHolderName)" Width="200" />
-                <Column Caption="KK No" Field="@nameof(PaymentTransaction.MaskedCardNumber)" Width="200" />
+                <Column Caption="KK No" Field="@nameof(PaymentTransaction.MaskedCardNumber)" Width="150" />
                 <Column Caption="Banka Mesajı" Field="@nameof(PaymentTransaction.BankErrorMessage)" Width="200" />
-                <Column Caption="Ödeme Tarihi" Field="@nameof(PaymentTransaction.PaidDate)" Width="150" />
+                <Column Caption="Ödeme Tarihi" Field="@nameof(PaymentTransaction.PaidDate)" Width="100" />
                 <Column Caption="Banka Cevabı" Field="@nameof(PaymentTransaction.Status)" Width="150" />
-
             </Columns>
             <DetailRowTemplate>
 
@@ -78,19 +83,30 @@
     private DateTime? lastDate { get; set; }
     private PaymentTransaction paymentTransaction { get; set; }
     private List<PaymentTransaction> paymentList { get; set; } = default!;
-    private int RowsCount { get; set; } = 20;
-    protected override void OnInitialized()
+    private int RowsCount { get; set; } = 10;
+    private int TotalCount;
+    private Company company { get; set; } = default!;
+    private int CurrentPage = 0;
+
+    protected async override void OnInitialized()
     {
-        if (id != Guid.Empty)
-            paymentList = paymentService.GetUserId(id, DateTime.Now.Date.AddDays(-30), DateTime.Now.Date).Result.Data;
-        else
-            paymentList = paymentService.GetFull(DateTime.Now.Date.AddDays(-30), DateTime.Now.Date).Result.Data;
-        StateHasChanged();
+        firstDate = DateTime.Now.Date.AddDays(-30);
+        lastDate = DateTime.Now.Date.AddDays(1).AddSeconds(-1);
+        GetExtre(CurrentPage);
+
     }
 
     private void ChangedRowPerPage(int rowCount)
     {
         RowsCount = rowCount;
+        GetExtre(0);
+    }
+
+    private void selectPageChange(int page)
+    {
+
+        GetExtre(page);
+
     }
 
     private void selectedItemChange(PaymentTransaction Transaction)
@@ -98,34 +114,64 @@
         paymentTransaction = Transaction;
     }
 
-    private async void CheckPayment()
+    private async void GetExtre(int _currentPage)
     {
-        VirtualPos virtualPos = await virtualPosService.GetVirtualPosAsync(paymentTransaction.VirtualPosId);
-        PaymentDetailRequest paymentDetailRequest = new()
-            {
-                CurrencyIsoCode = "949",
-                Amount = paymentTransaction.TotalAmount,
-                TransactionId = paymentTransaction.TransactionNumber,
-                OrderNumber = paymentTransaction.OrderNumber.ToString(),
-                BankParameters = virtualPos.VirtualPosParameters.ToDictionary(key => key.Key, value => value.Value),
-                BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), virtualPos.BankCard.SystemName)
-            };
-        IPaymentProvider provider = paymentProviderFactory.Create((VirtualPosSystem)virtualPos.VirtualPosSystem);
-        var result = await provider.PaymentDetailRequest(paymentDetailRequest);
-        if (result.Paid)
+
+        if (id != Guid.Empty)
         {
-            paymentTransaction.Status = PaymentStatus.Paid;
-            paymentTransaction.PaidDate = result.PaidDate;
-            if (result.CardNumber != null && result.CardNumber != string.Empty)
-                paymentTransaction.MaskedCardNumber = result.CardNumber;
-            paymentTransaction.BankErrorMessage = result.BankMessage;
-            await paymentService.Update(paymentTransaction);
+            company = await companyService.GetByUserId(id);
+            TotalCount = await paymentService.GetCompanyTotalCount(company.Id, firstDate.Value, lastDate.Value);
+            paymentList = await paymentService.GetPaymentTransaction(company.Id, firstDate.Value, lastDate.Value, _currentPage, RowsCount);
+
         }
         else
         {
-            paymentTransaction.Status = PaymentStatus.Failed;
-            paymentTransaction.BankErrorMessage = result.ErrorMessage;
-            await paymentService.Update(paymentTransaction);
+            TotalCount = await paymentService.GetTotalCount(firstDate.Value, lastDate.Value);
+            paymentList = await paymentService.GetFull(firstDate.Value, lastDate.Value, _currentPage, RowsCount);
+
+
         }
+
+    }
+
+    private async void CheckPayment()
+    {
+        try
+        {
+            VirtualPos virtualPos = await virtualPosService.GetVirtualPosAsync(paymentTransaction.VirtualPosId);
+            PaymentDetailRequest paymentDetailRequest = new()
+                {
+                    CurrencyIsoCode = "949",
+                    Amount = paymentTransaction.TotalAmount,
+                    TransactionId = paymentTransaction.TransactionNumber,
+                    OrderNumber = paymentTransaction.OrderNumber.ToString(),
+                    BankParameters = virtualPos.VirtualPosParameters.ToDictionary(key => key.Key, value => value.Value),
+                    BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), virtualPos.BankCard.SystemName)
+                };
+            IPaymentProvider provider = paymentProviderFactory.Create((VirtualPosSystem)virtualPos.VirtualPosSystem);
+            var result = await provider.PaymentDetailRequest(paymentDetailRequest);
+            if (result.Paid)
+            {
+                paymentTransaction.Status = PaymentStatus.Paid;
+                paymentTransaction.PaidDate = result.PaidDate;
+                if (result.CardNumber != null && result.CardNumber != string.Empty)
+                    paymentTransaction.MaskedCardNumber = result.CardNumber;
+                paymentTransaction.BankErrorMessage = result.BankMessage;
+                await paymentService.Update(paymentTransaction);
+            }
+            else
+            {
+                paymentTransaction.Status = PaymentStatus.Failed;
+                paymentTransaction.BankErrorMessage = result.ErrorMessage;
+                await paymentService.Update(paymentTransaction);
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message, Duration = 5000 });
+        }
+
+        
     }
 }

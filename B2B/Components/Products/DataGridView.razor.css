@@ -2,6 +2,13 @@
     margin-inline-end: 5px;
 }
 
+.circle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
 /* Default styles for larger screens */
 .col-image {
     width: 75px;

@@ -11,9 +11,9 @@ namespace CoreUI.BackOrder
         private readonly FirmParameter _firmParameterService;
         private readonly IBackOrderClientService _clientService;
         private readonly IBackOrderOder _backOrderOder;
+        private readonly HttpClient _httpClient;
 
-
-        public BackOrder(ILogger<BackOrder> logger, IBackOrderProductService productService,
+        public BackOrder(ILogger<BackOrder> logger,HttpClient httpClient ,IBackOrderProductService productService,
              IBackOrderClientService clientCardService,
             FirmParameter firmParameterService, IConfiguration configuration, IBackOrderOder backOrderOder)
         {
@@ -23,6 +23,7 @@ namespace CoreUI.BackOrder
             _firmParameterService = firmParameterService;
             _configuration = configuration;
             _backOrderOder = backOrderOder;
+            _httpClient = httpClient;
         }
 
 
@@ -35,14 +36,12 @@ namespace CoreUI.BackOrder
             try
             {
                 _logger.LogInformation("Started Connection Api");
-                HttpClient _httpClient = new HttpClient();
-                _httpClient.Timeout = TimeSpan.FromSeconds(500);
-
 
                 _httpClient.BaseAddress = new Uri(_configuration.GetSection("ApiService").GetSection("Url").Value);
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     _backOrderOder.SentData(_httpClient); 
+                    _clientService.SentData(_httpClient);
                     await _backOrderOder.OrderFicheState(_httpClient);
                     _logger.LogInformation("SendData");
                     DateTime? lastUpdateDate = Convert.ToDateTime(_firmParameterService.ToString(8));
@@ -56,8 +55,8 @@ namespace CoreUI.BackOrder
                         await _productService.CharSetDeleteAll();
                         await _productService.PriceListDeleteAll();
                         await _productService.ProductAmountDeleteAll();
-                        if (_productService.CategoriesDeleteAll().IsCompleted)
-                            await _productService.deleteProducts();
+                        await _productService.CategoriesDeleteAll();
+                        await _productService.deleteProducts();
                         lastUpdateDate = null;
                         _logger.LogInformation("Tables deleted");
                     }
@@ -112,7 +111,7 @@ namespace CoreUI.BackOrder
                 _logger.LogCritical(ex.Message);
             }
 
-
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
     }
 

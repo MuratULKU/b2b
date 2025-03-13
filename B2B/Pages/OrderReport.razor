@@ -26,11 +26,11 @@
             </div>
         </div>
         <div class="col-sm-2">
-       @*      <input class="form-control btn btn-success" type="submit" onclick="@(()=>GetExtre(_currentPage,_rowsPerPage))" /> *@
+            <input class="form-control btn btn-success" type="submit" onclick="@(()=>GetExtre(_currentPage,_rowsPerPage))" />
         </div>
     </div>
-    <DataGrid TItem="OrdFiche" Items="ordFiches" Pager TotalCount="@TotalCount" SelectedPageChange="SelecetedPageChanged" 
-        RowCount="rowPerPage" SelectedItemChanged="ChangedSelecetedItem" RowsPerPage="RowPerPageChanged" >
+    <DataGrid TItem="OrdFiche" Items="ordFiches" Pager TotalCount="@TotalCount" SelectedPageChange="SelecetedPageChanged"
+              RowCount="rowPerPage" SelectedItemChanged="ChangedSelecetedItem" RowsPerPage="RowPerPageChanged">
         <Columns>
             <Column Caption="Tarih" Field="@nameof(OrdFiche.Date_)" />
             <Column Caption="FişNo" Field="@nameof(OrdFiche.Docode)" />
@@ -41,8 +41,8 @@
                 <CellTemplate>
                     @((OrderState)context.Item.Send)
                 </CellTemplate>
-            </Column> 
-            
+            </Column>
+
         </Columns>
         <DetailRowTemplate>
             @{
@@ -75,18 +75,18 @@
                             </CellTemplate>
                         </Column>
                     </Columns>
-                  <FooterTemplate>
-                    <td></td>
-                    <td></td>
-                    <td>Toplam</td>
-                    <td></td>
-                    <td class="text-end">@ordLines.Sum(x=>x.Total).ToString("N2")</td>
-                  </FooterTemplate>
+                    <FooterTemplate>
+                        <td></td>
+                        <td></td>
+                        <td>Toplam</td>
+                        <td></td>
+                        <td class="text-end">@ordLines.Sum(x => x.Total).ToString("N2")</td>
+                    </FooterTemplate>
                 </DataGrid>
             }
 
         </DetailRowTemplate>
-        
+
     </DataGrid>
 </div>
 @code {
@@ -95,9 +95,13 @@
     private List<OrdFiche> ordFiches { get; set; } = default!;
     private List<OrdLine> ordLines { get; set; } = default!;
     private int TotalCount { get; set; }
-    private Guid userId{ get; set; }
-    private Company company{ get; set; }
+    private Guid userId { get; set; }
+    private Company company { get; set; }
     private int rowPerPage { get; set; } = 10;
+    private int _currentPage { get; set; }
+    private int _rowsPerPage{ get; set; }
+
+
     [Parameter]
     public int state { get; set; }
 
@@ -106,14 +110,20 @@
         Guid userId = await userIdentity.GetCurrentUserId();
         company = await companyService.GetByUserId(userId);
         TotalCount = await orderService.GetOrderFicheCount(company.Id, state);
+        firstDate = DateTime.Now.Date.AddDays(-30);
+        lastDate = DateTime.Now.Date;
         SelecetedPageChanged(0);
     }
 
-   
+    private void GetExtre(int currentPage,int rowsPerPage)
+    {
+        
+    }
+
 
     private async void SelecetedPageChanged(int page)
     {
-        ordFiches = await orderService.GetOrderFiche(company.Id,state, page, rowPerPage);
+        ordFiches = await orderService.GetOrderFiche(company.Id, state, page, rowPerPage);
         //StateHasChanged();
         await InvokeAsync(StateHasChanged); // UI yeniden yüklemeye zorla
     }

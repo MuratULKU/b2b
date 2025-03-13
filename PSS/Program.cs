@@ -30,6 +30,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddUtiliesService();
 builder.Services.AddRepositoryService();
 builder.Services.AddBusinessService();
+builder.Services.AddHttpClient();
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 builder.Services.AddDbContext<RepositoryContext>(

@@ -57,7 +57,7 @@
     private async void SendMessage()
     {
 
-        EMailSender es = new SendEMail.EMailSender(firmParamService.FirmParameters);
+        EMailSender es = new SendEMail.EMailSender(firmParamService.ToString(11), firmParamService.ToInteger(12), firmParamService.ToBoolean(13), firmParamService.ToString(14), firmParamService.ToString(15));
         await es.SendEmailAsync(@firmParamService.ToString(7), "Web Sitesi Gelen Mesaj", $"{mail} {namesurname} {message}");
         mail = "";
         namesurname = "";

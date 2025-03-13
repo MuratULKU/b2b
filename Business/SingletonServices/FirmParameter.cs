@@ -69,7 +69,7 @@ namespace Business.SingletonServices
             var firmparam = FirmParameters.FirstOrDefault(x => x.No == no);
             if (firmparam != null)
             {
-                if (ToString(firmparam.Value) == "1")
+                if (ToString(firmparam.Value) == "True")
                     return true;
                 return false;
 

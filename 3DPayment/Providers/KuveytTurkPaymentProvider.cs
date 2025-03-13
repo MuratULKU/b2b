@@ -162,7 +162,7 @@ namespace _3DPayment.Providers
 
             if (model.ResponseCode == "00")
             {
-                return VerifyGatewayResult.Successed(model.OrderId.ToString(), model.OrderId.ToString(), "",
+                return VerifyGatewayResult.Successed(model.OrderId.ToString(), model.ProvisionNumber.ToString(), "",
                     0, 0, model.ResponseMessage,
                     model.ResponseCode);
             }

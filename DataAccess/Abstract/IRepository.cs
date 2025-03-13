@@ -11,7 +11,8 @@ namespace DataAccess.Abstract
     public interface IRepository<T> where T : class
     {
         Task<IDataResult<T>> GetByIdAsync(Guid id);
-        Task<IDataResult<List<T>>> GetAllAsync();
+        Task<IDataResult<List<T>>> GetAllAsync(Func<IQueryable<T>, IQueryable<T>> includes = null);
+        Task<List<T>> GetFilteredAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null);
         Task<IResult> AddAsync(T entity);
         Task<IResult> UpdateAsync(T entity);
         Task<IResult> Delete(T entity);
@@ -20,5 +21,6 @@ namespace DataAccess.Abstract
         Task<IDataResult<List<T>>> Find(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null,int CurrentPage = 0, int PageSize=0);
         Task<IDataResult<T>> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes);
+        Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes);
     }
 }

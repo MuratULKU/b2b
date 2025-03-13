@@ -63,10 +63,26 @@ namespace DataAccess.Concrete
             return result;
         }
 
-        public async Task<IDataResult<List<T>>> GetAllAsync()
+        public async Task<IDataResult<List<T>>> GetAllAsync(Func<IQueryable<T>, IQueryable<T>> includes =null)
         {
-            var result = await dbContext.Set<T>().ToListAsync();
-            return new DataResult<List<T>>(ResultStatus.Success, result);
+            IQueryable<T> query = dbContext.Set<T>();
+
+            if (includes != null)
+            {
+                query = includes(query);
+            }
+            return new DataResult<List<T>>(ResultStatus.Success,(await query.ToListAsync()));
+        }
+
+        public Task<List<T>> GetFilteredAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null)
+        {
+            IQueryable<T> query = dbContext.Set<T>();
+
+            if (includes != null)
+            {
+                query = includes(query);
+            }
+            return query.Where(predicate).ToListAsync();
         }
 
         public async Task<IDataResult<T>> GetByIdAsync(Guid id)
@@ -93,6 +109,17 @@ namespace DataAccess.Concrete
                 return await query.SingleOrDefaultAsync(predicate);
         }
 
+        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes)
+        {
+            IQueryable<T> query = dbContext.Set<T>();
+
+            if (includes != null)
+            {
+                query = includes(query);
+            }
+
+            return await query.FirstOrDefaultAsync(predicate);
+        }
 
         public async Task<IResult> UpdateAsync(T entity)
         {
@@ -107,6 +134,11 @@ namespace DataAccess.Concrete
         {
             var result = await dbContext.Set<T>().CountAsync();
             return result;
+        }
+
+        public Task<T> FisrtOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes)
+        {
+            throw new NotImplementedException();
         }
     }
 }

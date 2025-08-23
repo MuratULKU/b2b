@@ -15,8 +15,6 @@ namespace Business.Validaton
             var result = new List<string>();
             if (creditCardPrefix.BankCode == 0)
                 result.Add("Banka Hesap Kodu Boş Olamaz.");
-            if (creditCardPrefix.BrandCode == 0)
-                result.Add("Kredi Kartı Üye Programı Boş Olamaz.");
             if (creditCardPrefix.Prefix.Length < 6)
                 result.Add("Prefix 6 Karakterden Az Olmaz.");
             if (creditCardPrefix.Prefix.Length > 8)

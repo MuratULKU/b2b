@@ -53,8 +53,8 @@ namespace _3DPayment.Providers
                 parameters.Add("Lang", request.LanguageIsoCode);//iki haneli dil iso kodu
 
                 //işlem başarılı da olsa başarısız da olsa callback sayfasına yönlendirerek kendi tarafımızda işlem sonucunu kontrol ediyoruz
-                parameters.Add("OkUrl", request.CallbackUrl);//başarılı dönüş adresi
-                parameters.Add("FailUrl", request.CallbackUrl);//hatalı dönüş adresi
+                parameters.Add("OkUrl", request.OkUrl);//başarılı dönüş adresi
+                parameters.Add("FailUrl", request.FailUrl);//hatalı dönüş adresi
 
                
                 parameters.Add("InstallmentCount", request.Installment);//taksit sayısı | 0, 1 veya boş tek çekim olur
@@ -63,8 +63,8 @@ namespace _3DPayment.Providers
                 hashBuilder.Append(mbrId);
                 hashBuilder.Append(request.OrderNumber);
                 hashBuilder.Append(totalAmount);
-                hashBuilder.Append(request.CallbackUrl);
-                hashBuilder.Append(request.CallbackUrl);
+                hashBuilder.Append(request.OkUrl);
+                hashBuilder.Append(request.FailUrl);
                 hashBuilder.Append(txnType);
                 hashBuilder.Append(request.Installment);
                 hashBuilder.Append(random);

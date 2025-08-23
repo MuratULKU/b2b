@@ -10,13 +10,13 @@ namespace Business.Abstract
 {
     public interface ICreditCardInstallmentService
     {
-        List<CreditCardInstallment> GetAll();
-        CreditCardInstallment Get(Guid id);
-        List<CreditCardInstallment> GeyBankId(Guid id);
-        List<CreditCardInstallment> GeyCreditId(Guid id);
+        Task<List<CreditCardInstallment>> GetAll();
+        Task<CreditCardInstallment> Get(Guid id);
+        Task<List<CreditCardInstallment>> GeyBankId(Guid id);
+        Task<List<CreditCardInstallment>> GeyCreditId(Guid id);
 
-        CreditCardInstallment Create(CreditCardInstallment creditCardInstallment);
-        IResult Update(CreditCardInstallment creditCardInstallment);
-        CreditCardInstallment Delete(CreditCardInstallment creditCardInstallment);
+        Task<CreditCardInstallment> Create(CreditCardInstallment creditCardInstallment);
+        Task<IResult> Update(CreditCardInstallment creditCardInstallment);
+        Task<CreditCardInstallment> Delete(CreditCardInstallment creditCardInstallment);
     }
 }

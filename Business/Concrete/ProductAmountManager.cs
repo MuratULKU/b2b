@@ -26,7 +26,7 @@ namespace Business.Concrete
             try
             {
                 var productamounts = await _unitOfWork.ProductAmount.GetAllAsync();
-                foreach (var productamount in productamounts.Data)
+                foreach (var productamount in productamounts)
                 {
                     await _unitOfWork.ProductAmount.Delete(productamount);
                 }
@@ -43,7 +43,7 @@ namespace Business.Concrete
         public async Task<ProductAmount> GetByCode(string code)
         {
             var result = await _unitOfWork.ProductAmount.SingleOrDefaultAsync(x => x.Code == code);
-            return result.Data;
+            return result;
         }
 
         public async Task<IResult> Insert(ProductAmount productamount)

@@ -19,6 +19,7 @@
 @inject NavigationManager navManager
 @inject IUserIdentityProcessor userIdentity
 @inject NotificationService notification
+@inject ConfirmDialogService confirmDialog
 @attribute [Authorize]
 <div class="container">
     <div class="row">
@@ -93,17 +94,17 @@
         </div>
     </div>
     <Modal @ref="modal" Title="Parametre Giriş">
-        <BodyTeplate>
+        <BodyTemplate>
             <label for="key">Key</label>
             <input class="form-control" id="key" type="text" @bind-value="virtualPosParameter.Key" />
             <label for="value">Value</label>
             <input class="form-control" id="value" type="text" @bind-value="virtualPosParameter.Value" />
-        </BodyTeplate>
+        </BodyTemplate>
     </Modal>
 </div>
-<Confirm @ref="confirm" />
+
 @code {
-    private Confirm? confirm;
+  
     private Modal? modal;
     private VirtualPos virtualPos { get; set; } = new();
     private List<BankCard> bankCardList { get; set; } = default!;
@@ -193,7 +194,7 @@
     {
         if (virtualPosParameter != null)
         {
-            var onay = await confirm.ShowAsync("Silme Onay", $"{virtualPosParameter.Key} Kayıt Silinecektir Onaylıyor musunuz.");
+            var onay = await confirmDialog.Show("Silme Onay", $"{virtualPosParameter.Key} Kayıt Silinecektir Onaylıyor musunuz.");
             if (onay)
             {
                 await virtualPosParameterService.DeleteBankParameter(virtualPosParameter);
@@ -206,7 +207,7 @@
     {
         if (modal != null && await modal.ShowAsync())
         {
-            var onay = await confirm.ShowAsync("Değişirme Onay", $"{virtualPosParameter.Key} Kayıt Değiştirilecektir Onaylıyor musunuz.");
+            var onay = await confirmDialog.Show("Değişirme Onay", $"{virtualPosParameter.Key} Kayıt Değiştirilecektir Onaylıyor musunuz.");
             if (onay)
             {
                 await virtualPosParameterService.UpdateBankParameter(virtualPosParameter);
@@ -230,7 +231,7 @@
         }
         else
         {
-            var onay = await confirm.ShowAsync("Değiştirme Onayı", $"{virtualPos.Name} Kayıt Değiştilecektir Onaylıyor musunuz.");
+            var onay = await confirmDialog.Show("Değiştirme Onayı", $"{virtualPos.Name} Kayıt Değiştilecektir Onaylıyor musunuz.");
             if (onay)
             {
                 virtualPos.UpdateDate = DateTime.Now;
@@ -267,7 +268,7 @@
             notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Parametreleri Olan Kart Silinemez.", Duration = 5000 });
             return;
         }
-        var onay = await confirm.ShowAsync("Silme Onay", $"{virtualPos.Name} Kayıt Silinecektir Onaylıyor musunuz.");
+        var onay = await confirmDialog.Show("Silme Onay", $"{virtualPos.Name} Kayıt Silinecektir Onaylıyor musunuz.");
         if (onay)
         {
             if (virtualPos != null)

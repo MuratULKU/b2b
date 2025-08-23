@@ -25,7 +25,7 @@ namespace Business.Concrete
             try
             {
                 var charcodes = await _unitOfWork.CharCode.GetAllAsync();
-                foreach (var charcode in charcodes.Data)
+                foreach (var charcode in charcodes)
                 {
                     await _unitOfWork.CharCode.Delete(charcode);
                 }
@@ -42,7 +42,7 @@ namespace Business.Concrete
         public async Task<CharCode> GetByCode(string code)
         {
             var result = await _unitOfWork.CharCode.SingleOrDefaultAsync(x => x.Code == code);
-            return result.Data;
+            return result;
         }
 
         public async Task<IResult> Insert(CharCode code)

@@ -26,7 +26,7 @@ namespace Business.Concrete
             try
             {
                 var charsets = await _unitOfWork.CharSet.GetAllAsync();
-                foreach (var charset in charsets.Data)
+                foreach (var charset in charsets)
                 {
                     await _unitOfWork.CharSet.Delete(charset);
                 }
@@ -43,8 +43,8 @@ namespace Business.Concrete
 
         public async Task<CharSet> GetByCode(string code)
         {
-            var result =  await _unitOfWork.CharSet.SingleOrDefaultAsync(x => x.Code == code);
-            return result.Data;
+            return  await _unitOfWork.CharSet.SingleOrDefaultAsync(x => x.Code == code);
+         
         }
 
         public async Task<IResult> Insert(CharSet charSet)

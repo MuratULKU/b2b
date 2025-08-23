@@ -42,7 +42,7 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<IUserService,UserManager>();
             serviceCollection.AddScoped<IUserRoleService, UserRoleManager>();
             serviceCollection.AddScoped<IClientCardService,ClientCardManager>();
-            serviceCollection.AddScoped<IProductServices,ProductManager>();
+            serviceCollection.AddScoped<IProductService,ProductManager>();
             serviceCollection.AddScoped<ICategoryService,CategoryManager>();
             serviceCollection.AddScoped<IOrderService,OrderManager>();
             serviceCollection.AddScoped<IFirmParamService,FirmParamManager>();

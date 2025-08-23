@@ -25,7 +25,7 @@
         pdata.Results = await ProductServices.GetAllAsync(Filter ?? string.Empty, null, selectCategory is null ? 0 : selectCategory.id, pdata.CurrentPage, pdata.PageSize);
 
     }
-    [Inject] IProductServices ProductServices { get; set; } = default!;
+    [Inject] IProductService ProductServices { get; set; } = default!;
     protected async void PagerPageChanged(int page)
     {
 

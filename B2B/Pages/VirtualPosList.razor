@@ -28,10 +28,7 @@
                     <NoDataTemplate>
                         <label class="text-center">Veri Bulunamadı.</label>
                     </NoDataTemplate>
-                    <ButtonRowTemplate>
-                        <input type="button" class="btn btn-success" value="Ekle" />
-                        <input type="button" class="btn btn-danger" value="Sil" />
-                    </ButtonRowTemplate>
+                   
                 </DataGrid>
             }
             @if (creditCardInstallment != null)
@@ -55,10 +52,10 @@
         </div>
     </div>
     <Modal @ref="modal">
-        <HeaderTeplate>
+        <HeaderTemplate>
             <label class="text-center">Kredi Kartı Taksit Giriş</label>
-        </HeaderTeplate>
-        <BodyTeplate>
+        </HeaderTemplate>
+        <BodyTemplate>
             <div class="col-4">
                 <label>Taksit Sayısı</label>
             </div>
@@ -71,7 +68,7 @@
             <div class="col-8">
                 <input @bind-value="selectInstallment.InstallmentRate" />
             </div>
-        </BodyTeplate>
+        </BodyTemplate>
     </Modal>
 
 </div>
@@ -92,9 +89,9 @@
 
 
 
-    private void LoadCreditCartInstalment(CreditCard creditCard)
+    private async  void LoadCreditCartInstalment(CreditCard creditCard)
     {
-        creditCardInstallment = creditCardInstallmentManager.GeyCreditId(creditCard.Id);
+        creditCardInstallment = await creditCardInstallmentManager.GeyCreditId(creditCard.Id);
         selectCreditCard = creditCard;
     }
 

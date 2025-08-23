@@ -1,0 +1,49 @@
+﻿@page "/productlist"
+@using Business.Abstract
+@using Business.Concrete
+@using CoreUI.Components.DataGrid
+@inject IProductService productManager
+@if(products != null)
+{
+<DataGrid TItem="Product" Items="products" Pager RowCount="RowPerCount" SelectedItemChanged="selectedChange" 
+    TotalCount="TotalRowCount" SelectedPageChange="@selectedPageChanged" RowsPerPage="@PagePerCount">
+    <Columns>
+        <Column Caption="Stok Kodu" Field="@nameof(Product.Code)" />
+        <Column Caption="Stok Adı" Field="@nameof(Product.Name)" />
+
+    </Columns>
+    <ButtonRowTemplate>
+        <a class="btn btn-primary" href="/product">Ekle</a>
+        <a class="btn btn-secondary" href="/product?code=@product?.Code" disabled>Değiştir</a>
+    </ButtonRowTemplate>
+</DataGrid>
+}
+@code {
+    private List<Product>? products{ get; set; }
+    private Product product { get; set; }
+    private int TotalRowCount { get; set; }
+    private int RowPerCount { get; set; } = 10;
+    public Dictionary<Guid, List<string>> PropertySet { get; set; } = default!;
+    protected override async Task OnInitializedAsync()
+    {
+
+        products = await productManager.GetAllAsync(string.Empty,PropertySet,0,0,RowPerCount);
+        TotalRowCount = await productManager.TotalCount(string.Empty, PropertySet, 0, 0, RowPerCount);
+    }
+
+    private async void selectedPageChanged(int selectedPage)
+    {
+        products = await productManager.GetAllAsync(string.Empty, PropertySet, 0, selectedPage+1, RowPerCount);
+        
+    }
+
+    private void selectedChange(Product prd)
+    {
+        product = prd;
+    }
+
+    private void PagePerCount (int value)
+    {
+        RowPerCount = value;
+    }
+}

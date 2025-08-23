@@ -65,8 +65,8 @@ namespace _3DPayment.Providers
 
                 //işlem başarılı da olsa başarısız da olsa callback sayfasına yönlendirerek kendi tarafımızda işlem sonucunu kontrol ediyoruz
 
-                parameters.Add("successurl", request.CallbackUrl);//başarılı dönüş adresi
-                parameters.Add("errorurl", request.CallbackUrl);//hatalı dönüş adresi
+                parameters.Add("successurl", request.OkUrl);//başarılı dönüş adresi
+                parameters.Add("errorurl", request.FailUrl);//hatalı dönüş adresi
 
                 //garanti bankasında tutar bilgisinde nokta, virgül gibi değerler istenmiyor. 1.10 TL'lik işlem 110 olarak gönderilmeli. Yani tutarı 100 ile çarpabiliriz.
                 string amount = (request.TotalAmount * 100m).ToString("0.##", new CultureInfo("en-US"));//virgülden sonraki sıfırlara gerek yok
@@ -86,7 +86,7 @@ namespace _3DPayment.Providers
 
 
                 var hashData = GetHashData(terminalProvPassword, terminalId, request.OrderNumber,
-                    installment, storeKey, amount, request.CurrencyIsoCode, request.CallbackUrl.ToString(), type, request.CallbackUrl.ToString());
+                    installment, storeKey, amount, request.CurrencyIsoCode, request.OkUrl.ToString(), type, request.FailUrl.ToString());
                 parameters.Add("secure3dhash", hashData);
 
                 return Task.FromResult(PaymentGatewayResult.Successed(parameters, request.VirtualPosParameters["gatewayUrl"]));

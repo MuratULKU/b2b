@@ -90,9 +90,9 @@
 
 
 
-    private void LoadCreditCartInstalment(CreditCard creditCard)
+    private async void LoadCreditCartInstalment(CreditCard creditCard)
     {
-        creditCardInstallment = creditCardInstallmentManager.GeyCreditId(creditCard.Id);
+        creditCardInstallment = await creditCardInstallmentManager.GeyCreditId(creditCard.Id);
         selectCreditCard = creditCard;
     }
 

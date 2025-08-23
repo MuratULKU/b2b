@@ -3,6 +3,7 @@ using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,37 +24,29 @@ namespace DataAccess.Concrete
             dbContext = context;
         }
 
-        public async Task<IResult> AddAsync(T entity)
+        public async Task<T> AddAsync(T entity)
         {
-            var result = await dbContext.Set<T>().AddAsync(entity);
-            if (result.State == EntityState.Added)
-                return new Result(ResultStatus.Success, message: "Kayıt Basarılı Şekilde Eklenmiştir.");
-            return new Result(ResultStatus.Error, message: result.ToString());
+            await dbContext.Set<T>().AddAsync(entity);
+            return entity;
         }
 
-        public async Task<IResult> Delete(T entity)
+        public async Task<T> Delete(T entity)
         {
-            var result = dbContext.Set<T>().Remove(entity);
-            if (result.State == EntityState.Deleted)
-                return new Result(ResultStatus.Success, message: "Kayıt Basarılı Şekilde Silinmiştir.");
-            return new Result(ResultStatus.Error, message: result.ToString());
+            dbContext.Set<T>().Remove(entity);
+            return entity;
         }
 
-        public async Task<IDataResult<List<T>>> Find(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null, int currentPage = 0, int pageSize = 10000)
+        public async Task<List<T>> Find(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null, int currentPage = 0, int pageSize = 10000)
         {
             int skip = currentPage * pageSize;
 
             IQueryable<T> query = dbContext.Set<T>();
 
-            if (includes != null)
-                query = includes(query);
+            query = includes?.Invoke(query) ?? query;
             if (pageSize > 0)
-            {
-                query = query.Skip(skip);
-                query = query.Take(pageSize);
-            }
-            var result = await query.Where(predicate).ToListAsync();
-            return new DataResult<List<T>>(ResultStatus.Success, result);
+                query = query.Skip(skip).Take(pageSize);
+
+            return await query.AsNoTracking().Where(predicate).ToListAsync();
 
         }
 
@@ -63,7 +56,7 @@ namespace DataAccess.Concrete
             return result;
         }
 
-        public async Task<IDataResult<List<T>>> GetAllAsync(Func<IQueryable<T>, IQueryable<T>> includes =null)
+        public async Task<List<T>> GetAllAsync(Func<IQueryable<T>, IQueryable<T>> includes = null)
         {
             IQueryable<T> query = dbContext.Set<T>();
 
@@ -71,7 +64,7 @@ namespace DataAccess.Concrete
             {
                 query = includes(query);
             }
-            return new DataResult<List<T>>(ResultStatus.Success,(await query.ToListAsync()));
+            return await query.AsNoTracking().ToListAsync();
         }
 
         public Task<List<T>> GetFilteredAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null)
@@ -85,16 +78,16 @@ namespace DataAccess.Concrete
             return query.Where(predicate).ToListAsync();
         }
 
-        public async Task<IDataResult<T>> GetByIdAsync(Guid id)
+        public async Task<T> GetByIdAsync(Guid id)
         {
             var result = await dbContext.Set<T>().FindAsync(id);
-            return new DataResult<T>(ResultStatus.Success, result);
+            return result!;
         }
 
-        public async Task<IDataResult<T>> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate)
+        public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate)
         {
-            var result = await dbContext.Set<T>().SingleOrDefaultAsync(predicate);
-            return new DataResult<T>(ResultStatus.Success, result);
+           return await dbContext.Set<T>().AsNoTracking().SingleOrDefaultAsync(predicate);
+           
         }
 
         public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes)
@@ -106,10 +99,10 @@ namespace DataAccess.Concrete
                 query = includes(query);
             }
 
-                return await query.SingleOrDefaultAsync(predicate);
+            return await query.AsNoTracking().SingleOrDefaultAsync(predicate);
         }
 
-        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes)
+        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null)
         {
             IQueryable<T> query = dbContext.Set<T>();
 
@@ -121,13 +114,10 @@ namespace DataAccess.Concrete
             return await query.FirstOrDefaultAsync(predicate);
         }
 
-        public async Task<IResult> UpdateAsync(T entity)
+        public async Task<T> UpdateAsync(T entity)
         {
-            var result = dbContext.Set<T>().Update(entity);
-
-            if (result.State == EntityState.Added) return new Result(ResultStatus.Success, "Kayıt Başarıyla Eklendi");
-            else if (result.State == EntityState.Modified) return new Result(ResultStatus.Success, "Kayıt Başarıyla Bubcellendi");
-            return new Result(ResultStatus.Information, "İşlem Yapılmadı");
+            dbContext.Set<T>().Update(entity);
+            return entity;
         }
 
         public async Task<int> RowCount()
@@ -136,9 +126,5 @@ namespace DataAccess.Concrete
             return result;
         }
 
-        public Task<T> FisrtOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

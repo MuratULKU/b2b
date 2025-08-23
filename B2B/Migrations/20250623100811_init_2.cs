@@ -1,0 +1,47 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace B2C.Migrations
+{
+    /// <inheritdoc />
+    public partial class init_2 : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+           
+
+            migrationBuilder.AddColumn<string>(
+                name: "BankControlMessage",
+                table: "PaymentTransactions",
+                type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "ControlDate",
+                table: "PaymentTransactions",
+                type: "TEXT",
+                nullable: true);
+
+           
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+
+            migrationBuilder.DropColumn(
+                name: "BankControlMessage",
+                table: "PaymentTransactions");
+
+            migrationBuilder.DropColumn(
+                name: "ControlDate",
+                table: "PaymentTransactions");
+
+        }
+    }
+}

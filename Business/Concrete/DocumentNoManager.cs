@@ -23,18 +23,18 @@ namespace Business.Concrete
         public async Task<string> GetDocNo(int doctype)
         {
             var docno = await _unitOfWork.DocumentNo.SingleOrDefaultAsync(x=>x.DocType == doctype);
-            if (docno.Data == null)
+            if (docno == null)
             {
                 await Insert(new DocumentNo() { DocType = doctype, DocNo = 1, Prefix = "" });
                 docno = await _unitOfWork.DocumentNo.SingleOrDefaultAsync(x => x.DocType == doctype);
             }
             else
             {
-               docno.Data.DocNo+=1;
-               await Update(docno.Data);
+               docno.DocNo+=1;
+               await Update(docno);
             }
             await _unitOfWork.CommitAsync();
-            return docno.Data.Prefix + docno.Data.DocNo;
+            return docno.Prefix + docno.DocNo;
         }
 
         public async Task<IResult> Insert(Entity.DocumentNo documentNo)

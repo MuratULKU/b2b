@@ -51,9 +51,9 @@ namespace _3DPayment.Providers
                 }
 
                 //işlem başarılı da olsa başarısız da olsa callback sayfasına yönlendirerek kendi tarafımızda işlem sonucunu kontrol ediyoruz
-                parameters.Add("okUrl", request.CallbackUrl);//başarılı dönüş adresi
-                parameters.Add("failUrl", request.CallbackUrl);//hatalı dönüş adresi
-                parameters.Add("callbackUrl", request.CallbackUrl); //pencere beklenmeyen şekilde kapatıldığında sisteme yapılacak dönüş.
+                parameters.Add("okUrl", request.OkUrl);//başarılı dönüş adresi
+                parameters.Add("failUrl", request.FailUrl);//hatalı dönüş adresi
+                // geçici süre kapatıldı . parameters.Add("callbackUrl", request.CallbackUrl); //pencere beklenmeyen şekilde kapatıldığında sisteme yapılacak dönüş.
                 parameters.Add("TranType", processType);//direk satış
                 parameters.Add("rnd", random);//rastgele bir sayı üretilmesi isteniyor
                 parameters.Add("currency", request.CurrencyIsoCode);//ISO code TL 949 | EURO 978 | Dolar 840

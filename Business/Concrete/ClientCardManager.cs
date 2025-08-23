@@ -16,12 +16,8 @@ namespace Business.Concrete
 
         public async Task<List<Client>> GetAll()
         {
-            var result = await _unitOfWork.Client.GetAllAsync();
-            if (result.Status == Core.Abstract.ResultStatus.Success)
-            {
-                return result.Data;
-            }
-            return null!;
+           return await _unitOfWork.Client.GetAllAsync();
+           
         }
 
         public List<Client> GetAll(int currentPage, int pageSize)
@@ -36,14 +32,14 @@ namespace Business.Concrete
 
         public async Task<Client> GetByCode(string Code)
         {
-            var result = await _unitOfWork.Client.SingleOrDefaultAsync(x => x.Code == Code);
-            return result.Data;
+           return await _unitOfWork.Client.SingleOrDefaultAsync(x => x.Code == Code);
+          
         }
 
         public async Task<Client> GetByGuid(Guid id)
         {
-            var result = await _unitOfWork.Client.SingleOrDefaultAsync(x => x.Id == id);
-            return result.Data;
+            return await _unitOfWork.Client.SingleOrDefaultAsync(x => x.Id == id);
+         
         }
 
         public async Task<bool> Insert(Client client)

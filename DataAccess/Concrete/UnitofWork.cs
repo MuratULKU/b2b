@@ -1,4 +1,5 @@
-﻿using DataAccess.Abstract;
+﻿using Core.Logger;
+using DataAccess.Abstract;
 using DataAccess.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -12,6 +13,7 @@ namespace DataAccess.Concrete
     {
         private IDbContextTransaction _transaction;
         private readonly RepositoryContext _context;
+        private readonly ILoggerService _logger;
         private IBankCardRepository? _bankCardRepository;
         private IBrandCardRepository? _brandCardRepository;
         private ICreditCardInstallmentRepository? _creditCardInstallmentRepository;
@@ -37,9 +39,12 @@ namespace DataAccess.Concrete
         private IRoleRepository? _roleRepository;
         private IUserRoleRepository? _userRoleRepository;
         private IClFicheRepository _clFicheRepository;
-        public UnitofWork(RepositoryContext context)
+        private IProductRepository? _productRepository;
+        private IFirmDocRepository? _firmDocRepository;
+        public UnitofWork(RepositoryContext context, ILoggerService logger)
         {
             this._context = context;
+            this._logger = logger;
         }
 
         public IBankCardRepository BankCards => _bankCardRepository = _bankCardRepository ?? new BankCardRepository(_context);
@@ -87,10 +92,23 @@ namespace DataAccess.Concrete
 
         public IClFicheRepository ClFiche => _clFicheRepository = _clFicheRepository ?? new ClFicheRepository(_context);
 
+        public IProductRepository Product => _productRepository = _productRepository ?? new ProductRepository(_context);
+        public IFirmDocRepository FirmDoc => _firmDocRepository = _firmDocRepository ?? new FirmDocRepository(_context);
+
         // Commit changes asynchronously
         public async Task<int> CommitAsync()
         {
-            return await _context.SaveChangesAsync();
+            try
+            {
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+                _logger.Error("Veri Tabanı Ekleme Hatası "+ex.Message);
+                return -1;
+            }
+            
             
         }
 

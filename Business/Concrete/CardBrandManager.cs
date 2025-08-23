@@ -21,12 +21,12 @@ namespace Business.Concrete
 
         public async Task<List<CardBrand>> GetCardBrand()
         {
-            return  _unitOfWork.BrandCards.GetAllAsync().Result.Data;
+            return await _unitOfWork.BrandCards.GetAllAsync();
         }
 
-        public Task<IDataResult<List<CardBrand>>> GetCardBrandById(int brandCode)
+        public async Task<CardBrand> GetCardBrandById(Guid brandId)
         {
-            throw new NotImplementedException();
+            return await _unitOfWork.BrandCards.FirstOrDefaultAsync(x => x.Id == brandId);
         }
     }
 }

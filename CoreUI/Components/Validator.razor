@@ -1,0 +1,11 @@
+﻿@using System.Linq.Expressions
+@typeparam T
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <span class="text-danger">@ErrorMessage</span>
+}
+
+@code {
+    [Parameter] public Expression<Func<T>> For { get; set; }
+    [Parameter] public string ErrorMessage { get; set; } = default!;
+}

@@ -32,7 +32,7 @@ namespace DataAccess.EFCore
                 }
 
                 //seed data
-                SeedData(context);
+                //SeedData(context);
             }
             return app;
         }

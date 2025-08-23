@@ -15,7 +15,7 @@
 @inject IConfiguration _configuration
 @inject HttpClient _httpClient
 @inject NavigationManager navManager
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 <EditForm Model="@company" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />

@@ -20,39 +20,35 @@ namespace Business.Concrete
 
         public async Task<Company> Get(Guid id)
         {
-          var result = await _unitOfWork.Company.GetByIdAsync(id);
-            if (result.Status == ResultStatus.Success)
-                return result.Data;
-            else
-                return null;
+            return await _unitOfWork.Company.GetByIdAsync(id);
+           
         }
 
         public List<Company> GetAll(int currentPage, int pageSize)
         {
-           return GetAllAsync(currentPage, pageSize).Result;
+            return GetAllAsync(currentPage, pageSize).Result;
         }
 
         public async Task<List<Company>> GetAllAsync(int CurrentPage, int PageSize)
         {
-           var result = await _unitOfWork.Company.GetPagedCompanies(CurrentPage, PageSize);
+            var result = await _unitOfWork.Company.GetPagedCompanies(CurrentPage, PageSize);
             return result;
         }
 
         public async Task<Company> GetByUserId(Guid userId)
         {
             var user = await _unitOfWork.User.GetByIdAsync(userId);
-            var result = user.Data;
-            var company = await _unitOfWork.Company.SingleOrDefaultAsync(x => x.Id == result.CompanyId);
-            return company.Data;
-            
+            var company = await _unitOfWork.Company.SingleOrDefaultAsync(x => x.Id == user.CompanyId);
+            return company;
+
         }
 
         public async Task<bool> Insert(Company company)
         {
-           var result = await _unitOfWork.Company.AddAsync(company);
-            if (result.Status == ResultStatus.Success)
+            await _unitOfWork.Company.AddAsync(company);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
             {
-                await _unitOfWork.CommitAsync();
                 return true;
             }
             return false;
@@ -63,15 +59,10 @@ namespace Business.Concrete
             try
             {
                 _unitOfWork.BeginTransaction();
-                var companyResult = await _unitOfWork.Company.AddAsync(company);
-                if (companyResult.Status != ResultStatus.Success)
-                    throw new Exception("There was an error adding the company");
-                var userResult = await _unitOfWork.User.AddAsync(user);
-                if (userResult.Status != ResultStatus.Success)
-                    throw new Exception("There was an error adding the user");
-                var userRoleResult = await _unitOfWork.UserRole.AddAsync(userRole);
-                if (userRoleResult.Status != ResultStatus.Success)
-                    throw new Exception("There wan an error adding the UserRole");
+                await _unitOfWork.Company.AddAsync(company);
+                await _unitOfWork.User.AddAsync(user);
+                await _unitOfWork.UserRole.AddAsync(userRole);
+                
                 await _unitOfWork.CommitTransactionAsync();
                 return true;
             }
@@ -81,8 +72,8 @@ namespace Business.Concrete
                 _logger.Error(ex);
                 throw;
             }
-          
-            
+
+
         }
 
         public async Task<int> TotalCount()
@@ -92,9 +83,9 @@ namespace Business.Concrete
 
         public async Task<bool> Update(Company company)
         {
-             await _unitOfWork.Company.UpdateAsync(company);
+            await _unitOfWork.Company.UpdateAsync(company);
             var result = await _unitOfWork.CommitAsync();
-            if(result == 1)   { return true; }
+            if (result == 1) { return true; }
             return false;
         }
 

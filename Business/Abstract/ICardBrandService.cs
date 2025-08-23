@@ -10,7 +10,7 @@ namespace Business.Abstract
 {
     public interface ICardBrandService
     {
-        Task<IDataResult<List<CardBrand>>> GetCardBrandById(int brandCode);
+        Task<CardBrand> GetCardBrandById(Guid brandId);
         Task<List<CardBrand>> GetCardBrand();
     }
 }

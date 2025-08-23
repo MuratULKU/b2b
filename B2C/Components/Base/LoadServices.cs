@@ -45,13 +45,14 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<IPaymentRepository, PaymentRepository>();
             serviceCollection.AddScoped<IClientRepository, ClientRepository>();
             serviceCollection.AddScoped<IDocumentNoRepository, DocumentNoRepository>();
+            serviceCollection.AddScoped<ICategoryRepository, CategoryRepository>();
             return serviceCollection;
         }
         public static IServiceCollection AddBusinessService(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddScoped<IBankCardService, BankCardManager>();
             serviceCollection.AddScoped<ICardBrandService, CardBrandManager>();
-            serviceCollection.AddScoped<IProductServices, ProductManager>();
+            serviceCollection.AddScoped<IProductService, ProductManager>();
             serviceCollection.AddScoped<ICategoryService, CategoryManager>();
             serviceCollection.AddScoped<IOrderService, OrderManager>();
             serviceCollection.AddScoped<IUserService, UserManager>();
@@ -74,6 +75,8 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<IClientCardService, ClientCardManager>();
             serviceCollection.AddScoped<IDocumentNoService, DocumentNoManager>();
             serviceCollection.AddScoped<IFirmParamService, FirmParamManager>();
+            serviceCollection.AddScoped<ICategoryService, CategoryManager>();
+            serviceCollection.AddScoped<IFirmDocService, FirmDocManager>();
             return serviceCollection;
         }
     }

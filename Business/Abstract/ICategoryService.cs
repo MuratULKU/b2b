@@ -12,9 +12,12 @@ namespace Business.Abstract
     {
         Task DeleteAll();
         Task<List<Category>> Get(int parentref);
-        
+        Task<Category> GetByRefNo(int refno);
+        Task<Category> Get(Guid id);
         Task<Category> GetByCode(string code);
         Task<IResult> Insert(Category category);
         Task<IResult> Update(Category category);
+        Task<IResult> Delete(Category category);
+        Task<int> Refno();
     }
 }

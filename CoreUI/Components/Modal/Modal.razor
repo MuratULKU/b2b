@@ -1,19 +1,18 @@
 ﻿<div class="modal @ModalClass" id="exampleModal" style="display:@ModalDisplay" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-
         <div class="modal-content">
             @if (isVisible)
             {
-                if (ShowCloseButton || HeaderTeplate != null || !string.IsNullOrWhiteSpace(Title))
+                if (ShowCloseButton || HeaderTemplate != null || !string.IsNullOrWhiteSpace(Title))
                 {
                     <div class="modal-header">
                         @if (!string.IsNullOrWhiteSpace(Title))
                         {
                             <h5 class="modal-title">@Title</h5>
                         }
-                        else if (HeaderTeplate != null)
+                        else if (HeaderTemplate != null)
                         {
-                            @HeaderTeplate
+                            @HeaderTemplate
                         }
 
                         @if (ShowCloseButton)
@@ -22,28 +21,38 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         }
-
                     </div>
                 }
                 <div class="modal-body">
-                  @if(!string.IsNullOrWhiteSpace(Message))
+                    @if (!string.IsNullOrWhiteSpace(Message))
                     {
                         @Message
                     }
-                    else if(BodyTeplate != null)
+                    else if (BodyTemplate != null)
                     {
-                        @BodyTeplate
+                        @BodyTemplate
                     }
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="@(()=>OnConfirmationChanged(false))">Vazgeç</button>
-                    <button type="button" class="btn btn-primary" onclick="@(()=>OnConfirmationChanged(true))">Kaydet</button>
+                    @if (FooterTemplate != null)
+                    {
+                        @FooterTemplate
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-secondary" onclick="@(()=>OnConfirmationChanged(false))">Vazgeç</button>
+                        <button type="button" class="btn btn-primary" onclick="@(()=>OnConfirmationChanged(true))">Kaydet</button>
+                    }
                 </div>
             }
         </div>
-
     </div>
 </div>
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
 
 @code {
     private bool isVisible;
@@ -54,15 +63,19 @@
 
     [Parameter]
     public bool ShowCloseButton { get; set; } = true;
+
     [Parameter]
-    public RenderFragment HeaderTeplate { get; set; } = default!;
+    public RenderFragment HeaderTemplate { get; set; } = default!;
+
     [Parameter]
-    public RenderFragment BodyTeplate { get; set; } = default!;
+    public RenderFragment BodyTemplate { get; set; } = default!;
+
     [Parameter]
-    public RenderFragment FooterTeplate { get; set; } = default!;
+    public RenderFragment FooterTemplate { get; set; } = default!;
 
     [Parameter]
     public string Title { get; set; } = default!;
+
     [Parameter]
     public string Message { get; set; } = default!;
 
@@ -71,20 +84,18 @@
         isVisible = true;
         ModalClass = "show";
         ShowBackdrop = true;
-        taskCompletionSource = new TaskCompletionSource<bool>();
-        var task = taskCompletionSource.Task;
+        taskCompletionSource = new TaskCompletionSource<bool>(); // Her açıldığında yeni bir Task oluştur
         StateHasChanged();
-        return task;
+        return taskCompletionSource.Task;
     }
     public Task<bool> ShowAsync() => Show();
-
-
 
     public async Task HideAsync()
     {
         isVisible = false;
         ModalClass = "";
         ShowBackdrop = false;
+        //taskCompletionSource?.SetResult(false); // Modal kapandığında default olarak false döndür
         await InvokeAsync(StateHasChanged);
     }
 

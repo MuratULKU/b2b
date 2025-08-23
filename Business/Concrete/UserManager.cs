@@ -45,45 +45,46 @@ namespace Business.Concrete
         public async Task<List<User>> GetAllUser()
         {
             var result = await _unitOfWork.User.GetAllAsync();
-            return result.Data;
+            return result;
         }
 
         public async Task<User> GetUser(string username, string password)
         {
             var result = await _unitOfWork.User.SingleOrDefaultAsync(x => x.Username == username && x.Password == password);
-            return result.Data;
+            return result;
         }
 
         public async Task<User> GetUser(Guid id)
         {
-            var result = await _unitOfWork.User.GetByIdAsync(id);
-            return result.Data;
+            var result = await _unitOfWork.User.SingleOrDefaultAsync(x=>x.Id == id);
+            return result;
         }
 
         public async Task<User> GetUserMail(string mail)
         {
             var result = await _unitOfWork.User.SingleOrDefaultAsync(x => x.Email == mail);
-            return result.Data;
+            return result;
 
         }
 
         public async Task<List<UserRole>> GetUserRole(Guid id)
         {
            var result = await _unitOfWork.UserRole.Find(x => x.UserId == id,x=>x.Include(y=>y.Role));  
-            return result.Data;
+            return result;
         }
 
         public async Task<IDataResult<List<User>>> GetUsers(Expression<Func<User, bool>> predicate)
         {
             var result = await _unitOfWork.User.Find(predicate);
-            if (result.Status == ResultStatus.Success)
-                return new DataResult<List<User>>(ResultStatus.Success, result.Data);
-            return new DataResult<List<User>>(ResultStatus.Error, result.Data);
+            if (result != null)
+                return new DataResult<List<User>>(ResultStatus.Success, result);
+            return new DataResult<List<User>>(ResultStatus.Error, result);
         }
 
         public async Task<IResult> UpdateUser(User user)
         {
             await _unitOfWork.User.UpdateAsync(user);
+          
             var result = await _unitOfWork.CommitAsync();
             if (result== 1)
                 return new Result(ResultStatus.Success, "User Updated Successfuly");

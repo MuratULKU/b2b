@@ -35,7 +35,7 @@ namespace CoreUI.BackOrder
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-               var _productRepository = scope.ServiceProvider.GetRequiredService<IProductServices>();
+               var _productRepository = scope.ServiceProvider.GetRequiredService<IProductService>();
                var _priceRepository = scope.ServiceProvider.GetRequiredService<IPriceListService>();
                 HttpResponseMessage respone;
 

@@ -36,8 +36,8 @@ namespace _3DPayment.Providers
                 parameters.Add("OrderId", request.OrderNumber);//sipariş numarası
 
                 //işlem başarılı da olsa başarısız da olsa callback sayfasına yönlendirerek kendi tarafımızda işlem sonucunu kontrol ediyoruz
-                parameters.Add("OkUrl", request.CallbackUrl);//başarılı dönüş adresi
-                parameters.Add("FailUrl", request.CallbackUrl);//hatalı dönüş adresi
+                parameters.Add("OkUrl", request.OkUrl);//başarılı dönüş adresi
+                parameters.Add("FailUrl", request.FailUrl);//hatalı dönüş adresi
                 parameters.Add("TxnType", txnType);//direk satış
                 parameters.Add("Rnd", random);//rastgele bir sayı üretilmesi isteniyor
 
@@ -74,8 +74,8 @@ namespace _3DPayment.Providers
                 hashBuilder.Append(shopCode);
                 hashBuilder.Append(request.OrderNumber);
                 hashBuilder.Append(totalAmount);
-                hashBuilder.Append(request.CallbackUrl);
-                hashBuilder.Append(request.CallbackUrl);
+                hashBuilder.Append(request.OkUrl);
+                hashBuilder.Append(request.FailUrl);
                 hashBuilder.Append(txnType);
                 hashBuilder.Append(installment);
                 hashBuilder.Append(random);

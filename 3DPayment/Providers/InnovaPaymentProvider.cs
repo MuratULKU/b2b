@@ -265,6 +265,7 @@ namespace _3DPayment.Providers
         {
             string merchantId = request.BankParameters["merchantId"];
             string merchantPassword = request.BankParameters["merchantPassword"];
+            //ödeme tarihi boş ise hata veriyor.
             var startDate = request.PaidDate.AddDays(-1).ToString("yyyy-MM-dd");
             var endDate = request.PaidDate.AddDays(1).ToString("yyyy-MM-dd");
 

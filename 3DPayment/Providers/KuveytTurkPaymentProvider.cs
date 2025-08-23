@@ -38,14 +38,14 @@ namespace _3DPayment.Providers
                     installment = "0";//0 veya 1 olması durumunda taksit bilgisini boş gönderiyoruz
 
                 //merchantId, merchantOrderId, amount, okUrl, failUrl, userName and password
-                var hashData = CreateHash(merchantId, merchantOrderId, amount, request.CallbackUrl.ToString(), request.CallbackUrl.ToString(), userName, password);
+                var hashData = CreateHash(merchantId, merchantOrderId, amount, request.OkUrl.ToString(), request.FailUrl.ToString(), userName, password);
 
                 var requestXml = $@"<KuveytTurkVPosMessage
                     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
                     xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
                         <APIVersion>TDV2.0.0</APIVersion>
-                        <OkUrl>{request.CallbackUrl}</OkUrl>
-                        <FailUrl>{request.CallbackUrl}</FailUrl>
+                        <OkUrl>{request.OkUrl}</OkUrl>
+                        <FailUrl>{request.FailUrl}</FailUrl>
                         <HashData>{hashData}</HashData>
                         <MerchantId>{merchantId}</MerchantId>
                         <CustomerId>{customerId}</CustomerId>

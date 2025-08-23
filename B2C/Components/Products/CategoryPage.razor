@@ -1,0 +1,90 @@
+﻿@page "/category"
+@page "/category/{id:guid}"
+@* @page "/category/{refno:int}" *@
+@using Business.Abstract
+@using Business.Concrete
+@using CoreUI.Components.NotificationService
+@inject ICategoryService categoryManager
+@inject NavigationManager navManager
+@inject NotificationService notification
+<div class="container">
+    <div class="row">
+        <div class="col-7">
+            <div class="col-5">
+                <label>RefNo</label>
+            </div>
+            <div class="col-7">
+                <input class="form-control" disabled @bind-value="category.LogicalRef" />
+            </div>
+        </div>
+        <div class="col-7">
+            <div class="col-5">
+                <label>Kodu</label>
+            </div>
+            <div class="col-7">
+                <input class="form-control" @bind-value="category.Code" />
+            </div>
+        </div>
+        <div class="col-7">
+            <div class="col-5">
+                <label>Adı</label>
+            </div>
+            <div class="col-7">
+                <input class="form-control" @bind-value="category.Name" />
+            </div>
+        </div>
+        <div class="col-7">
+            <div class="col-5">
+                <label>Parent</label>
+            </div>
+            <div class="col-7">
+                <input class="form-control" disabled @bind-value="category.Parent" />
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <button class="btn btn-primary" @onclick="saveCategory">Kaydet</button>
+   
+    <button class="btn btn-danger" @onclick="deleteCategory">Sil</button>
+</div>
+@code {
+
+
+    [Parameter]
+    public Guid id { get; set; }
+
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public int refno { get; set; }
+
+    private Category? category;
+    private Category? parent;
+    protected override async void OnInitialized()
+    {
+        if (id != Guid.Empty)
+            category = await categoryManager.Get(id);
+        if (category == null)
+            category = new Category();
+        category.LogicalRef = await categoryManager.Refno();
+        if(refno > 0 && parent == null)
+        {
+            parent = await categoryManager.GetByRefNo(refno);
+            category.Parent = parent.LogicalRef;
+        }
+    }
+
+    private async void saveCategory()
+    {
+        var result =  await categoryManager.Update(category!);
+        if (result.Status == Core.Abstract.ResultStatus.Success)
+            navManager.NavigateTo("/categories");
+            else
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hatalı İşlem", Detail = result.Message, Duration = 2000 });
+    }
+    private async void deleteCategory()
+    {
+        if(category != null)
+          await categoryManager.Delete(category);
+    }
+}

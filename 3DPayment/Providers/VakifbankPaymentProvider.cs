@@ -44,8 +44,8 @@ namespace _3DPayment.Providers
                 httpParameters.Add("SessionInfo", "1");//banka dökümanları sabit bir değer
                 httpParameters.Add("MerchantID", merchantId);
                 httpParameters.Add("MerchantPassword", merchantPassword);
-                httpParameters.Add("SuccessUrl", request.CallbackUrl.ToString());
-                httpParameters.Add("FailureUrl", request.CallbackUrl.ToString());
+                httpParameters.Add("SuccessUrl", request.OkUrl.ToString());
+                httpParameters.Add("FailureUrl", request.FailUrl.ToString());
 
                 string installment = request.Installment.ToString();
                 if (request.Installment < 2)

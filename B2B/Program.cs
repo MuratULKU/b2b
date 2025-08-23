@@ -19,7 +19,11 @@ using Core.Logger;
 using SanalMagaza.Business.Concrete;
 using _3DPayment;
 using Business.SingletonServices;
+using System.Globalization;
+using CoreUI.Components.Confirm;
 
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("tr-TR");
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("tr-TR");
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,7 +60,7 @@ builder.Services.AddScoped<IUserRoleService,UserRoleManager>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserManager>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IProductServices, ProductManager>();
+builder.Services.AddScoped<IProductService, ProductManager>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryManager>();
 builder.Services.AddScoped<IFirmParamRepository, FirmParamRepository>();
@@ -93,6 +97,7 @@ builder.Services.AddScoped<UserRoleManager>();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<IUserIdentityProcessor, UserIdentityProcessor>();
+builder.Services.AddSingleton<ConfirmDialogService>();
 builder.Services.AddSingleton<FirmParameter>();
 builder.Services.AddBackOrederServices();
 builder.Services.AddHostedService<BackOrder>();
@@ -125,6 +130,14 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
+    name: "Ok",
+    pattern: "payment/ok/{paymentId:Guid?}",
+    defaults: new { action = "OkUrl", controller = "Payment" });
+    endpoints.MapControllerRoute(
+     name: "Fail",
+     pattern: "payment/fail/{paymentId:Guid?}",
+     defaults: new { action = "FailUrl", controller = "Payment" });
+    endpoints.MapControllerRoute(
        name: "Confirm",
        pattern: "payment/confirm/{paymentId:Guid?}",
        defaults: new { action = "Confirm", controller = "Payment" });
@@ -132,6 +145,7 @@ app.UseEndpoints(endpoints =>
         name: "Callback",
         pattern: "payment/callback/{paymentId:Guid?}",
         defaults: new { action = "Callback", controller = "Payment" });
+
     endpoints.MapRazorPages();
     endpoints.MapDefaultControllerRoute();
 

@@ -9,7 +9,7 @@
 <div class="basket-container">
     <div class="cart-basket">
 
-       @if (cartService._ordFiche.Lines != null)
+        @if (cartService._ordFiche != null && cartService._ordFiche.Lines != null)
         {
             int _count = 0;
             <table class="table table-hover">
@@ -57,7 +57,7 @@
                 <label class="text-center">Sepet Özeti</label>
             </div>
             <div class="card-body">
-                @if (cartService._ordFiche.Lines?.Count > 0)
+                @if (cartService._ordFiche?.Lines?.Count > 0)
                 {
                     <label>Toplam : </label>
                     <label>@cartService._ordFiche.Lines.Sum(x => x.Total).ToString("N2") TL</label>

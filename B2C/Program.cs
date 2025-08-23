@@ -4,7 +4,9 @@ using B2C.Components.Base;
 using B2C.Components.UserPanel;
 using Business.Concrete;
 using Business.SingletonServices;
+using Core.Logger;
 using CoreUI.BackOrder;
+using CoreUI.Components.Confirm;
 using CoreUI.Components.NotificationService;
 
 using CoreUI.Data;
@@ -28,6 +30,10 @@ builder.Services.AddDbContext<RepositoryContext>(
 
  ServiceLifetime.Transient);
 
+
+builder.Services.AddSingleton<ILoggerService>(provider =>
+            new FileLogger("app.log"));
+
 // repository context
 builder.Services.AddUtiliesService();
 builder.Services.AddRepositoryService();
@@ -36,6 +42,7 @@ builder.Services.AddScoped<IUnitofWork, UnitofWork>();
 //back order service
 
 builder.Services.AddSingleton<FirmParameter>();
+builder.Services.AddSingleton<ConfirmDialogService>();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddBackOrederServices();
 builder.Services.AddHostedService<BackOrder>();

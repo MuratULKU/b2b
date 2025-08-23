@@ -25,7 +25,7 @@ namespace Business.Concrete
             try
             {
                 var pricelists = await _unitOfWork.PriceList.GetAllAsync();
-                foreach (var pricelist in pricelists.Data)
+                foreach (var pricelist in pricelists)
                 {
                     await _unitOfWork.PriceList.Delete(pricelist);
                 }
@@ -42,13 +42,13 @@ namespace Business.Concrete
         public async Task<PriceList> GetByCode(string code)
         {
             var result = await _unitOfWork.PriceList.SingleOrDefaultAsync(x => x.Code == code);
-            return result.Data;
+            return result;
         }
 
         public async Task<PriceList> GetByLogicalref(int Logicalref)
         {
             var result = await _unitOfWork.PriceList.SingleOrDefaultAsync(x => x.Logicalref == Logicalref);
-            return result.Data;
+            return result;
         }
 
         public async Task<IResult> Insert(PriceList priceList)

@@ -64,7 +64,7 @@ namespace CoreUI.BackOrder
         {
             using var scope = _serviceProvider.CreateScope();
             _firmDocRepository = scope.ServiceProvider.GetRequiredService<IFirmDocRepository>();
-            _firmDocRepository.DeleteAll();
+           // _firmDocRepository.DeleteAll();
             return Task.CompletedTask;
         }
         private async Task InsertProduct(List<Product> products)

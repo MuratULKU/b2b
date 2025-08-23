@@ -8,6 +8,7 @@
 @inject CartService cartService
 @inject IUserIdentityProcessor userIdentity
 @inject NotificationService notification
+
 @attribute [Authorize]
 
 <div class="container">
@@ -36,8 +37,18 @@
         Guid UserId = await userIdentity.GetCurrentUserId();
         if (Data != null &&  Data.PriceLists?.Count > 0 && Data.OrderAmount > 0 && UserId != Guid.Empty)
         {
-            cartService.AddUserCart(Data, Data.PriceLists[0].Price, Data.OrderAmount, 0, UserId);
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "", Detail = "Sepete Eklendi.", Duration = 2000 });
+            try
+            {
+                await cartService.AddUserCart(Data, Data.PriceLists[0].Price, Data.OrderAmount, 0, UserId);
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "", Detail = "Sepete Eklendi.", Duration = 2000 });
+            }
+            catch (Exception)
+            {
+                
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Ürün Eklenmedi", Duration = 2000 });
+            }
+            
+           
         }
         else
         {

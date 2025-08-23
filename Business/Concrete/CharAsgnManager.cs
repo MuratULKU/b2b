@@ -22,7 +22,7 @@ namespace Business.Concrete
             try
             {
                 var charasgns = await _unitOfWork.CharAsgn.GetAllAsync();
-                foreach (var charasgn in charasgns.Data)
+                foreach (var charasgn in charasgns)
                 {
                     await _unitOfWork.CharAsgn.Delete(charasgn);
                 }
@@ -38,8 +38,7 @@ namespace Business.Concrete
 
         public async Task<CharAsgn> GetByCode(string code)
         {
-            var result = await _unitOfWork.CharAsgn.SingleOrDefaultAsync(x => x.Code == code);
-            return result.Data;
+            return await _unitOfWork.CharAsgn.SingleOrDefaultAsync(x => x.Code == code);
         }
 
         public async Task<IResult> Insert(CharAsgn charAsgn)

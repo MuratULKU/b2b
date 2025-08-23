@@ -83,7 +83,7 @@
                 <fieldset>
                     <label for="total">Tutar*</label>
                     <div class="input-container">
-                        <CurrencyEdit id="totalInput" Disabled="currencyDisable" CharacterPattern="[0-9]" TValue="decimal" Value="Total" ValueChanged="TotalChange" DecimalPlaces="2"></CurrencyEdit>
+                        <CurrencyEdit id="totalInput" Disabled="currencyDisable" CharacterPattern="[0-9\.]" TValue="decimal" Value="Total" ValueChanged="TotalChange" DecimalPlaces="2"></CurrencyEdit>
                     </div>
                 </fieldset>
                 <fieldset>
@@ -413,91 +413,91 @@
 
         }
     }       
- 
 
-   
 
-    
+
+
+
 
     private async void CardNumberChanged(string e)
-{
-    cardNumber = e;
-    if (e.Length == 1)
     {
-    // switch (e.Substring(0, 1))
-    // {
-    //     case "3":
-    //         await JS.InvokeVoidAsync("Ulku.loadicon", "amex");
-    //         break;
-    //     case "4":
-    //         await JS.InvokeVoidAsync("Ulku.loadicon", "visa");
-    //         break;
-    //     case "5":
-    //         await JS.InvokeVoidAsync("Ulku.loadicon", "mastercard");
-    //         break;
-    //     case "9":
-    //         await JS.InvokeVoidAsync("Ulku.loadicon", "troy");
-    //         break;
-    // }
+        cardNumber = e;
+        if (e.Length == 1)
+        {
+            // switch (e.Substring(0, 1))
+            // {
+            //     case "3":
+            //         await JS.InvokeVoidAsync("Ulku.loadicon", "amex");
+            //         break;
+            //     case "4":
+            //         await JS.InvokeVoidAsync("Ulku.loadicon", "visa");
+            //         break;
+            //     case "5":
+            //         await JS.InvokeVoidAsync("Ulku.loadicon", "mastercard");
+            //         break;
+            //     case "9":
+            //         await JS.InvokeVoidAsync("Ulku.loadicon", "troy");
+            //         break;
+            // }
+
+        }
+        if (e.Length > 6)
+        {
+
+
+
+            creditCard = null;
+            creditCardPrefix = null;
+
+            CreditCardPrefix dataResultPrefix = await creditCardPrefixService.GetByPrefix(e.Replace(" ", string.Empty).Substring(0, 6));
+            if (dataResultPrefix == null)
+            {
+                if (e.Length > 8)
+                    dataResultPrefix = await creditCardPrefixService.GetByPrefix(e.Replace(" ", string.Empty).Substring(0, 8));
+            }
+            if (dataResultPrefix != null)
+            {
+                creditCardPrefix = dataResultPrefix;
+                creditCard = await creditCardService.GetCreditCardByPrefix(creditCardPrefix.Prefix.ToString(), true);
+                //vPosList = await virtualPosService.GetByBrandId(creditCard.CardBrandId);
+
+            }
+            LoadInstalment();
+        }
+
 
     }
-    if (e.Length > 6)
+
+
+
+    private void TotalChange(decimal value)
     {
+        if (Total.Equals(value))
+            return;
+        Total = value;
+        if (vPosList != null)
+            LoadInstalment();
 
-
-
-    creditCard = null;
-    creditCardPrefix = null;
-
-    CreditCardPrefix dataResultPrefix = await creditCardPrefixService.GetByPrefix(e.Replace(" ", string.Empty).Substring(0, 6));
-    if (dataResultPrefix == null)
-    {
-        if (e.Length > 8)
-            dataResultPrefix = await creditCardPrefixService.GetByPrefix(e.Replace(" ", string.Empty).Substring(0, 8));
-    }
-    if (dataResultPrefix != null)
-    {
-        creditCardPrefix = dataResultPrefix;
-        creditCard = await creditCardService.GetCreditCardByPrefix(creditCardPrefix.Prefix.ToString(), true);
-        //vPosList = await virtualPosService.GetByBrandId(creditCard.CardBrandId);
 
     }
-    LoadInstalment();
-    }
 
-
-}
-
-
-
-private void TotalChange(decimal value)
-{
-    if (Total.Equals(value))
-    return;
-    Total = value;
-    if (vPosList != null)
-    LoadInstalment();
-
-
-}
-
-private async void payment()
-{
-    try
+    private async void payment()
     {
-    btndisabled = false;
-    if (OrderId == Guid.Empty)
-    {
-        OrderId = Guid.NewGuid();
-    }
+        try
+        {
+            btndisabled = false;
+            if (OrderId == Guid.Empty)
+            {
+                OrderId = Guid.NewGuid();
+            }
 
-    if (!checkPaymentForm())
-        return;
-    if (company == null)
-        throw new Exception("Şirket Bilgileri Olmayan Kullanıcı Bu İşlemi Yapamaz");
-    if (selectInstallment != null)
-    {
-        PaymentViewModel paymentViewModel = new PaymentViewModel()
+            if (!checkPaymentForm())
+                return;
+            if (company == null)
+                throw new Exception("Şirket Bilgileri Olmayan Kullanıcı Bu İşlemi Yapamaz");
+            if (selectInstallment != null)
+            {
+                PaymentViewModel paymentViewModel = new PaymentViewModel()
             {
                 VirtualPosId = selectInstallment.VirtualPos.Id,
                 CardHolderName = cardHolderName,
@@ -517,32 +517,37 @@ private async void payment()
 
 
 
-        httpClient.DefaultRequestHeaders.Clear();
-        if (httpClient.BaseAddress == null)
-            httpClient.BaseAddress = new Uri(navManager.BaseUri);
+                httpClient.DefaultRequestHeaders.Clear();
+                if (httpClient.BaseAddress == null)
+                    httpClient.BaseAddress = new Uri(navManager.BaseUri);
 
-        var viewModelJson = new StringContent(
-     JsonSerializer.Serialize(paymentViewModel),
-     Encoding.UTF8,
-     Application.Json);
-        using var httpResponseMessage =
-               await httpClient.PostAsync(@"/Payment/Index", viewModelJson);
+                var viewModelJson = new StringContent(
+             JsonSerializer.Serialize(paymentViewModel),
+             Encoding.UTF8,
+             Application.Json);
+                using var httpResponseMessage =
+                       await httpClient.PostAsync(@"/Payment/Index", viewModelJson);
 
 
-        httpResponseMessage.EnsureSuccessStatusCode();
+                httpResponseMessage.EnsureSuccessStatusCode();
 
-        var result = await httpResponseMessage.Content.ReadAsStringAsync();
-        returnModel resultMessage = JsonSerializer.Deserialize<returnModel>(result);
-        if (resultMessage.gatewayUrl != string.Empty)
-        {
-            string iframesrc = resultMessage.gatewayUrl;
-            await JS.InvokeVoidAsync("iframe.ac", resultMessage);
-            await JS.InvokeAsync<VerifyGatewayResult>("iframe.kapat", "/Payment/Completed/");
-        }
-        else
-        {
-            throw new Exception(resultMessage.message);
-        }
+                var result = await httpResponseMessage.Content.ReadAsStringAsync();
+
+                returnModel resultMessage = JsonSerializer.Deserialize<returnModel>(result);
+                
+                var t = $"/payment/confirm/{resultMessage.message}";
+                navManager.NavigateTo(t,true);
+
+        // if (resultMessage.gatewayUrl != string.Empty)
+        // {
+        //     string iframesrc = resultMessage.gatewayUrl;
+        //     await JS.InvokeVoidAsync("iframe.ac", resultMessage);
+        //     await JS.InvokeAsync<VerifyGatewayResult>("iframe.kapat", "/Payment/Completed/");
+        // }
+        // else
+        // {
+        //     throw new Exception(resultMessage.message);
+        // }
 
     }
     else

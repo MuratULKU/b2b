@@ -23,7 +23,7 @@ namespace Business.Concrete
         public async Task<List<ClFiche>> GetClFicheFiche(int trCode, byte send)
         {
            var result = await _unitOfWork.ClFiche.Find(x=>x.Send == send && x.TrCode == trCode);
-            return result.Data;
+            return result;
         }
 
         public async Task<IResult> Insert(ClFiche clFiche)

@@ -7,18 +7,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Concrete
 {
-    public class ProductRepository : IProductRepository
+    public class ProductRepository :Repository<Product>, IProductRepository
     {
-        private readonly RepositoryContext _dbContext;
-
-        public ProductRepository(RepositoryContext dbContext)
+        
+        public ProductRepository(RepositoryContext context) : base(context)
         {
-            _dbContext = dbContext;
+
         }
 
         public List<Product> GetAll()
         {
-            return _dbContext.Products
+            return dbContext.Set<Product>()
                 .Include(x => x.PriceLists)
                 .Include(x => x.ProductAmounts)
                 .OrderBy(x => x.Code)
@@ -27,7 +26,7 @@ namespace DataAccess.Concrete
 
         public List<Product> GetAll(int currentPage, int pageSize)
         {
-            return _dbContext.Products
+            return dbContext.Set<Product>()
                 .Include(x => x.PriceLists)
                 .ThenInclude(y => y.Currency)
                 .Include(x => x.ProductAmounts)
@@ -96,7 +95,7 @@ namespace DataAccess.Concrete
 
         private bool isParent(int CategoryId)
         {
-            var result = _dbContext.Categories.Count(x=>x.Parent == CategoryId);
+            var result = dbContext.Set<Category>().Count(x=>x.Parent == CategoryId);
             if(result > 1)
                 return true;
             return false;
@@ -104,7 +103,7 @@ namespace DataAccess.Concrete
 
         private string ParentRef(int CategoryId)
         {
-            int result = _dbContext.Categories.Where(x => x.LogicalRef == CategoryId).Select(x=>x.Parent).FirstOrDefault();
+            int result = dbContext.Set<Category>().Where(x => x.LogicalRef == CategoryId).Select(x=>x.Parent).FirstOrDefault();
           return result.ToString();
         }
 
@@ -116,7 +115,7 @@ namespace DataAccess.Concrete
             string category = "";
             if (isParent(CategoryId))
             {
-                var parent = _dbContext.Categories.Where(x => x.Parent == CategoryId).Select(x => x.LogicalRef).ToArray();
+                var parent = dbContext.Set<Category>().Where(x => x.Parent == CategoryId).Select(x => x.LogicalRef).ToArray();
                 category = string.Join(",", parent);
                 category += "," + ParentRef(CategoryId);
             }
@@ -165,7 +164,7 @@ namespace DataAccess.Concrete
             var queryText = $"select * from Products {where} order by Code LIMIT {PageSize} OFFSET {(CurrentPage - 1) * PageSize}";
 
 
-             return Task.FromResult(_dbContext.Products
+             return Task.FromResult(dbContext.Set<Product>()
                 .FromSqlRaw(queryText)
                 .Include(x => x.PriceLists)
                 .ThenInclude(y => y.Currency)
@@ -183,7 +182,7 @@ namespace DataAccess.Concrete
             var result =
 
                 CategoryId == 0
-                 ? _dbContext.Products
+                 ? dbContext.Set<Product>()
                  .Include(x => x.PriceLists)
                  .ThenInclude(y => y.Currency)
                  .Include(x => x.ProductAmounts)
@@ -211,7 +210,7 @@ namespace DataAccess.Concrete
                  .Skip((CurrentPage - 1) * PageSize)
                  .Take(PageSize)
                  .ToList()
-                : _dbContext.Products
+                : dbContext.Set<Product>()
                  .Include(x => x.PriceLists)
                  .ThenInclude(y => y.Currency)
                  .Include(x => x.ProductAmounts)
@@ -244,11 +243,11 @@ namespace DataAccess.Concrete
 
         public async Task<Product> GetByGuid( Guid id )
         {
-            return await _dbContext.Products.FirstOrDefaultAsync(x=>x.Id == id);
+            return await dbContext.Set<Product>().FirstOrDefaultAsync(x=>x.Id == id);
         }
         public async Task<Product> GetByCode(string code)
         {
-            return await _dbContext.Products
+            return await dbContext.Set<Product>()
                 .Include(x => x.firmDocs)
                 .Include(x => x.PriceLists)
                 .ThenInclude(y => y.Currency)
@@ -258,24 +257,24 @@ namespace DataAccess.Concrete
 
         public async Task<Product> GetByLogicalref(int logicalref)
         {
-            return await _dbContext.Products.FirstOrDefaultAsync(x => x.LogicalRef == logicalref);
+            return await dbContext.Set<Product>().FirstOrDefaultAsync(x => x.LogicalRef == logicalref);
         }
 
         public void Insert(Product product)
         {
-            _dbContext.Products.Add(product);
-            _dbContext.SaveChanges();
+            dbContext.Set<Product>().Add(product);
+            dbContext.SaveChanges();
         }
 
         public void InsertImage(FirmDoc firmDoc)
         {
-            _dbContext.FirmDocs.Add(firmDoc);
-            _dbContext.SaveChanges();
+            dbContext.Set<FirmDoc>().Add(firmDoc);
+            dbContext.SaveChanges();
         }
         public async Task<int> DeleteAll()
         {
-            _dbContext.Products.ExecuteDelete();
-            return await _dbContext.SaveChangesAsync();
+            dbContext.Set<Product>().ExecuteDelete();
+            return await dbContext.SaveChangesAsync();
         }
         public Task<int> TotalCount(string Filtre, Dictionary<Guid, List<string>> PropertySet, int CategoryId, int CurrentPage, int PageSize)
         {
@@ -285,7 +284,7 @@ namespace DataAccess.Concrete
                 string category = "";
                 if (isParent(CategoryId))
                 {
-                    var parent = _dbContext.Categories.Where(x => x.Parent == CategoryId).Select(x => x.LogicalRef).ToArray();
+                    var parent = dbContext.Set<Category>().Where(x => x.Parent == CategoryId).Select(x => x.LogicalRef).ToArray();
                     category = string.Join(",", parent);
                     category += "," + ParentRef(CategoryId);
                 }
@@ -329,7 +328,7 @@ namespace DataAccess.Concrete
                 }
                 var queryText = $"select * from Products {where}";
 
-                return Task.FromResult(_dbContext.Products
+                return Task.FromResult(dbContext.Set<Product>()
                     .FromSqlRaw(queryText).Count());
 
 
@@ -345,28 +344,24 @@ namespace DataAccess.Concrete
 
         public void Update(Product product)
         {
-            _dbContext.Products.Update(product);
-            _dbContext.SaveChanges();
+            dbContext.Set<Product>().Update(product);
+            dbContext.SaveChanges();
         }
 
         public void UpdateImage(FirmDoc firmdoc)
         {
-            _dbContext.FirmDocs.Update(firmdoc);
-            _dbContext.SaveChanges();
+            dbContext.Set<FirmDoc>().Update(firmdoc);
+            dbContext.SaveChanges();
         }
 
         public Task<bool> Delete(Product product)
         {
-            _dbContext.Products.Remove(product);
-            _dbContext.SaveChanges();
+            dbContext.Set<Product>().Remove(product);
+            dbContext.SaveChanges();
             return Task.FromResult(true);
         }
 
        
     }
 
-    public class IntReturn
-    {
-        public int Value { get; set; }
-    }
 }

@@ -18,7 +18,7 @@ namespace Business.SingletonServices
     {
         private IFirmParamService _firmParamService;
         private readonly IServiceProvider _serviceProvider;
-        public readonly List<FirmParam> FirmParameters;
+        public  List<FirmParam> FirmParameters;
 
         public FirmParameter(IServiceProvider serviceProvider)
         {

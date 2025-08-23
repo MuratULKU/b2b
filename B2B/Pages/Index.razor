@@ -1,6 +1,9 @@
 ﻿@page "/"
 @using System.Security.Claims
+@using CoreUI.Components.Base
 @inject AuthenticationStateProvider AuthStateProvider
+@attribute [Authorize]
+
 <PageTitle>Index</PageTitle>
 
 <h1>Lütfen Giriş Yapınız....</h1>
@@ -20,6 +23,7 @@ B2B Satış ve Tahsilat
         if (_currentUser.Identity?.IsAuthenticated ?? false)
         {
             Console.WriteLine($"Kullanıcı: {_currentUser.Identity.Name} ");
+         
         }
         else
         {

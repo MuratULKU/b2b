@@ -22,29 +22,35 @@ namespace Business.Concrete
 
         public async Task<IResult> CreateBankParameter(VirtualPosParameter bankParameter)
         {
-            var result = await _unitOfWork.VirtualPosParameter.AddAsync(bankParameter);
-            await _unitOfWork.CommitAsync();
-           return result;
+            await _unitOfWork.VirtualPosParameter.AddAsync(bankParameter);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+            return new Result(ResultStatus.Error, "Hatalı İşlem");
         }
 
         public async Task<IResult> DeleteBankParameter(VirtualPosParameter bankParameter)
         {
-            var result = await _unitOfWork.VirtualPosParameter.Delete(bankParameter);
-            await _unitOfWork.CommitAsync();
-            return result;
+             await _unitOfWork.VirtualPosParameter.Delete(bankParameter);
+            var result =await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+            return new Result(ResultStatus.Error, "Hatalı İşlem");
         }
 
         public async Task<List<VirtualPosParameter>> GetAll(Guid BankId)
         {
             var result = await _unitOfWork.VirtualPosParameter.GetAllAsync();
-            return result.Data;
+            return result;
         }
 
         public async Task<IResult> UpdateBankParameter(VirtualPosParameter bankParameter)
         {
-            var result = await _unitOfWork.VirtualPosParameter.UpdateAsync(bankParameter);
-            await _unitOfWork.CommitAsync();
-          return result;
+            await _unitOfWork.VirtualPosParameter.UpdateAsync(bankParameter);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+            return new Result(ResultStatus.Error, "Hatalı İşlem");
         }
     }
 }

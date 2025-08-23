@@ -1,5 +1,6 @@
 ﻿using Business.Abstract;
 using Core.Abstract;
+using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
 using System;
@@ -20,36 +21,43 @@ namespace Business.Concrete
             _unitOfWork = unitOfWork;
         }
 
-        public Task<IResult> Create(FirmParam firmParam)
+        public async Task<IResult> Create(FirmParam firmParam)
         {
-            return _unitOfWork.FirmParam.AddAsync(firmParam);
+            await _unitOfWork.FirmParam.AddAsync(firmParam);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Başarılı");
+            return new Result(ResultStatus.Error, "Kayıt İşlemi Hatalı");
         }
 
-        public Task<IResult> Delete(FirmParam firmParam)
+        public async Task<IResult> Delete(FirmParam firmParam)
         {
-            return _unitOfWork.FirmParam.Delete(firmParam);
+            _unitOfWork.FirmParam.Delete(firmParam);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt Silindi");
+            return new Result(ResultStatus.Error, "Kayıt Silinemedi");
         }
 
         public async  Task<FirmParam> Get(int no)
         {
            var result = await _unitOfWork.FirmParam.SingleOrDefaultAsync(x=>x.No == no);
-            return result.Data;
+            return result;
         }
 
         public async Task<List<FirmParam>> GetAll()
         {
             var result = await _unitOfWork.FirmParam.GetAllAsync();
-            return result.Data;
+            return result;
         }
 
         public async Task<IResult> Update(FirmParam firmParam)
         {
-            var result = await  _unitOfWork.FirmParam.UpdateAsync(firmParam);
-            var r = await _unitOfWork.CommitAsync();
-            if (r == 1)
-                return result;
-            else
-                return result;
+            await  _unitOfWork.FirmParam.UpdateAsync(firmParam);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt Güncellendi");
+            return new Result(ResultStatus.Error, "Kayıt Güncellenmedi");
         }
 
 

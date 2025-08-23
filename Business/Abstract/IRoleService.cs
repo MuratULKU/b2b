@@ -13,6 +13,7 @@ namespace Business.Abstract
         Task<IDataResult<List<Role>>> GetAllRole();
 
         Task<IDataResult<Role>> GetRole(string RoleName);
+        Task<IDataResult<Role>> GetRole(Guid RoleId);
        
     }
 }

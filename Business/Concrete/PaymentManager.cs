@@ -17,9 +17,10 @@ namespace Business.Concrete
             _unitOfWork = unitOfWork;
         }
 
-        public Task<IDataResult<PaymentTransaction>> GetById(Guid id, bool includeBank = false)
+        public async Task<IDataResult<PaymentTransaction>> GetById(Guid id, bool includeBank = false)
         {
-            return _unitOfWork.Payment.SingleOrDefaultAsync(x => x.Id == id);
+           
+            return new DataResult<PaymentTransaction>(ResultStatus.Success, (await _unitOfWork.Payment.SingleOrDefaultAsync(x => x.Id == id)));
         }
 
         public async Task<IDataResult<PaymentTransaction>> GetByOrderNumber(Guid orderNumber, bool includeBank = false)
@@ -45,17 +46,20 @@ namespace Business.Concrete
 
         public decimal GetTotalAmount()
         {
-            return _unitOfWork.Payment.GetAllAsync().Result.Data.Sum(x => x.TotalAmount);
+            return _unitOfWork.Payment.GetAllAsync().Result.Sum(x => x.TotalAmount);
         }
 
         public decimal GetTotalAmount(DateTime startDate)
         {
-           return _unitOfWork.Payment.Find(x=>x.PaidDate == startDate).Result.Data.Sum(x=>x.TotalAmount);
+           return _unitOfWork.Payment.Find(x=>x.PaidDate == startDate).Result.Sum(x=>x.TotalAmount);
         }
 
-        public Task<IDataResult<List<PaymentTransaction>>> GetUserId(Guid userId, DateTime startDate, DateTime endDate,int currentPage = 0, int pageSize =10)
+        public async Task<IDataResult<List<PaymentTransaction>>> GetUserId(Guid userId, DateTime startDate, DateTime endDate,int currentPage = 0, int pageSize =10)
         {
-            return _unitOfWork.Payment.Find(x => x.UserId == userId && x.CreateDate >= startDate || x.CreateDate <= endDate, includes:x=>x.Include(q=>q.User).Include(q=>q.Company));
+            var result =  await _unitOfWork.Payment.Find(x => x.UserId == userId && x.CreateDate >= startDate || x.CreateDate <= endDate, includes:x=>x.Include(q=>q.User).Include(q=>q.Company));
+            if (result != null)
+                return new DataResult<List<PaymentTransaction>>(ResultStatus.Success, result);
+            return new DataResult<List<PaymentTransaction>>(ResultStatus.Error, result);
         }
 
         public Task<IDataResult<List<PaymentTransaction>>> GetUserId(Guid userId, DateTime startDate, DateTime endDate)
@@ -70,18 +74,19 @@ namespace Business.Concrete
 
         public async Task<IResult> Insert(PaymentTransaction paymentTransaction)
         {
-           var result = await _unitOfWork.Payment.AddAsync(paymentTransaction);
-            await _unitOfWork.VirtualPoses.GetByIdAsync(paymentTransaction.VirtualPosId);
-           
-            await _unitOfWork.CommitAsync();
-            return result;
+          await _unitOfWork.Payment.AddAsync(paymentTransaction);
+           await _unitOfWork.VirtualPoses.GetByIdAsync(paymentTransaction.VirtualPosId);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+            return new Result(ResultStatus.Error, "Hatalı İşlem");
         }
 
         public  async Task<IResult> Update(PaymentTransaction paymentTransaction)
         {
-            var result = await  _unitOfWork.Payment.UpdateAsync(paymentTransaction);
+            await  _unitOfWork.Payment.UpdateAsync(paymentTransaction);
             var clFiche = await _unitOfWork.ClFiche.GetByIdAsync(paymentTransaction.Id);
-            if (clFiche.Data == null)
+            if (clFiche == null)
             {
                 await _unitOfWork.Company.GetByIdAsync(paymentTransaction.CompanyId);
                 ClFiche _clFiche = new ClFiche();
@@ -103,8 +108,10 @@ namespace Business.Concrete
 
                 await _unitOfWork.ClFiche.AddAsync(_clFiche);
             }
-            await _unitOfWork.CommitAsync();
-            return result;
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+            return new Result(ResultStatus.Error, "Hatalı İşlem");
         }
     }
 }

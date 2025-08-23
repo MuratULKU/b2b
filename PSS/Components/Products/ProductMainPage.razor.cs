@@ -19,7 +19,7 @@ namespace PSS.Components.Products
         public string? Filter { get; set; } = default!;
 
         public List<Product> ProductLlist { get; set; } = default!;
-        [Inject] IProductServices ProductServices { get; set; }=default!;
+        [Inject] IProductService ProductServices { get; set; }=default!;
         [Inject] ICategoryService categoryManager { get; set; } =default!;
 
         [Parameter]

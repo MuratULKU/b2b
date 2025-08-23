@@ -15,7 +15,7 @@
 @inject IUserIdentityProcessor userIdentity
 @inject IUserService userService
 @inject IJSRuntime JSRuntime
-
+@inject ICompanyService companyService
 
  @((MarkupString)GenerateEmailContent())
 
@@ -24,10 +24,10 @@
  <input type="button" class="btn btn-primary" value="Ödeme Sayfası" />
 @code {
     [Parameter]
-    public string guid { get; set; }
-    string htmlstring;
-    PaymentTransaction payment;
-
+    public string guid { get; set; } = default!;
+    string htmlstring="";
+    PaymentTransaction payment { get; set; } = default!;
+    Company company { get; set; } = default!;
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
     protected async override void OnInitialized()
@@ -36,8 +36,9 @@
         if (payment == null)
             throw new Exception("Hatalı Sipariş Nuraması");
         var param = firmParam.Get(1);
-
-
+        var user = (await authenticationState).User.Claims.FirstOrDefault(x => x.Type == System.Security.Claims.ClaimTypes.Sid).Value;
+        company = await companyService.GetByUserId(Guid.Parse(user));
+        payment.User = await userService.GetUser(payment.UserId);
 
         // OrdFiche ordFiche = orderService.GetFiche(payment.OrderNumber);
         // if (ordFiche != null)
@@ -107,7 +108,7 @@
             <img src='./media/logo.png' height='80' alt=''>
             <table style='width:100%;'>
                 <tr class='baslik'>
-                    <td colspan='3'>islemturu</td>
+                    <td colspan='3'>Kredi Kartı Mail Order</td>
                 </tr>
                 <tr>
                     <td>İşlem No</td>
@@ -132,12 +133,12 @@
                 <tr>
                     <td>Cari Kod</td>
                     <td> : </td>
-                    <td></td>
+                    <td>{company.ProgramCode}</td>
                 </tr>
                 <tr>
                     <td>Cari Ünvan</td>
                     <td> : </td>
-                    <td></td>
+                    <td>{company.Name}</td>
                 </tr>
                 <tr>
                     <td>Açıklama</td>

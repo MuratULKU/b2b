@@ -10,5 +10,11 @@ namespace DataAccess.Concrete
         public CategoryRepository(RepositoryContext context) : base(context)
         {
         }
+
+        public int MaxRefNo()
+        {
+            return  dbContext.Set<Category>().Max(x => x.LogicalRef);
+            
+        }
     }
 }

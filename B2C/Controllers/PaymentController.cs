@@ -147,11 +147,13 @@ namespace B2C.Controllers
                 bankRequest.CustomerIpAddress = "127.0.0.1";
             }
 
-            bankRequest.BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), payment.VirtualPos.BankCard.SystemName);
+            //bankRequest.BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), payment.VirtualPos.BankCard.SystemName);
             IPaymentProvider provider = _paymentProviderFactory.Create((VirtualPosSystem)payment.VirtualPos.VirtualPosSystem);
 
-            //set callback url
+            //set callback url ok ve fail url nestpay tarafından ayrı isteniyor
             bankRequest.CallbackUrl = new Uri($"{Request.GetHostUrl(false)}{Url.RouteUrl("Callback", new { paymentId = payment.OrderNumber })}");
+            bankRequest.FailUrl = new Uri($"{Request.GetHostUrl(false)}{Url.RouteUrl("Fail", new { paymentId = payment.OrderNumber })}");
+            bankRequest.OkUrl = new Uri($"{Request.GetHostUrl(false)}{Url.RouteUrl("Ok", new { paymentId = payment.OrderNumber })}");
 
            
             //gateway request

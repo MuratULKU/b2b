@@ -13,7 +13,7 @@ namespace B2C.Components.CartPanel
     public class CartService
     {
         private readonly ProtectedLocalStorage _localStorage;
-        private readonly IProductServices productServices;
+        private readonly IProductService productServices;
         private readonly IOrderService orderService;
         private readonly IDocumentNoService documentNoService;
         private readonly IUnitofWork unitofWork;
@@ -25,7 +25,7 @@ namespace B2C.Components.CartPanel
 
 
 
-        public CartService(ProtectedLocalStorage sessionStroge, IProductServices productServices, IOrderService orderService, IDocumentNoService documentNo, IUnitofWork unitofWork)
+        public CartService(ProtectedLocalStorage sessionStroge, IProductService productServices, IOrderService orderService, IDocumentNoService documentNo, IUnitofWork unitofWork)
         {
 
             _localStorage = sessionStroge;

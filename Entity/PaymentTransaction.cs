@@ -20,7 +20,9 @@ namespace Entity
         public int? ExtraInstallment { get; set; }
         public decimal TotalAmount { get; set; }
         public string? BankErrorMessage { get; set; }
+        public string? BankControlMessage { get; set; }
         public DateTime? PaidDate { get; set; }
+        public DateTime? ControlDate { get; set; }
         public Guid UserId { get; set; }
 
         public int StatusId { get; set; }

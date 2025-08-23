@@ -3,11 +3,8 @@
 
 namespace DataAccess.Abstract
 {
-    public interface IFirmDocRepository
+    public interface IFirmDocRepository:IRepository<FirmDoc>
     {
-        void Insert(FirmDoc doc);
-        void Update(FirmDoc doc);
-        void Delete(FirmDoc doc);
-        Task<int> DeleteAll();
+       
     }
 }

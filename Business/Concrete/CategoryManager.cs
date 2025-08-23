@@ -20,10 +20,19 @@ namespace Business.Concrete
             _unitOfWork = unitOfWork;
         }
 
+        public async Task<IResult> Delete(Category category)
+        {
+            await _unitOfWork.Category.Delete(category);
+            var result =await  _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt Silindi");
+            return new Result(ResultStatus.Error, "Kayıt İşlemi Hatalı");
+        }
+
         public async Task DeleteAll()
         {
            var list = await _unitOfWork.Category.GetAllAsync();
-           List<Category> allcategory = list.Data;
+           List<Category> allcategory = list;
             foreach (var category in allcategory)
             {
                await _unitOfWork.Category.Delete(category); 
@@ -33,30 +42,45 @@ namespace Business.Concrete
 
         public async Task<List<Category>> Get(int parentref)
         {
-           var result = await _unitOfWork.Category.Find(x => x.Parent == parentref);
-            return result.Data;
+           return await _unitOfWork.Category.Find(x => x.Parent == parentref);
+         
+        }
+
+        public async Task<Category> Get(Guid id)
+        {
+           return await _unitOfWork.Category.GetByIdAsync(id);
         }
 
         public async Task<Category> GetByCode(string code)
         {
-          var result = await _unitOfWork.Category.SingleOrDefaultAsync(x => x.Code == code);
-            return result.Data;
+         return await _unitOfWork.Category.SingleOrDefaultAsync(x => x.Code == code);
+        
+        }
+
+        public async Task<Category> GetByRefNo(int refno)
+        {
+           return await _unitOfWork.Category.SingleOrDefaultAsync(x=>x.LogicalRef == refno);  
         }
 
         public async Task<IResult> Insert(Category category)
         {
-            var result = await _unitOfWork.Category.AddAsync(category);
-            await _unitOfWork.CommitAsync();
-            if (result.Status == ResultStatus.Success)
+            await _unitOfWork.Category.AddAsync(category);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Başarılı");
             return new Result(ResultStatus.Error, "Kayıt İşlemi Hatalı");
         }
 
+        public async Task<int> Refno()
+        {
+         return _unitOfWork.Category.MaxRefNo() + 1;
+        }
+
         public async Task<IResult> Update(Category category)
         {
-            var result = await _unitOfWork.Category.UpdateAsync(category);
-            await _unitOfWork.CommitAsync();
-            if (result.Status == ResultStatus.Success)
+             await _unitOfWork.Category.UpdateAsync(category);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Başarılı");
             return new Result(ResultStatus.Error, "Kayıt İşlemi Hatalı");
         }

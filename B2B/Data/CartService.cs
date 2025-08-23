@@ -9,24 +9,27 @@ namespace B2B.Data
 {
     public class CartService:IDisposable
     {
-        private readonly IProductServices productServices;
+        private readonly IProductService productServices;
         private readonly IOrderService orderService;
         private readonly ICompanyService companyService;
         private readonly IUserService userService;
         private readonly IDocumentNoService documentNoService;
+     
 
         public OrdFiche _ordFiche;
         public Company company { get; set; }
         public User user { get; set; }
 
 
-        public CartService(IProductServices productServices, IOrderService orderService, ICompanyService companyService, IUserService userService, IDocumentNoService documentNoService)
+
+        public CartService(IProductService productServices, IOrderService orderService, ICompanyService companyService, IUserService userService, IDocumentNoService documentNoService)
         {
             this.productServices = productServices;
             this.orderService = orderService;
             this.companyService = companyService;
             this.userService = userService;
             this.documentNoService = documentNoService;
+          
         }
 
 
@@ -71,7 +74,7 @@ namespace B2B.Data
 
 
 
-        public async void AddUserCart(Product product, double Price, double Amount, double Discount, Guid userId)
+        public async Task AddUserCart(Product product, double Price, double Amount, double Discount, Guid userId)
         {
             user = await userService.GetUser(userId);
 
@@ -99,7 +102,7 @@ namespace B2B.Data
                     _ordFiche.CurrencyId = 1; //döviz kuru seçildiğinde değişecek
                     _ordFiche.CompanyId = user.CompanyId ?? default;
                 }
-                OrdLine ordLine = _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == product.Id);
+                OrdLine ordLine =  _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == product.Id);
                 if (ordLine == null)
                 {
                     ordLine = new();
@@ -140,6 +143,7 @@ namespace B2B.Data
                     ordLine.Date_ = _ordFiche.Date_;
                     ordLine.CurrencyId = 1;
                     _ordFiche.Lines.Add(ordLine);
+                    
                 }
                 else
                 {
@@ -157,25 +161,32 @@ namespace B2B.Data
                     ordLine.VatMatrah = Math.Round((ordLine.Total - ordLine.Distdisc), 2);
                     ordLine.VatAmnt = Math.Round((ordLine.VatMatrah * ordLine.Vat / 100), 2);
                 }
-                _ordFiche.GrossTotal = Math.Round(_ordFiche.Lines.Sum(x => x.Total), 2);
-                _ordFiche.TotalDiscounted = Math.Round(_ordFiche.Lines.Sum(x => x.Distdisc), 2);
-                _ordFiche.TotalVat = Math.Round(_ordFiche.Lines.Sum(x => x.VatAmnt), 2);
-                _ordFiche.Total = Math.Round(_ordFiche.Lines.Sum(x => x.Total - x.Distdisc + x.VatAmnt), 2);
-                _ordFiche.UpdateDate = DateTime.Now;
-                _ordFiche.UpdateUser = userId; // b2b yapısı şirket üzerinde yürüyecek....
-                                              //orderService.InsertOrderLine(ordLine);
-                await orderService.Save(_ordFiche);
+                CalculateFiche();
+               
+               await orderService.Save(_ordFiche);
             }
 
+        }
+
+        private void CalculateFiche()
+        {
+            _ordFiche.GrossTotal = Math.Round(_ordFiche.Lines.Sum(x => x.Total), 2);
+            _ordFiche.TotalDiscounted = Math.Round(_ordFiche.Lines.Sum(x => x.Distdisc), 2);
+            _ordFiche.TotalVat = Math.Round(_ordFiche.Lines.Sum(x => x.VatAmnt), 2);
+            _ordFiche.Total = Math.Round(_ordFiche.Lines.Sum(x => x.Total - x.Distdisc + x.VatAmnt), 2);
+            _ordFiche.UpdateDate = DateTime.Now;
+            _ordFiche.UpdateUser = user.Id;
         }
 
 
         public void RemoveCart(OrdLine ordLine)
         {
-            var test = EntityState.Added.Equals(ordLine);
-            if (!test)
+            if (ordLine.Id != Guid.Empty)
             {
                 _ordFiche.Lines?.Remove(ordLine);
+                orderService.DeleteLine(ordLine);
+                CalculateFiche();
+                orderService.Save(_ordFiche);
             }
         }
 

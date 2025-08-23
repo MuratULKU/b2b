@@ -1,0 +1,50 @@
+﻿@page "/categories"
+
+@using Business.Abstract
+@using Business.Concrete
+@using CoreUI.Components.DataGrid
+@inject ICategoryService categoryManager
+
+<DataGrid TItem="Category" 
+           Items=" categoryList"
+           Virtualize
+           Pager
+           RowCount="10"
+           TotalCount=categoryList.Count
+SelectedItemChanged="selectCategoryChanged">
+    <Columns>
+        <Column Caption="Kodu" Field="@nameof(Category.LogicalRef)" />
+        <Column Caption="Kodu" Field="@nameof(Category.Code)" />
+        <Column Caption="Adı" Field="@nameof(Category.Name)" />
+        <Column Caption="Parent" Field="@nameof(Category.Parent)" />
+    </Columns>
+    <ButtonRowTemplate>
+        <a class="btn btn-primary" href="/category">Ekle</a>
+        <a class="btn btn-secondary" href="/category/@_category?.Id" disabled>Değiştir</a>
+        <a class="btn btn-secondary @(_category == null ?"disabled":"")" href="/category?refno=@_category?.LogicalRef" disabled="@(_category == null ?true:false)">Alt Kategori Ekle</a>
+        <a class="btn btn-secondary @(_category == null ?"disabled":"")" href="/categories?refno=@_category?.LogicalRef" disabled="@(_category == null ?true:false)">Alt Kategorileri Göster</a>
+    </ButtonRowTemplate>
+</DataGrid>
+@code {
+    private List<Category> categoryList;
+    private Category? _category;
+
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public int refno { get; set; }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        categoryList = await categoryManager.Get(refno);
+    }
+
+    // protected async override void OnInitialized()
+    // {
+    //     categoryList = await categoryManager.Get(refno);
+    // }
+
+    private void selectCategoryChanged(Category category)
+    {
+        _category = category;
+    }
+}

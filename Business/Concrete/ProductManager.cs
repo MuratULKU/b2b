@@ -1,4 +1,6 @@
 ﻿using Business.Abstract;
+using Core.Abstract;
+using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
 using System;
@@ -9,51 +11,58 @@ using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
-    public class ProductManager : IProductServices
+    public class ProductManager : IProductService
     {
-        private readonly IProductRepository produtctRepository;
+       
+        private readonly IUnitofWork _unitOfWork;
 
-        public ProductManager(IProductRepository produtctRepository)
+        public ProductManager(IUnitofWork unitOfWork)
         {
-            this.produtctRepository = produtctRepository;
+            _unitOfWork = unitOfWork;
+        }
+        public async Task<List<Product>> GetAll()
+        {
+           return await _unitOfWork.Product.GetAllAsync();
+           
         }
 
-        public List<Product> GetAll()
-        {
-           return produtctRepository.GetAll();
-        }
-
-        public List<Product> GetAll(int currentPage, int pageSize)
-        {
-            return produtctRepository.GetAll(currentPage, pageSize);
-        }
+       
 
         public async Task<List<Product>> GetAllAsync(string Filtre, Dictionary<Guid, List<string>> PropertySet, int CategoryId, int CurrentPage, int PageSize)
         {
-            return await produtctRepository.GetAllAsync(Filtre, PropertySet, CategoryId, CurrentPage, PageSize);
+            return await _unitOfWork.Product.GetAllAsync(Filtre, PropertySet, CategoryId, CurrentPage, PageSize);
         }
 
         public async Task<Product> GetByCode(string Code)
         {
-            var result = await produtctRepository.GetByCode(Code);
+            var result = await _unitOfWork.Product.GetByCode(Code);
             return result;
         }
 
         public async Task<Product> GetByGuid(Guid id)
         {
-            var result = await produtctRepository.GetByGuid(id);
+            var result = await _unitOfWork.Product.GetByGuid(id);
             return result;
         }
 
         public async Task<Product> GetByLogicalref(int Logicalref)
         {
-            var result = await produtctRepository.GetByLogicalref(Logicalref);
+            var result = await _unitOfWork.Product.GetByLogicalref(Logicalref);
             return result;
+        }
+
+        public async Task<IResult> Insert(Product product)
+        {
+          var result = await _unitOfWork.Product.AddAsync(product);
+          await _unitOfWork.CommitAsync();
+          return new Result(ResultStatus.Success, "Product inserted successfully.");
+          
+
         }
 
         public Task<int> TotalCount(string Filtre, Dictionary<Guid, List<string>> PropertySet, int CategoryId, int CurrentPage, int PageSize)
         {
-           return produtctRepository.TotalCount(Filtre,PropertySet, CategoryId, CurrentPage, PageSize);
+           return _unitOfWork.Product.TotalCount(Filtre,PropertySet, CategoryId, CurrentPage, PageSize);
         }
     }
 }

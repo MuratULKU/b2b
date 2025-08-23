@@ -86,7 +86,7 @@
                             @foreach (var item in user.UsersRoles)
                             {
                                 <tr>
-                                    <td>@item.Role.RoleName</td>
+                                    <td>@item.Role?.RoleName</td>
                                     <td><button class="btn-danger" value="@item.Id" @onclick="()=>DeleteRole(item.Id)">Sil</button></td>
                                 </tr>
                             }
@@ -125,21 +125,28 @@
         userRole1.Id = Guid.NewGuid();
         userRole1.RoleId = RoleId;
         userRole1.UserId = user.Id;
-        userRole1.Role = null;
-        userRole1.User = null;
+        userRole1.Role = (await roleRepository.GetRole(RoleId)).Data;
         await userRoleRepository.AddRole(userRole1);
-        user = await userReposiyory.GetUser(id);
-        StateHasChanged();
+
+        user.UsersRoles = await userReposiyory.GetUserRole(id);
     }
 
     private async Task DeleteRole(Guid userRoleId)
     {
         var userRole = await userRoleRepository.GetUserRole(userRoleId);
         if (userRole != null)
-            await userRoleRepository.DeleteRole(userRole);
-
-        var result = await userReposiyory.GetUser(id);
-
+        {
+            var result =  await userRoleRepository.DeleteRole(userRole);
+            if(result.Status == ResultStatus.Success)
+            {
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+            }
+            else
+            {
+                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+            }
+        }
+        user.UsersRoles = await userReposiyory.GetUserRole(id);
 
     }
 
@@ -150,7 +157,7 @@
         else
         {
             user = await userReposiyory.GetUser(id);
-            user.UsersRoles = userReposiyory.GetUserRole(id).Result;
+            user.UsersRoles = await userReposiyory.GetUserRole(id);
         }
         userRole = (await roleRepository.GetAllRole()).Data;
         company = companyService.GetAllAsync(0,200).Result;
@@ -171,8 +178,7 @@
             userRole.RoleId = selectedRole;
             userRole.UserId = user.Id;
             await userReposiyory.AddUser(user);
-            userRole.Role = null;
-            userRole.User = null;
+
             var result = await userRoleRepository.AddRole(userRole);
             if (result.Status == ResultStatus.Success)
             {
@@ -188,11 +194,13 @@
             user.UpdateDate = DateTime.Now;
             user.UpdateUser = userId;
             user.CompanyId = selectedCompanyId;
-            await userReposiyory.UpdateUser(user);
-            UserRole userrole = user.UsersRoles.FirstOrDefault();
-            userrole.RoleId = selectedRole;
+           
+            user.UsersRoles = null;
+            var result = await userReposiyory.UpdateUser(user);
+            // UserRole userrole = user.UsersRoles.FirstOrDefault();
+            // userrole.RoleId = selectedRole;
                         
-            var result = await userRoleRepository.UpdateRole(userrole);
+            // var result = await userRoleRepository.UpdateRole(userrole);
             if (result.Status == ResultStatus.Success)
             {
                 notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });

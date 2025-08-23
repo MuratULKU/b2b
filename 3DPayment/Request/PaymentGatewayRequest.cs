@@ -23,6 +23,8 @@ namespace _3DPayment.Request
         public bool ManufacturerCard { get; set; }
         public bool CommonPaymentPage { get; set; }
         public Uri CallbackUrl { get; set; }
+        public Uri FailUrl { get; set; }
+        public Uri OkUrl { get; set; }
         public BankNames BankName { get; set; }
         public VirtualPosSystem VPosSystem { get; set; }    
 

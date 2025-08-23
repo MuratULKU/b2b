@@ -31,9 +31,11 @@ namespace Business.Concrete
             {
                 try
                 {
-                    var result = await _unitOfWork.VirtualPoses.AddAsync(virtualPos);
-                    await _unitOfWork.CommitAsync();
-                    return result;
+                    await _unitOfWork.VirtualPoses.AddAsync(virtualPos);
+                    var result = await _unitOfWork.CommitAsync();
+                    if (result == 1)
+                        return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+                    return new Result(ResultStatus.Error, "Hatalı İşlem");
                 }
                 catch (Exception ex)
                 {
@@ -56,9 +58,12 @@ namespace Business.Concrete
 
         public async Task<IResult> DeleteVirtualPos(VirtualPos virtualPos)
         {
-            var result =  await _unitOfWork.VirtualPoses.Delete(virtualPos);
-            await _unitOfWork.CommitAsync();
-            return result;
+            await _unitOfWork.VirtualPoses.Delete(virtualPos);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Tamamlandı");
+            return new Result(ResultStatus.Error, "Hatalı İşlem");
+
         }
 
         public async Task<VirtualPos> GetByBrandId(Guid id)
@@ -76,7 +81,7 @@ namespace Business.Concrete
            var result = await _unitOfWork.VirtualPoses.GetAllAsync();
             if (result == null)
                 return null;
-            return result.Data;
+            return result;
         }
 
         public async Task<VirtualPos> GetVirtualPosAsync(Guid virtualPosId)
@@ -93,15 +98,16 @@ namespace Business.Concrete
             var result = await _unitOfWork.VirtualPosParameter.Find(x => x.VirtualPosId == bankId);
             if (result == null)
                 return null;
-            return new DataResult<List<VirtualPosParameter>>(ResultStatus.Success, result.Data);  
+            return new DataResult<List<VirtualPosParameter>>(ResultStatus.Success, result);  
         }
 
         public async Task<IResult> UpdateVirtualPos(VirtualPos virtualPos)
         {
-            var result = await _unitOfWork.VirtualPoses.UpdateAsync(virtualPos);
-            if (result.Status == ResultStatus.Success)
-                await _unitOfWork.CommitAsync();
-            return result;
+            await _unitOfWork.VirtualPoses.UpdateAsync(virtualPos);
+            var result =await  _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt Tamamlandı");
+            return new Result(ResultStatus.Error, "Hatalı Kayıt");
         }
     }
 }

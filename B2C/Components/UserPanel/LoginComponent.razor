@@ -1,5 +1,4 @@
 ﻿@using Business.Concrete
-
 @using CoreUI.Components.NotificationService
 @using B2C.Components.UserPanel
 
@@ -8,47 +7,76 @@
 @inject NavigationManager navManager
 @inject NotificationService notification
 @inject AuthenticationStateProvider authStateProvider
-<AuthorizeView>
-    <Authorized>
+
+<style>
+    .menu-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .dropdown-menu {
+        position: absolute;
+    }
+    
+    .menu-text .nav-link {
+        padding: 0.5rem 1rem;
+    }
+</style>
+
+<div class="menu-container">
+    <AuthorizeView>
+        <Authorized>
+            <div class="nav-item dropdown menu-text">
+                <a class="nav-link dropdown-toggle userpanel" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="oi oi-account-login" aria-hidden="true" style="padding-right:5px;" />
+                    Admin
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class="dropdown-item" onclick="@exitClick"><span class="oi oi-account-logout" aria-hidden="true" style="padding-right:5px;" />Çıkış</a>
+                    <a class="dropdown-item" onclick="@buttonClick"><span class="oi oi-key" aria-hidden="true" style="padding-right:5px;" />Şifre Değiştir</a>
+                    <a class="dropdown-item" onclick="@userProfil"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Profil</a>
+                </div>
+            </div>
+        </Authorized>
+       
+        <NotAuthorized>
+            <div class="nav-item px-3 menu-text" style="display:flex;flex-direction:row;" >
+                <NavLink class="nav-link" onclick="@(()=>navManager.NavigateTo("/login"))">
+                    <span class="oi oi-login" aria-hidden="true">Giriş</span>
+                </NavLink>
+                <NavLink class="nav-link" onclick="@(()=>navManager.NavigateTo("/register"))">
+                    <span class="oi oi-aseprite" aria-hidden="true">Kayıt</span>
+                </NavLink>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+    
+    <AuthorizeView Roles="Admin">
         <div class="nav-item dropdown menu-text">
             <a class="nav-link dropdown-toggle userpanel" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="oi oi-account-login" aria-hidden="true" style="padding-right:5px;" />
-             @*    @userManager.User.Username *@
+                Yönetim
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                <a class="dropdown-item" onclick="@exitClick"><span class="oi oi-account-logout" aria-hidden="true" style="padding-right:5px;" />Çıkış</a>
-                <a class="dropdown-item" onclick="@buttonClick"><span class="oi oi-key" aria-hidden="true" style="padding-right:5px;" />Şifre Değiştir</a>
-                <a class="dropdown-item" onclick="@userProfil"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Profil</a>
+                <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/firmparam"))"><span class="oi oi-account-logout" aria-hidden="true" style="padding-right:5px;" />Firma Parametreleri</a>
+                <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/userlist"))"><span class="oi oi-key" aria-hidden="true" style="padding-right:5px;" />Kullanıcı İşlemleri</a>
+                <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/virtualpos"))"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Banka İşlemleri</a>
             </div>
         </div>
-    </Authorized>
-   
-    <NotAuthorized>
-        <div class="nav-item px-3 menu-text" style="display:flex;flex-direction:row;" >
-            <NavLink class="nav-link" onclick="@(()=>navManager.NavigateTo("/login"))">
-                <span class="oi oi-login" aria-hidden="true">Giriş</span>
-            </NavLink>
-            <NavLink class="nav-link" onclick="@(()=>navManager.NavigateTo("/register"))">
-                <span class="oi oi-aseprite" aria-hidden="true">Kayıt</span>
-            </NavLink>
+        <div class="nav-item dropdown menu-text">
+            <a class="nav-link dropdown-toggle userpanel" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="oi oi-account-login" aria-hidden="true" style="padding-right:5px;" />
+                Ürün Yönetimi
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/categories"))"><span class="oi oi-account-logout" aria-hidden="true" style="padding-right:5px;" />Kategori</a>
+                <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/productlist"))"><span class="oi oi-key" aria-hidden="true" style="padding-right:5px;" />Stok</a>
+                <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/virtualpos"))"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Fiyat</a>
+            </div>
         </div>
-    </NotAuthorized>
-</AuthorizeView>
-<AuthorizeView Roles="Admin">
-    <div class="nav-item dropdown menu-text">
-        <a class="nav-link dropdown-toggle userpanel" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span class="oi oi-account-login" aria-hidden="true" style="padding-right:5px;" />
-            Yönetim
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/firmparam"))"><span class="oi oi-account-logout" aria-hidden="true" style="padding-right:5px;" />Firma Parametreleri</a>
-            <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/userlist"))"><span class="oi oi-key" aria-hidden="true" style="padding-right:5px;" />Kullanıcı İşlemleri</a>
-            <a class="dropdown-item" onclick="@(()=>navManager.NavigateTo("/virtualpos"))"><span class="oi oi-person" aria-hidden="true" style="padding-right:5px;" />Banka İşlemleri</a>
-        </div>
-    </div>
-</AuthorizeView>
-
-
+    </AuthorizeView>
+</div>
 
 @code {
     private class Model

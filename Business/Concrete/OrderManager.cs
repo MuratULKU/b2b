@@ -1,6 +1,7 @@
 ﻿using Business.Abstract;
 using Core.Abstract;
 using Core.Concrete;
+using Core.Logger;
 using DataAccess.Abstract;
 using Entity;
 using Microsoft.EntityFrameworkCore;
@@ -21,14 +22,15 @@ namespace Business.Concrete
       
 
         private readonly IUnitofWork _unitOfWork;
-       
+        private readonly ILoggerService _logger;
 
-        public OrderManager(IUnitofWork unitOfWork)
+        public OrderManager(IUnitofWork unitOfWork, ILoggerService logger)
         {
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
-       public async Task DeleteLine(OrdLine ordLine)
+        public async Task DeleteLine(OrdLine ordLine)
         {
             await _unitOfWork.OrdLine.Delete(ordLine);
         }
@@ -37,7 +39,8 @@ namespace Business.Concrete
         {
             try
             {
-              if(ordFiche.Lines == null && ordFiche.Lines?.Count == 0 && ordFiche.Id != Guid.Empty)
+                var r = _unitOfWork.ChangedEntries().ToArray();
+                if (ordFiche.Lines == null || ordFiche.Lines.Count == 0)
                  await   _unitOfWork.OrdFiche.Delete(ordFiche);
 
                 else
@@ -58,6 +61,7 @@ namespace Business.Concrete
                         {
                             foreach (OrdLine line in ordFiche.Lines)
                             {
+                                var entity = _unitOfWork.ChangedEntity<OrdLine>(line);
                                 if (line.Id == Guid.Empty)
                                 {
                                     line.Product = null;
@@ -70,12 +74,13 @@ namespace Business.Concrete
                         await _unitOfWork.OrdFiche.UpdateAsync(ordFiche);
                     }
                 }
+              
               await  _unitOfWork.CommitAsync();
             }
             catch (Exception ex)
             {
-                // await _unitOfWork.RollbackTransactionAsync(dbContextTransaction);
-                throw new Exception(ex.Message, ex);
+                _logger.Error(ex.Message);
+               await Task.FromException(ex);
             }
 
         }
@@ -101,7 +106,7 @@ namespace Business.Concrete
         public async Task<List<OrdFiche>> GetOrderFiche(int trCode)
         {
             var result = await _unitOfWork.OrdFiche.Find(x => x.TrCode == trCode);
-            return result.Data;
+            return result;
         }
 
         public async Task<OrdFiche> GetOrderFiche(short send, Guid userId)
@@ -133,8 +138,8 @@ namespace Business.Concrete
 
         public async Task<List<OrdFiche>> GetOrderFiche(int trCode, byte send)
         {
-            var result = await _unitOfWork.OrdFiche.Find(x => x.TrCode == trCode && x.Send == send,includes: x=>x.Include(x=>x.Lines).Include(x=>x.User));
-            return result.Data;
+            var result = await _unitOfWork.OrdFiche.Find(x => x.TrCode == trCode && x.Send == send,includes: x=>x.Include(x=>x.Lines).Include(x=>x.User).AsNoTracking());
+            return result;
         }
 
         public async Task DeleteOrderFiche(OrdFiche ordFiche)
@@ -145,7 +150,7 @@ namespace Business.Concrete
         public async Task<OrdFiche> GetOrderFiche(int send, Guid userId)
         {
            var result = await _unitOfWork.OrdFiche.SingleOrDefaultAsync(x => x.Send == send && x.UserId == userId,x=>x.Include(x=>x.Lines).ThenInclude(x=>x.Product));
-            return result;
+           return result;
         }
 
         public async Task<List<OrdFiche>> GetOrderFiche(Guid FirmId, int trCode, int CurrentPage, int PageSize)

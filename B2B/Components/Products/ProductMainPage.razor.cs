@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace B2B.Components.Products
 {
-    public partial class ProductMainPage
+    public partial class ProductMainPage:IDisposable
     {
         protected CoreUI.Components.Pagenation.PagedResult<Product> pdata = new();
         public Dictionary<Guid, List<string>> PropertySet { get; set; } = default!;
@@ -15,7 +15,7 @@ namespace B2B.Components.Products
         public string? Filter { get; set; } = default!;
 
         public List<Product> ProductLlist { get; set; } = default!;
-        [Inject] IProductServices ProductServices { get; set; } = default!;
+        [Inject] IProductService ProductServices { get; set; } = default!;
         [Inject] ICategoryService categoryManager { get; set; } = default!;
 
         [Parameter]
@@ -66,5 +66,12 @@ namespace B2B.Components.Products
             }
         }
 
+        public void Dispose()
+        {
+            selectCategory = null;
+            menuItems = null;
+            ProductLlist = null;
+            Filter = null;
+        }
     }
 }

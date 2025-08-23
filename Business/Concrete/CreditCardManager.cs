@@ -1,5 +1,6 @@
 ﻿using Business.Abstract;
 using Core.Abstract;
+using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
 using Microsoft.EntityFrameworkCore;
@@ -20,33 +21,52 @@ namespace Business.Concrete
             _unitOfWork = unitOfWork;
         }
 
-        public Task<IResult> CreateCreditCard(CreditCard creditCard)
+        public async Task<IResult> CreateCreditCard(CreditCard creditCard)
         {
-            return _unitOfWork.CreditCards.AddAsync(creditCard);
+            try
+            {
+                await _unitOfWork.CreditCards.AddAsync(creditCard);
+                var result = await _unitOfWork.CommitAsync();
+
+                if (result == 1)
+                    return new Result(ResultStatus.Success, "Kayıt İşlemi Tamamlandı");
+
+                return new Result(ResultStatus.Error, "Hatalı İşlem");
+            }
+            catch (Exception ex)
+            {
+                // Loglama mekanizmanız varsa burada loglama yapabilirsiniz.
+                return new Result(ResultStatus.Error, $"Beklenmedik bir hata oluştu: {ex.Message}");
+            }
         }
 
-        public Task<IResult> DeleteCreditCard(CreditCard creditCard)
+
+        public async Task<IResult> DeleteCreditCard(CreditCard creditCard)
         {
-           return _unitOfWork.CreditCards.Delete(creditCard);
+           await _unitOfWork.CreditCards.Delete(creditCard);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+            return new Result(ResultStatus.Error, "Hatalı İşlem");
         }
 
         public async Task<CreditCard> Get(Guid id)
         {
             var result = await  _unitOfWork.CreditCards.SingleOrDefaultAsync(x=>x.Id == id);
-            return result.Data;
+            return result;
         }
 
 
 
-        public Task<IDataResult<CreditCard>> Get(Guid bankId, int brandCode)
+        public async Task<CreditCard> Get(Guid bankId, Guid brandId)
         {
-            return null;
+            return await _unitOfWork.CreditCards.FirstOrDefaultAsync(x=>x.BankCardId == bankId && x.CardBrandId == brandId);
         }
 
         public async Task<List<CreditCard>> GetAll()
         {
-            var result = await _unitOfWork.CreditCards.GetAllAsync(x=>x.Include(x=>x.CardBrand));
-            return result.Data;
+            var result = await _unitOfWork.CreditCards.GetAllAsync(x=>x.Include(x=>x.CardBrand).AsNoTracking());
+            return result;
         }
 
         public async Task<List<CreditCard>> GetBankCreditCard(Guid bankid)
@@ -54,30 +74,34 @@ namespace Business.Concrete
             var result = await _unitOfWork.CreditCards.Find(x=>x.CardBrandId == bankid);
             if (result == null)
                 return null;
-            return result.Data;
+            return result;
         }
 
         public async Task<CreditCard> GetCreditCardByPrefix(string prefix, bool includeInstallments = false)
         {
             var result = await _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x=>x.Prefix == prefix);
-            var creditCard = await _unitOfWork.CreditCards.SingleOrDefaultAsync(x=>x.Id == result.Data.CreditCardId);
+            var creditCard = await _unitOfWork.CreditCards.SingleOrDefaultAsync(x=>x.Id == result.CreditCardId);
             if (creditCard != null)
             {
-                var instalment = await _unitOfWork.CreditCardInstallment.Find(x => x.CreditCardId == creditCard.Data.Id);
-                creditCard.Data.Installments =  instalment.Data;
+                var instalment = await _unitOfWork.CreditCardInstallment.Find(x => x.CreditCardId == creditCard.Id);
+                creditCard.Installments =  instalment;
             }
                
-            return creditCard.Data;
+            return creditCard;
         }
 
         public Task<List<CreditCard>> GetFiltered(string filter)
         {
-           return _unitOfWork.CreditCards.GetFilteredAsync(x=>x.Name.StartsWith(filter),x=>x.Include(x=>x.CardBrand));
+           return _unitOfWork.CreditCards.GetFilteredAsync(x=>x.Name.StartsWith(filter),x=>x.Include(x=>x.CardBrand).AsNoTracking());
         }
 
         public async Task<IResult> UpdateCreditCard(CreditCard creditCard)
         {
-           return await _unitOfWork.CreditCards.UpdateAsync(creditCard);
+          await _unitOfWork.CreditCards.UpdateAsync(creditCard);
+            var result = await _unitOfWork.CommitAsync();
+            if (result == 1)
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+            return new Result(ResultStatus.Error, "Hatalı İşlem");
         }
     }
 }

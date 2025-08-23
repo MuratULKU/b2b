@@ -4,6 +4,6 @@ namespace DataAccess.Abstract
 {
     public interface ICategoryRepository:IRepository<Category>
     {
-       
+        int MaxRefNo();
     }
 }

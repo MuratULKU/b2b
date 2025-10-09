@@ -1,8 +1,10 @@
 ﻿using Business.Abstract;
+using Business.Validaton;
 using Core.Abstract;
 using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,6 +59,30 @@ namespace Business.Concrete
           await _unitOfWork.CommitAsync();
           return new Result(ResultStatus.Success, "Product inserted successfully.");
           
+
+        }
+
+        public async Task<IResult> Save(Product product)
+        {
+            var validator = new ProductValidator();
+            var validationResult = validator.Validate(product);
+
+            if (!validationResult.IsValid)
+            {
+                return new ErrorResult("Doğrulama Hatası: " + string.Join(", ", validationResult.Errors));
+            }
+
+            if (product.Id == Guid.Empty)
+            {
+                await _unitOfWork.Product.AddAsync(product);
+                await _unitOfWork.CommitAsync();
+                return new Result(ResultStatus.Success, "Kayıt Başarılı");
+            }else
+            {
+                await _unitOfWork.Product.UpdateAsync(product);
+                await _unitOfWork.CommitAsync();
+                return new Result(ResultStatus.Success, "Günceleme Başarılı");
+            }
 
         }
 

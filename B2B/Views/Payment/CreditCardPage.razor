@@ -143,10 +143,10 @@
             </PaymentPlanPage>
         </div>
         <div class="paymentconfirm">
-            <input id="confirm1" type="checkbox" />
+           @*  <input id="confirm1" type="checkbox" />
             <label for="confirm1"> <a href="/acikriza">Açık Rıza Metini</a> Okudum Onayladım.</label><br>
             <input id="confirm2" type="checkbox" />
-            <label for="confirm2"> <a href="/info">Bilgilendirme Formunu</a> Okudum Onayladım.</label><br>
+            <label for="confirm2"> <a href="/info">Bilgilendirme Formunu</a> Okudum Onayladım.</label><br> *@
             <button id="btn-payment" disabled="@btndisabled" class="btn btn-primary" onclick="@payment">Öde</button>
         </div>
     </div>
@@ -199,7 +199,7 @@
         }
         if (OrderId == Guid.Empty)
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Sipariş Numarası Oluşturlamadı.", Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Sipariş Numarası Oluşturlamadı.", Duration = 5000 });
             btndisabled = false;
         }
     }
@@ -220,31 +220,31 @@
         int totalError = 0;
         if (Total < 1)
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Tutar 0 dan büyük olmalı.", Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Tutar 0 dan büyük olmalı.", Duration = 5000 });
             Task.Delay(10 + totalError);
             totalError += 1;
         }
         if (cardNumber.Length != 19)
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Kart No 16 Karakter Olmalı", Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Kart No 16 Karakter Olmalı", Duration = 5000 });
             Task.Delay(10 + totalError);
             totalError += 1;
         }
         if (cardHolderName.Length < 3)
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Kart Sahibi Adı En Az 3 Karakter Olmalı.", Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Kart Sahibi Adı En Az 3 Karakter Olmalı.", Duration = 5000 });
             Task.Delay(10 + totalError);
             totalError += 1;
         }
         if (expiryDate.Length < 5)
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Son Kullanma Tarihi Hatalı", Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Son Kullanma Tarihi Hatalı", Duration = 5000 });
             Task.Delay(10 + totalError);
             totalError += 1;
         }
         if (Ccv2Code.Length != 3)
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Güvenlik No 3 Krakter Olmalı", Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Güvenlik No 3 Krakter Olmalı", Duration = 5000 });
             Task.Delay(10 + totalError);
             totalError += 1;
         }
@@ -280,7 +280,7 @@
         }
         if (cardNumber.Length != 0)
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Kredi Kartı Numarası Hatalı.", Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Kredi Kartı Numarası Hatalı.", Duration = 5000 });
         }
     }
 
@@ -332,7 +332,7 @@
                     }
                     else
                     {
-                        notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
+                        notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
                     }
                 }
 
@@ -383,7 +383,7 @@
                 }
                 else
                 {
-                    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
+                    notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
                 }
 
             }
@@ -408,7 +408,7 @@
             }
             else
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Firma Parametrelerinden Varsayılan Pos Seçilmeli.", Duration = 5000 });
             }
 
         }
@@ -557,7 +557,7 @@
     }
     catch (Exception ex)
     {
-    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message, Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = ex.Message, Duration = 5000 });
     }
     finally
     {

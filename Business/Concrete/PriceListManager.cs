@@ -51,6 +51,11 @@ namespace Business.Concrete
             return result;
         }
 
+        public async Task<List<PriceList>> GetPriceListAsync()
+        {
+            return await _unitOfWork.PriceList.GetAllAsync();
+        }
+
         public async Task<IResult> Insert(PriceList priceList)
         {
             try

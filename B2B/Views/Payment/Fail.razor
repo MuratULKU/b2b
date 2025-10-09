@@ -12,15 +12,26 @@
     </div>
     <div>
         <label>@paymet.BankErrorMessage</label>
-        
+       @if(!string.IsNullOrWhiteSpace(ErrorMessage))
+       {
+       <label>@ErrorMessage</label>
+       }
     </div>
 </div>
+
 @code {
     [Parameter]
     public string guid { get; set; }
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public string ErrorMessage { get; set; }
+
+
+
     PaymentTransaction paymet;
     protected override void OnInitialized()
     {
+      
         paymet = paymentTransaction.GetByOrderNumber(Guid.Parse(guid)).Result.Data;
     }
 

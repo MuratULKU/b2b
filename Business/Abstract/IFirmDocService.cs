@@ -1,4 +1,5 @@
-﻿using DataAccess.Abstract;
+﻿using Core.Abstract;
+using DataAccess.Abstract;
 using Entity;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,12 @@ namespace Business.Abstract
 {
     public interface IFirmDocService
     {
-        void Insert(FirmDoc doc);
+        Task<IResult> Save(FirmDoc doc);
         void Update(FirmDoc doc);
         void Delete(FirmDoc doc);
         Task<int> DeleteAll();
+        Task<List<FirmDoc>> GetAll(Guid ByProductId);   
+
     }
 }
 

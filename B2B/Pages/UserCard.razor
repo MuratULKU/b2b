@@ -139,11 +139,11 @@
             var result =  await userRoleRepository.DeleteRole(userRole);
             if(result.Status == ResultStatus.Success)
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
             }
             else
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
             }
         }
         user.UsersRoles = await userReposiyory.GetUserRole(id);
@@ -182,11 +182,11 @@
             var result = await userRoleRepository.AddRole(userRole);
             if (result.Status == ResultStatus.Success)
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
             }
             else
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = result.Message, Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = result.Message, Duration = 5000 });
             }
         }
         else
@@ -203,11 +203,11 @@
             // var result = await userRoleRepository.UpdateRole(userrole);
             if (result.Status == ResultStatus.Success)
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
             }
             else
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = result.Message, Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = result.Message, Duration = 5000 });
             }
         }
 

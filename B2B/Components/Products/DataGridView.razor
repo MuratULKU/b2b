@@ -27,7 +27,7 @@
         @foreach (var item in Data)
         {
             <tr>
-                <td class="col-image" onclick="@(()=>trClick(item.Code))"><img width="50px" src="@item.ToImage()" /></td>
+                <td class="col-image" onclick="@(()=>trClick(item.Code))"><img width="50px" src="@item.ToImage(0)" /></td>
                 <td class="code" onclick="@(()=>trClick(item.Code))" style="cursor:pointer">@item.Code</td>
                 <td class="col-product">
                     @item.Name

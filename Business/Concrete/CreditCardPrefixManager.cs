@@ -4,6 +4,7 @@ using Core.Abstract;
 using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
+using System.Net.Http.Headers;
 
 namespace SanalMagaza.Business.Concrete
 {
@@ -38,7 +39,7 @@ namespace SanalMagaza.Business.Concrete
            await _unitOfWork.CreditCardPrefixs.Delete(creditCardPrefix);
             var result = await _unitOfWork.CommitAsync();
             if (result == 1)
-                return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+                return new Result(ResultStatus.Success, "Kayıt Silme İşlemi Tamanlandı");
             return new Result(ResultStatus.Error, "Hatalı İşlem");
         }
 
@@ -50,8 +51,12 @@ namespace SanalMagaza.Business.Concrete
 
         public async Task<CreditCardPrefix> GetByPrefix(string prefix)
         {
-            var result = await _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x => x.Prefix == prefix); 
-            return result;
+            return await _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x => x.Prefix == prefix); 
+        }
+
+        public async Task<List<CreditCardPrefix>> GetByPrefixList(string prefix)
+        {
+            return await _unitOfWork.CreditCardPrefixs.Find(x=>x.Prefix == prefix);
         }
 
         public async Task<IList<CreditCardPrefix>> GetAll()

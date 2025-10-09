@@ -5,7 +5,8 @@
 @using Entity;
 @using _3DPayment.Results;
 @attribute [Authorize]
-@inject IPaymentService paymentTransaction;
+@inject IPaymentService paymentTransaction
+@inject NavigationManager navManager
 <div class="container">
     <div>
         <label>Ödeme İşlemi Sonucu Hatalı</label>
@@ -14,6 +15,7 @@
         <label>@paymet.BankErrorMessage</label>
         
     </div>
+    <button class="btn btn-primary align-content-center" @onclick="@paymentPage">Ödeme Sayfası</button>
 </div>
 @code {
     [Parameter]
@@ -22,6 +24,11 @@
     protected override void OnInitialized()
     {
         paymet = paymentTransaction.GetByOrderNumber(Guid.Parse(guid)).Result.Data;
+    }
+
+    private void paymentPage()
+    {
+        navManager.NavigateTo("/payment", true);
     }
 
     }

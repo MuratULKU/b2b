@@ -10,6 +10,7 @@ namespace _3DPayment.Request
     {
         public string TransactionId { get; set; }
         public string OrderNumber { get; set; }
+        public DateTime CreateDate { get; set; }
         public DateTime PaidDate { get; set; }
         public string CurrencyIsoCode { get; set; }
         public string LanguageIsoCode { get; set; }

@@ -164,7 +164,7 @@
                 var success = await companyService.Insert(company, user, userRole);
                 if (success)
                 {
-                    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Kayıt Tamamlandı.", Detail = "Firma Kayıt Edildi.", Duration = 2000 });
+                    notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "Kayıt Tamamlandı.", Detail = "Firma Kayıt Edildi.", Duration = 2000 });
                     navManager.NavigateTo("/companylist",true);
                 }
             }
@@ -174,14 +174,14 @@
                 if (success)
                 {
                     company.UpdateUser = await userIdentity.GetCurrentUserId();
-                    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Kayıt Tamamlandı.", Detail = "Firma Bilgileri Güncellendi.", Duration = 2000 });
+                    notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "Kayıt Tamamlandı.", Detail = "Firma Bilgileri Güncellendi.", Duration = 2000 });
                 }
             }
         }
         catch (Exception ex)
         {
             var errorDetail = ex.InnerException != null ? $"{ex.Message}\n{ex.InnerException.Message}" : ex.Message;
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Hata", Detail = errorDetail, Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Warning, Summary = "Hata", Detail = errorDetail, Duration = 5000 });
 
         }
 

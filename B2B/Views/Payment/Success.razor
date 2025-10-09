@@ -17,11 +17,13 @@
 @inject IJSRuntime JSRuntime
 @inject ICompanyService companyService
 
+
+
  @((MarkupString)GenerateEmailContent())
 
  <input type="button" class="btn btn-primary" onclick="@Print" value="Yazdır" />
- <input type="button" class="btn btn-primary" value="Ana Sayfa" />
- <input type="button" class="btn btn-primary" value="Ödeme Sayfası" />
+ <a type="button" class="btn btn-primary"  href="/"  >Ana Sayfa </a>
+ <a type="button" class="btn btn-primary" href ="/payment" >Ödeme Sayfası</a>
 @code {
     [Parameter]
     public string guid { get; set; } = default!;
@@ -53,6 +55,8 @@
              await es.SendEmailAsync(payment.User.Email, "Kredi Kartı Tahsilat Maili",GenerateEmailContent());
 
     }
+
+   
 
     private string GenerateEmailContent()
     {

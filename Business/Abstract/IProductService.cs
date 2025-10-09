@@ -17,5 +17,6 @@ namespace Business.Abstract
         Task<IResult> Insert(Product product);
         Task<List<Product>> GetAllAsync(string Filtre, Dictionary<Guid, List<string>> PropertySet, int CategoryId, int CurrentPage, int PageSize);
         Task<int> TotalCount(string Filtre, Dictionary<Guid, List<string>> PropertySet, int CategoryId, int CurrentPage, int PageSize);
+        Task<IResult> Save(Product product);
     }
 }

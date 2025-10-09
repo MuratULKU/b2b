@@ -10,6 +10,7 @@ namespace Business.Abstract
 {
     public interface IPriceListService
     {
+        Task<List<PriceList>> GetPriceListAsync();    
         Task<PriceList> GetByCode(string code);
         Task<PriceList> GetByLogicalref(int Logicalref);
         Task<IResult> Insert(PriceList priceList);

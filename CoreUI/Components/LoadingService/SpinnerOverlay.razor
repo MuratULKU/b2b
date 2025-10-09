@@ -1,0 +1,74 @@
+﻿@if (IsVisible)
+{
+    <div class="spinner-overlay">
+        <div class="spinner-overlay__box">
+            <div class="spinner"></div>
+            <div class="spinner-overlay__text">
+                @Text @($"{(int)((double)Progress / loadingService.ProgressBarMax * 100)}%")
+                @if (loadingService.ProgressbarShow)
+                {
+                    <div class="progress mt-2">
+                        <div class="progress-bar bg-success"
+                             role="progressbar"
+                             style="width:@($"{(int)((double)Progress / loadingService.ProgressBarMax * 100)}%")"
+                             aria-valuenow="@Progress"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    private bool IsVisible { get; set; }
+  
+    [Parameter] public string Text { get; set; } = "Yükleniyor...";
+
+    [Parameter] public int Progress { get; set; }
+    [Inject] LoadingService loadingService { get; set; }
+
+    private Action<string> showHandler;
+    private Action hideHandler;
+
+   
+    protected override void OnInitialized()
+    {
+
+
+        showHandler = async message =>
+         {
+             Text = message;
+             IsVisible = true;
+             await InvokeAsync(StateHasChanged);
+
+         };
+
+        hideHandler = async () =>
+        {
+            IsVisible = false;
+            await InvokeAsync(StateHasChanged);
+        };
+
+        loadingService.OnShow += showHandler;
+        loadingService.OnHide += hideHandler;
+        loadingService.OnProgressChanged += UpdateProgress;
+    }
+
+    private void UpdateProgress(int value)
+    {
+        Progress = value;
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        loadingService.OnShow -= showHandler;
+        loadingService.OnHide -= hideHandler;
+        loadingService.OnProgressChanged -= UpdateProgress;
+    }
+}

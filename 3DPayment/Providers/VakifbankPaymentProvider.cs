@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -20,6 +21,8 @@ namespace _3DPayment.Providers
             client = httpClientFactory.CreateClient();
         }
 
+
+
         public async Task<PaymentGatewayResult> ThreeDGatewayRequest(PaymentGatewayRequest request)
         {
             try
@@ -31,7 +34,7 @@ namespace _3DPayment.Providers
                 var httpParameters = new Dictionary<string, string>();
                 httpParameters.Add("Pan", request.CardNumber);
                 httpParameters.Add("ExpiryDate", $"{string.Format("{0:00}", request.ExpireYear)}{string.Format("{0:00}", request.ExpireMonth)}");
-                httpParameters.Add("PurchaseAmount", request.TotalAmount.ToString("N2", new CultureInfo("en-US")));
+                httpParameters.Add("PurchaseAmount", request.TotalAmount.ToString("F2", new CultureInfo("en-US")));
                 httpParameters.Add("Currency", request.CurrencyIsoCode);//TL 949 | EURO 978 | Dolar 840
 
                 /*
@@ -39,20 +42,36 @@ namespace _3DPayment.Providers
                  * Master Card 200
                  * American Express 300
                 */
-                httpParameters.Add("BrandName", "200");
-                httpParameters.Add("VerifyEnrollmentRequestId", Guid.NewGuid().ToString("N"));//sipariş numarası
+                string brandName = "100";
+                switch (request.CardNumber.Substring(0, 1))
+                {
+                    case "3":
+                        brandName = "100";
+                        break;
+
+                    case "4":
+                        brandName = "100";
+                        break;
+                    case "5":
+                        brandName = "200";
+                        break;
+                    case "9":
+                        brandName = "300";
+                        break;
+                }
+
+                httpParameters.Add("BrandName", brandName);
+                httpParameters.Add("VerifyEnrollmentRequestId", request.OrderNumber);//sipariş numarası
                 httpParameters.Add("SessionInfo", "1");//banka dökümanları sabit bir değer
                 httpParameters.Add("MerchantID", merchantId);
                 httpParameters.Add("MerchantPassword", merchantPassword);
-                httpParameters.Add("SuccessUrl", request.OkUrl.ToString());
-                httpParameters.Add("FailureUrl", request.FailUrl.ToString());
+                //vakıfbank dönüş adresini mpi doğrulamada yaptığı için callback gönderilecek. 
+                httpParameters.Add("SuccessUrl", request.CallbackUrl.ToString());
+                httpParameters.Add("FailureUrl", request.CallbackUrl.ToString());
 
-                string installment = request.Installment.ToString();
-                if (request.Installment < 2)
-                    installment = string.Empty;//0 veya 1 olması durumunda taksit bilgisini boş gönderiyoruzdddddddd
+                if(request.Installment > 1)
+                 httpParameters.Add("InstallmentCount", request.Installment.ToString());
 
-               // httpParameters.Add("InstallmentCount", installment);
-               
                 var response = await client.PostAsync(enrollmentUrl, new FormUrlEncodedContent(httpParameters));
                 string responseContent = await response.Content.ReadAsStringAsync();
 
@@ -112,8 +131,10 @@ namespace _3DPayment.Providers
             string merchantPassword = request.BankParameters["merchantPassword"];
             string terminalNo = request.BankParameters["terminalNo"];
             var expireMonth = string.Format("{0:00}", gatewayRequest.ExpireMonth);
-            var expireYear = CultureInfo.CurrentCulture.Calendar.ToFourDigitYear(gatewayRequest.ExpireYear);
-            var totalAmount = gatewayRequest.TotalAmount.ToString("N2", new CultureInfo("en-US"));
+            var expireYear = DateTime.Now.Year.ToString(); 
+            expireYear = expireYear.Substring(0,2)+gatewayRequest.ExpireYear;
+            
+            var totalAmount = gatewayRequest.TotalAmount.ToString("F2", new CultureInfo("en-US"));
 
             var xmlBuilder = new StringBuilder();
             xmlBuilder.Append($@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -182,7 +203,7 @@ namespace _3DPayment.Providers
             int.TryParse(form["InstallmentCount"], out int installmentCount);
             int.TryParse(form["EXTRA.ARTITAKSIT"], out int extraInstallment);
 
-            return VerifyGatewayResult.Successed(transactionNode.InnerText, form["Xid"],"",
+            return VerifyGatewayResult.Successed(transactionNode.InnerText, form["Xid"], "",
                 installmentCount, extraInstallment,
                 resultDetailNode.InnerText,
                 resultCodeNode.InnerText);
@@ -262,8 +283,8 @@ namespace _3DPayment.Providers
         {
             string merchantId = request.BankParameters["merchantId"];
             string merchantPassword = request.BankParameters["merchantPassword"];
-            var startDate = request.PaidDate.AddDays(-1).ToString("yyyy-MM-dd");
-            var endDate = request.PaidDate.AddDays(1).ToString("yyyy-MM-dd");
+            var startDate = request.CreateDate.AddDays(-1).ToString("yyyy-MM-dd");
+            var endDate = request.CreateDate.AddDays(1).ToString("yyyy-MM-dd");
 
             string requestXml = $@"<?xml version=""1.0"" encoding=""utf-8""?>
                                         <SearchRequest>
@@ -276,7 +297,7 @@ namespace _3DPayment.Providers
                                               <EndDate>{endDate}</EndDate>
                                            </DateCriteria>
                                            <TransactionCriteria>
-                                              <TransactionId>{request.TransactionId}</TransactionId>
+                                              <TransactionId></TransactionId>
                                               <OrderId>{request.OrderNumber}</OrderId>
                                               <AuthCode />
                                            </TransactionCriteria>
@@ -285,7 +306,7 @@ namespace _3DPayment.Providers
             var parameters = new Dictionary<string, string>();
             parameters.Add("prmstr", requestXml);
 
-            var response = await client.PostAsync(request.BankParameters["verifyUrl"], new FormUrlEncodedContent(parameters));
+            var response = await client.PostAsync(request.BankParameters["requestUrl"], new FormUrlEncodedContent(parameters));
             string responseContent = await response.Content.ReadAsStringAsync();
 
             var xmlDocument = new XmlDocument();
@@ -295,8 +316,7 @@ namespace _3DPayment.Providers
             if (totalItemCount < 1)
             {
                 string errorMessage = xmlDocument.SelectSingleNode("SearchResponse/ResponseInfo/ResponseMessage").InnerText;
-                if (string.IsNullOrEmpty(errorMessage))
-                    errorMessage = "Bankadan hata mesajı alınamadı.";
+                errorMessage = "İşlem Bulunamadı";
 
                 return PaymentDetailResult.FailedResult(errorMessage);
             }
@@ -336,7 +356,9 @@ namespace _3DPayment.Providers
 
             if (responseCode == "0000")
             {
-                return PaymentDetailResult.PaidResult(transactionId, referenceNumber, cardPrefixValue.ToString(), bankMessage: bankMessage, responseCode: responseCode);
+                string rawDate = transactionInfoNode.SelectSingleNode("HostDate")?.InnerText;
+                string? paidDate = Convert.ToString(DateTime.ParseExact(rawDate, "yyyyMMddHHmmss", null));
+                return PaymentDetailResult.PaidResult(transactionId, referenceNumber, cardPrefixValue.ToString(), bankMessage: bankMessage, responseCode: responseCode, paiddate: paidDate);
             }
 
             if (string.IsNullOrEmpty(bankMessage))

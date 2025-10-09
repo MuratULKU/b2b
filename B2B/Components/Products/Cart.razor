@@ -138,7 +138,7 @@
     private async void ApprovingOrder()
     {
         cartService.OrderSend();
-        notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Kayıt Tamamlandı.", Detail = "Sipariş Kayıt Edildi.", Duration = 2000 });
+        notification.Notify(new NotificationMessage { Severity = Core.Abstract.ResultStatus.Success, Summary = "Kayıt Tamamlandı.", Detail = "Sipariş Kayıt Edildi.", Duration = 2000 });
         navManager.NavigateTo($"/confirmorder/{cartService._ordFiche.Id}");
     }
 

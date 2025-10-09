@@ -21,6 +21,7 @@ using _3DPayment;
 using Business.SingletonServices;
 using System.Globalization;
 using CoreUI.Components.Confirm;
+using CoreUI.Components.LoadingService;
 
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("tr-TR");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("tr-TR");
@@ -52,6 +53,7 @@ builder.Services.AddScoped<IIdGenerator, IdGenerator>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<NotificationService>();
 
+builder.Services.AddSingleton<LoadingService>();
 
 builder.Services.AddScoped<IDocumentNoRepository, DocumentNoRepository>();  
 builder.Services.AddScoped<IDocumentNoService,DocumentNoManager>();

@@ -32,6 +32,7 @@ namespace DataAccess.Concrete
 
         public async Task<T> Delete(T entity)
         {
+          
             dbContext.Set<T>().Remove(entity);
             return entity;
         }
@@ -46,7 +47,7 @@ namespace DataAccess.Concrete
             if (pageSize > 0)
                 query = query.Skip(skip).Take(pageSize);
 
-            return await query.AsNoTracking().Where(predicate).ToListAsync();
+            return await query.AsNoTracking().AsNoTracking().Where(predicate).ToListAsync();
 
         }
 
@@ -104,7 +105,7 @@ namespace DataAccess.Concrete
 
         public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null)
         {
-            IQueryable<T> query = dbContext.Set<T>();
+            IQueryable<T> query = dbContext.Set<T>().AsNoTracking();
 
             if (includes != null)
             {

@@ -174,7 +174,7 @@ namespace B2B.Controllers
             if (!gatewayResult.Success)
             {
                 VerifyGatewayResult failModel = VerifyGatewayResult.Failed(gatewayResult.ErrorMessage);
-                return View("Fail", failModel);
+                return RedirectToAction(payment.OrderNumber.ToString(), "Fail", failModel);
             }
 
             //html content
@@ -196,9 +196,9 @@ namespace B2B.Controllers
         public async Task<IActionResult> FailUrl(Guid paymentId, IFormCollection form)
         {
             _logger.Info("Fail url girildi");
-            await Callback(paymentId, form);
+            return await Callback(paymentId, form);
 
-            return RedirectToAction(paymentId.ToString(), "Fail");
+           
 
         }
         [HttpPost]
@@ -207,8 +207,10 @@ namespace B2B.Controllers
         public async Task<IActionResult> OkUrl(Guid paymentId, IFormCollection form)
         {
             _logger.Info($"Ok url: {paymentId}");
-            await Callback(paymentId, form);
-            return RedirectToAction(paymentId.ToString(), "Success");
+            //3d doğrulamdan sonra okey kodu geliyor doğru bile olsa hataya yönlendir.
+           return await Callback(paymentId, form);
+            
+            
         }
 
         [HttpPost]
@@ -299,8 +301,9 @@ namespace B2B.Controllers
             payment.BankResponse = JsonConvert.SerializeObject(form);
             await _paymentService.Update(payment);
             _logger.Info($"Hatalı Ödeme" + verifyRequest.ToString());
-            //return View("Fail", verifyResult);
-            return Ok("Approved");
+            return RedirectToAction(payment.OrderNumber.ToString(), "Fail");
+            //bu işlem netpay için sadece başarılı işlemde gönderilecek
+            //return Ok("Approved");
         }
 
         //public async Task<IActionResult> Completed([FromRoute(Name = "id")] Guid orderNumber, [FromForm] VerifyGatewayResult form)

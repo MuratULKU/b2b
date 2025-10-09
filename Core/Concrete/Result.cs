@@ -44,4 +44,28 @@ namespace Core.Concrete
         public ResultStatus Status { get; }
 
     }
+
+    public class SuccessResult : Result
+    {
+        public SuccessResult(string message = null)
+            : base(ResultStatus.Success, message) { }
+    }
+
+    public class ErrorResult : Result
+    {
+        public ErrorResult(string message = null)
+            : base(ResultStatus.Error, message) { }
+    }
+
+    public class WarningResult : Result
+    {
+        public WarningResult(string message = null)
+            : base(ResultStatus.Warning, message) { }
+    }
+
+    public class InfoResult : Result
+    {
+        public InfoResult(string message = null)
+            : base(ResultStatus.Information, message) { }
+    }
 }

@@ -89,3 +89,25 @@ a, .btn-link {
         border-color: #007bff;
         box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
     }
+
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #cerceve, #cerceve * {
+        visibility: visible;
+    }
+
+    #cerceve {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    .btn-print {
+        display: none !important;
+    }
+}

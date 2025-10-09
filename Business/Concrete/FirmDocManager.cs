@@ -1,4 +1,6 @@
 ﻿using Business.Abstract;
+using Core.Abstract;
+using Core.Concrete;
 using DataAccess.Abstract;
 using Entity;
 using System;
@@ -28,10 +30,27 @@ namespace Business.Concrete
             throw new NotImplementedException();
         }
 
-        public void Insert(FirmDoc doc)
+        public Task<List<FirmDoc>> GetAll(Guid ByProductId)
         {
-           _unitOfWork.FirmDoc.AddAsync(doc);
-            _unitOfWork.CommitAsync();
+           return  _unitOfWork.FirmDoc.Find(x=>x.ProtuctId == ByProductId);
+        }
+
+        public async Task<IResult> Save(FirmDoc doc)
+        {
+            if (doc.Id == Guid.Empty)
+            {
+               await _unitOfWork.FirmDoc.AddAsync(doc);
+                await _unitOfWork.CommitAsync();
+                return new Result(ResultStatus.Success, "Kayıt Başarılı");
+            }
+            else
+            {
+                await _unitOfWork.FirmDoc.UpdateAsync(doc);
+                await _unitOfWork.CommitAsync();
+                return new Result(ResultStatus.Success, "Kayıt Başarılı");
+            }
+          
+           
         }
 
         public void Update(FirmDoc doc)

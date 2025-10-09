@@ -105,7 +105,8 @@ namespace DataAccess.Concrete
             catch (Exception ex)
             {
 
-                _logger.Error("Veri Tabanı Ekleme Hatası "+ex.Message);
+                _logger.Error($"Veri Tabanı Ekleme Hatası: {(ex.InnerException?.Message ?? ex.Message)}");
+
                 return -1;
             }
             
@@ -151,5 +152,41 @@ namespace DataAccess.Concrete
             var test =  _context.Entry(entity);
             return test.State;
         }
+
+        public IEnumerable<string> GetTrackedChanges()
+        {
+            var entries = _context.ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Added
+                     || e.State == EntityState.Modified
+                     || e.State == EntityState.Deleted)
+            .ToList();
+
+            var changes = new List<string>();
+
+            foreach (var entry in entries)
+            {
+                string entityName = entry.Entity.GetType().Name;
+                changes.Add($"Entity: {entityName}, State: {entry.State}");
+
+                if (entry.State == EntityState.Modified)
+                {
+                    foreach (var prop in entry.Properties.Where(p => p.IsModified))
+                    {
+                        changes.Add($"   {prop.Metadata.Name}: {prop.OriginalValue} → {prop.CurrentValue}");
+                    }
+                }
+                else if (entry.State == EntityState.Added)
+                {
+                    changes.Add("   Yeni kayıt eklendi.");
+                }
+                else if (entry.State == EntityState.Deleted)
+                {
+                    changes.Add("   Kayıt silindi.");
+                }
+            }
+
+            return changes;
+        }
+    
     }
 }

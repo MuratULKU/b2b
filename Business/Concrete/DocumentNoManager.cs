@@ -60,7 +60,7 @@ namespace Business.Concrete
             }
             catch (Exception ex)
             {
-                return new Result(ResultStatus.Error, $"DocumentNo udate failed: {ex.Message}");
+                return new Result(ResultStatus.Error, $"DocumentNo update failed: {ex.Message}");
 
             }
         }

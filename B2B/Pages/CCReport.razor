@@ -1,18 +1,27 @@
 ﻿@page "/paymentreport"
 @page "/paymentreport/{id:guid}"
 @using Business.Abstract
+@using Core.Abstract
+@using Core.Extension
 @using CoreUI.Components.Confirm
 @using CoreUI.Components.DataGrid
 @using CoreUI.Components.NotificationService
+@using Core.Extantaion
 @using Entity
+@using System.Text
 @using _3DPayment
 @using _3DPayment.Request
+@using CoreUI.Components.LoadingService
+
 @inject IPaymentService paymentService
 @inject IVirtualPosService virtualPosService
 @inject IPaymentProviderFactory paymentProviderFactory
 @inject ICompanyService companyService
 @inject NotificationService notification
 @inject ConfirmDialogService DialogService
+@inject NavigationManager NavManager
+@inject IJSRuntime JSRuntime
+@inject LoadingService loadingService
 
 @attribute [Authorize]
 <div class="container">
@@ -61,6 +70,7 @@
                             <th>Referans No</th>
                             <th>Kullanıcı Adı</th>
                             <th>Şirket</th>
+                            <th>Sipariş Id</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -69,6 +79,7 @@
                             <td width="200px">@paymentTransaction.ReferenceNumber</td>
                             <td width="200px">@paymentTransaction.User.Username</td>
                             <td width="200px">@paymentTransaction.Company.Name</td>
+                            <td>@paymentTransaction.OrderNumber</td>
                         </tr>
                     </tbody>
                 </table>
@@ -76,7 +87,8 @@
             </DetailRowTemplate>
             <ButtonRowTemplate>
                 <input class="btn btn-primary" value="Kontrol" disabled="@(paymentTransaction == null?true:false)" onclick="@CheckPayment" />
-               @*  <input class="btn btn-danger" value="İptal Et" disabled="@(paymentTransaction == null?true:false)" onclick="@CancelPayment" /> *@
+                <input class="btn btn-danger" value="Mail Order Form" disabled="@(paymentTransaction == null?true:false || paymentTransaction.Status == PaymentStatus.Paid ?false:true)" onclick="@GotoSuccessPage" />
+                <input class="btn btn-info" value="Excele Aktar"  onclick="@(()=>toExcel())" />
             </ButtonRowTemplate>
         </DataGrid>
     </div>
@@ -92,7 +104,7 @@
     private int TotalCount;
     private Company company { get; set; } = default!;
     private int CurrentPage = 0;
-   
+
 
     protected async override void OnInitialized()
     {
@@ -140,6 +152,14 @@
 
     }
 
+    private void GotoSuccessPage()
+    {
+        if(paymentTransaction != null)
+        {
+            NavManager.NavigateTo($"/success/{paymentTransaction.OrderNumber}",true);
+        }
+    }
+
     // private async void CancelPayment()
     // {
     //     bool confirmed = await DialogService.Show($"İptal Onayı Bu İşlem Geri Alınamaz",$"{paymentTransaction.MaskedCardNumber} {paymentTransaction.TotalAmount} Kayıt İptal Edilecek?");
@@ -148,6 +168,97 @@
     //         // Silme işlemi
     //     }
     // }
+
+    private async void toExcel()
+    {
+        try
+        {
+
+            await loadingService.ShowAync("Yükleniyor...");
+
+            if (paymentList == null || !paymentList.Any())
+            {
+                notification.Notify(new NotificationMessage
+                    {
+                        Severity = ResultStatus.Warning,
+                        Summary = "Uyarı",
+                        Detail = "Aktarılacak veri bulunamadı.",
+                        Duration = 4000
+                    });
+                return;
+            }
+
+            // Excel içeriği (UTF-8)
+            var sb = new StringBuilder();
+            sb.AppendLine("<table border='1'>");
+            sb.AppendLine("<tr>");
+            sb.AppendLine("<th>Tarih</th>");
+            sb.AppendLine("<th>Banka Adı</th>");
+            sb.AppendLine("<th>Taksit</th>");
+            sb.AppendLine("<th>Tutar</th>");
+            sb.AppendLine("<th>KK Sahibi</th>");
+            sb.AppendLine("<th>KK No</th>");
+            sb.AppendLine("<th>Banka Mesajı</th>");
+            sb.AppendLine("<th>Ödeme Tarihi</th>");
+            sb.AppendLine("<th>Banka Cevabı</th>");
+            sb.AppendLine("<th>Açıklama</th>");
+            sb.AppendLine("</tr>");
+
+
+
+            TotalCount = await paymentService.GetTotalCount(firstDate.Value, lastDate.Value) / RowsCount;
+            //paymentList = await paymentService.GetFull(firstDate.Value, lastDate.Value, _currentPage, RowsCount);
+            loadingService.ProgressBarMax = TotalCount;
+            for (int i = 0; i <= TotalCount; i++)
+
+            {
+                paymentList = await paymentService.GetFull(firstDate.Value, lastDate.Value, i, RowsCount);
+                foreach (var item in paymentList)
+                {
+                    sb.AppendLine("<tr>");
+                    sb.AppendLine($"<td>{item.CreateDate:dd.MM.yyyy HH:mm}</td>");
+                    sb.AppendLine($"<td>{item.VirtualPos?.Name}</td>");
+                    sb.AppendLine($"<td>{item.Installment}</td>");
+                    sb.AppendLine($"<td>{item.TotalAmount}</td>");
+                    sb.AppendLine($"<td>{item.CardHolderName}</td>");
+                    sb.AppendLine($"<td>{item.MaskedCardNumber}</td>");
+                    sb.AppendLine($"<td>{item.BankErrorMessage}</td>");
+                    sb.AppendLine($"<td>{item.PaidDate:dd.MM.yyyy HH:mm}</td>");
+                    sb.AppendLine($"<td>{item.Status}</td>");
+                    sb.AppendLine($"<td>{item.Explanation}</td>");
+                    sb.AppendLine("</tr>");
+
+                }
+                loadingService.SetProgress(i);
+            }
+
+
+
+            sb.AppendLine("</table>");
+
+         
+            var utf8Bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+
+            var fileName = $"OdemeRaporu_{DateTime.Now:yyyyMMddHHmm}.xls";
+            var base64 = Convert.ToBase64String(utf8Bytes);
+            paymentList = await paymentService.GetFull(firstDate.Value, lastDate.Value, 0, RowsCount);
+            loadingService.Hide();
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, base64);
+        }
+        catch (Exception ex)
+        {
+            loadingService.Hide();
+            notification.Notify(new NotificationMessage
+                {
+                    Severity = ResultStatus.Error,
+                    Summary = "Hata",
+                    Detail = ex.Message,
+                    Duration = 5000
+                });
+        }
+    }
+
+
 
     private async void CheckPayment()
     {
@@ -161,7 +272,9 @@
                     TransactionId = paymentTransaction.TransactionNumber,
                     OrderNumber = paymentTransaction.OrderNumber.ToString(),
                     BankParameters = virtualPos.VirtualPosParameters.ToDictionary(key => key.Key, value => value.Value),
-                    BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), virtualPos.BankCard.SystemName)
+                    BankName = (_3DPayment.BankNames)Enum.Parse(typeof(_3DPayment.BankNames), virtualPos.BankCard.SystemName),
+                    CreateDate = paymentTransaction.CreateDate,
+
                 };
             IPaymentProvider provider = paymentProviderFactory.Create((VirtualPosSystem)virtualPos.VirtualPosSystem);
             var result = await provider.PaymentDetailRequest(paymentDetailRequest);
@@ -184,7 +297,7 @@
         }
         catch (Exception ex)
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = ex.Message, Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = ex.Message, Duration = 5000 });
         }
 
         

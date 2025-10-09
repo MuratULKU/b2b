@@ -1,6 +1,7 @@
 ﻿@page "/iletisim"
 @using Business.Abstract;
 @using Business.SingletonServices
+@using Core.Abstract
 @using CoreUI.Components.NotificationService
 @using SendEMail;
 @inject FirmParameter firmParamService
@@ -63,7 +64,7 @@
         mail = "";
         namesurname = "";
         message = "";
-        notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Mesaj Gönderildi", Detail = "Mesajınız Başarılı Şekilde İletildi.", Duration = 5000 });
+        notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Mesaj Gönderildi", Detail = "Mesajınız Başarılı Şekilde İletildi.", Duration = 5000 });
 
     }
 }

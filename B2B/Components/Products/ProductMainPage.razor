@@ -1,6 +1,7 @@
 ﻿@page "/Products"
 
 @using B2B.Data
+@using Core.Abstract
 @using CoreUI.Components.Base
 @using CoreUI.Components.NotificationService
 @using CoreUI.Components.Pagenation
@@ -40,19 +41,19 @@
             try
             {
                 await cartService.AddUserCart(Data, Data.PriceLists[0].Price, Data.OrderAmount, 0, UserId);
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "", Detail = "Sepete Eklendi.", Duration = 2000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "", Detail = "Sepete Eklendi.", Duration = 2000 });
             }
             catch (Exception)
             {
                 
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Ürün Eklenmedi", Duration = 2000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Ürün Eklenmedi", Duration = 2000 });
             }
             
            
         }
         else
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Ürün Bilgileri Hatalı", Duration = 2000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Ürün Bilgileri Hatalı", Duration = 2000 });
         }
 
     }

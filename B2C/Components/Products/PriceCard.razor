@@ -1,0 +1,45 @@
+﻿@page "/pricecard"
+@using Business.Abstract
+@inject IPriceListService priceListManager
+<div>
+    <div class="row">
+        <div class="col-sm-6">
+            Fiyat Kodu
+        </div>
+        <div class="col-sm-6">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            Stok Kodu
+        </div>
+        <div class="col-sm-6">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            Birim
+        </div>
+        <div class="col-sm-6">
+        </div>
+    </div>
+
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public string code { get; set; }
+
+    private PriceList priceList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(!string.IsNullOrEmpty(code))
+        {
+            priceList =await priceListManager.GetByCode(code);
+        }
+    }
+
+}

@@ -1,4 +1,5 @@
-﻿@if (Visible)
+﻿@using Core.Abstract
+@if (Visible)
 {
     var classes = GetMessageCssClasses();
     <div class="toast_container">
@@ -25,10 +26,10 @@
     {
         return Message.Severity switch
         {
-            NotificationSeverity.Error => new Tuple<string, string>("error", "red"),
-            NotificationSeverity.Info => new Tuple<string, string>("info", "blue"),
-            NotificationSeverity.Success => new Tuple<string, string>("success", "green"),
-            NotificationSeverity.Warning => new Tuple<string, string>("warn", "yellow"),
+            ResultStatus.Error => new Tuple<string, string>("error", "red"),
+            ResultStatus.Information => new Tuple<string, string>("info", "blue"),
+            ResultStatus.Success => new Tuple<string, string>("success", "green"),
+            ResultStatus.Warning => new Tuple<string, string>("warn", "yellow"),
             _ => new Tuple<string, string>("", "")
         };
     }

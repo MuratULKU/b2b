@@ -1,6 +1,8 @@
 ﻿@using CoreUI.Components.Confirm
+@using CoreUI.Components.LoadingService
 @using CoreUI.Components.Modal
 @using CoreUI.Components.NotificationService
+
 
 @inherits LayoutComponentBase
 
@@ -12,11 +14,13 @@
         <Confirm />
         <article class="content px-4">
             <MNotification />
+
             @Body
         </article>
     </main>
+    <SpinnerOverlay />
 </div>
 
 @code {
-
+   
 }

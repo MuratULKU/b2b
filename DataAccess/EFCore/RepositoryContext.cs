@@ -38,12 +38,13 @@ namespace DataAccess.EFCore
         public DbSet<ClFiche> ClFiches { get; set; }
         public RepositoryContext(DbContextOptions<RepositoryContext> options) : base(options)
         {
-          
+            ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
            //optionsBuilder.UseSqlite("Data Source=./database/B2CData.db;Password=29YkM1975** ");
+           
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

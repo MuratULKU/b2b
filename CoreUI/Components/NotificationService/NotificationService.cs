@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Core.Abstract;
+using Microsoft.AspNetCore.Components;
 using System.Collections.ObjectModel;
 
 namespace CoreUI.Components.NotificationService
@@ -33,7 +34,7 @@ namespace CoreUI.Components.NotificationService
         }
 
 
-        public void Notify(NotificationSeverity severity = NotificationSeverity.Info, string summary = "", string detail = "", int duration = 3000)
+        public void Notify(ResultStatus severity = ResultStatus.Information, string summary = "", string detail = "", int duration = 3000)
         {
             var newMessage = new NotificationMessage()
             {
@@ -56,7 +57,7 @@ namespace CoreUI.Components.NotificationService
 
         public int? Duration { get; set; }
 
-        public NotificationSeverity Severity { get; set; }
+        public ResultStatus Severity { get; set; }
 
         public string Summary { get; set; }
 

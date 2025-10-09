@@ -43,6 +43,7 @@ namespace DataAccess.Abstract
         public Task RollbackTransactionAsync();
         public IEnumerable<EntityEntry> ChangedEntries();
         public EntityState ChangedEntity<TEntity>(TEntity entity);
+        public IEnumerable<string> GetTrackedChanges();
         Task<int> CommitAsync();
     }
 }

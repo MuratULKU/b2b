@@ -12,6 +12,7 @@ namespace Core.Abstract
         public ResultStatus Status { get; }
         public string Message { get; }
         public Exception   Exception { get; }
+      
     }
 
     public enum ResultStatus

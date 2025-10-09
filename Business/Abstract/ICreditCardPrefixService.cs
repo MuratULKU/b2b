@@ -10,6 +10,7 @@ namespace Business.Abstract
         Task<CreditCardPrefix> Get(Guid id);
         Task<List<CreditCardPrefix>> GetBankList(Guid BankId);
         Task<CreditCardPrefix> GetByPrefix(string prefix);
+        Task<List<CreditCardPrefix>> GetByPrefixList(string prefix);
         Task<IResult> Create(CreditCardPrefix creditCardPrefix);
         Task<IResult> Update(CreditCardPrefix creditCardPrefix);
         Task<IResult> Delete(CreditCardPrefix creditCardPrefix);

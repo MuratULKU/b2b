@@ -5,50 +5,54 @@
 @using Core.Extantaion;
 @using CoreUI.Components.Base
 @using B2C.Components.CartPanel
+@using CoreUI.Components.NotificationService
 @using DataAccess.Abstract
 @using Entity
 @using System.Text
 @inject IProductService productManager
 @inject IFirmDocService firmDocManager
+@inject NavigationManager navManager
+@inject NotificationService notification
+@inject IUserIdentityProcessor identity
 <style>
     .preview-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-.big-preview img {
-    width: 400px;
-    height: auto;
-    margin-bottom: 10px;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-}
+    .big-preview img {
+        width: 400px;
+        height: auto;
+        margin-bottom: 10px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+    }
 
-.thumbnail-list {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+    .thumbnail-list {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 
-.thumbnail-list .thumb {
-    width: 80px;
-    height: 60px;
-    object-fit: cover;
-    cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 6px;
-    transition: 0.2s;
-}
+        .thumbnail-list .thumb {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
 
-.thumbnail-list .thumb:hover {
-    border-color: #666;
-}
+            .thumbnail-list .thumb:hover {
+                border-color: #666;
+            }
 
-.thumbnail-list .thumb.active {
-    border-color: #007bff;
-}
+            .thumbnail-list .thumb.active {
+                border-color: #007bff;
+            }
 
 </style>
 <div class="row">
@@ -71,32 +75,32 @@
                     }
                 </div>
             </div>
-        } 
+        }
     </div>
-  
-        <div class="col-sm-6">
-            <div class="row">
-           <div class="col-sm-4">
-               Stok Kodu
-           </div>
-           <div class="col-sm-8">
-               <input class="form-control" @bind-value="product.Code" />
-           </div>
-       </div>
+
+    <div class="col-sm-6">
+        <div class="row">
+            <div class="col-sm-4">
+                Stok Kodu
+            </div>
+            <div class="col-sm-8">
+                <input class="form-control" @bind="product.Code" />
+            </div>
+        </div>
         <div class="row mt-sm-1">
-           <div class="col-sm-4">
-               Stok Adı 
-           </div>
-           <div class="col-sm-8">
-               <input class="form-control" @bind-value="product.Name"/>
-           </div>
-       </div>
+            <div class="col-sm-4">
+                Stok Adı
+            </div>
+            <div class="col-sm-8">
+                <input class="form-control" @bind="product.Name" />
+            </div>
+        </div>
         <div class="row mt-sm-1">
             <div class="col-sm-4">
                 Stok Adı 2
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.Name2" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -104,7 +108,7 @@
                 Stok Adı 3
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.Name3" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -112,7 +116,7 @@
                 Stok Adı 4
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.Name4" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -120,7 +124,7 @@
                 Vergi Oranı
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.Vat" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -128,7 +132,7 @@
                 Stok Grup Kodu
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.StGrupCode" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -136,7 +140,7 @@
                 Üretici Kodu Kodu
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.ProducerCode" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -144,15 +148,15 @@
                 Özel Kod
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.SpeCode" />
             </div>
         </div>
         <div class="row mt-sm-1">
             <div class="col-sm-4">
-               Özel Kod 2
+                Özel Kod 2
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.SpeCode2" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -160,7 +164,7 @@
                 Özel Kod 3
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.SpeCode3" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -168,7 +172,7 @@
                 Özel Kod 4
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.SpeCode4" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -176,7 +180,7 @@
                 Özel Kod 5
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.SpeCode5" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -184,7 +188,7 @@
                 Açıklama 1
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.Keyword1" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -192,7 +196,7 @@
                 Açıklama 2
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.Keyword2" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -200,7 +204,7 @@
                 Açıklama 3
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.Keyword3" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -208,7 +212,7 @@
                 Açıklama 4
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.Keyword4" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -216,7 +220,7 @@
                 Açıklama 5
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.Keyword5" />
             </div>
         </div>
         <div class="row mt-sm-1">
@@ -224,11 +228,11 @@
                 Birim Adı
             </div>
             <div class="col-sm-8">
-                <input class="form-control" />
+                <input class="form-control" @bind="product.Unit" />
             </div>
         </div>
     </div>
-    
+
     <button class="btn btn-primary" onclick="@changeProduct">Ekle</button>
 </div>
 
@@ -248,9 +252,15 @@
         else
         {
             product = await productManager.GetByCode(ProductCode);
-            if (product == null)
-                product = new Product();
+            product.firmDocs = await firmDocManager.GetAll(product.Id);
+            foreach (var item in product.firmDocs)
+            {
+                imageUrls.Add(product.ToImage(item.LineNumber));
+            }
+
         }
+        if (imageUrls.Count > 0)
+            selectedImage = imageUrls[0];
     }
 
     private void addImage()
@@ -260,29 +270,50 @@
 
     private async void changeProduct()
     {
-        productManager.Insert(product);
-        product = await productManager.GetByCode(product.Code); //dönüş değeri farklı olduğu için geçici
-        if(selectedImage != "")
+        product.CreateUser =await  identity.GetCurrentUserId();
+        product.CreateDate = DateTime.Now;
+        product.firmDocs = null; // resimleri yüklerken kayıt ediyoruz burda gerek yok;
+        var result = await productManager.Save(product);
+        if (result.Status == Core.Abstract.ResultStatus.Success)
         {
-            FirmDoc fd = new();
-            fd.ProtuctId = product.Id;
-            fd.LineNumber = 0;
-            fd.LData = Encoding.ASCII.GetBytes(selectedImage);
-            firmDocManager.Insert(fd);
-        }
+            navManager.NavigateTo("/productlist", true);
+        }    
+
+        else
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hatalı İşlem", Detail = result.Message, Duration = 2000 });
+
     }
 
     private List<string> imageUrls = new();
-    private string selectedImage ="";
+    private string selectedImage = "";
 
     private async Task HandleSelectedFiles(InputFileChangeEventArgs e)
     {
-        using var stream = e.File.OpenReadStream(maxAllowedSize: 250_000);
-        using var ms = new MemoryStream();
-        await stream.CopyToAsync(ms);
-        var base64 = Convert.ToBase64String(ms.ToArray());
-        selectedImage = "data:image/jpeg;base64,"+ base64;
-        imageUrls.Add(selectedImage);
+        if (product.Id != Guid.Empty)
+        {
+            using var stream = e.File.OpenReadStream(maxAllowedSize: 250_000);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var base64 = Convert.ToBase64String(ms.ToArray());
+            if (product.firmDocs == null)
+                product.firmDocs = new();
+            var doc = new FirmDoc();
+            doc.ProtuctId = product.Id;
+            doc.CreateUser = await identity.GetCurrentUserId();
+            doc.CreateDate = DateTime.Now;
+            doc.LineNumber = imageUrls.Count;
+            doc.Code = product.Code + doc.LineNumber.ToString();
+            doc.LData = ms.ToArray();
+
+         
+            selectedImage = "data:image/jpeg;base64," + base64;
+             var result = await firmDocManager.Save(doc);
+            imageUrls.Add(selectedImage);
+        }
+        else
+        {
+            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hatalı İşlem", Detail = "Stok Kartı Kayıt Edilmeden Resim Ekleyemezsiniz", Duration = 2000 });
+        }
     }
 
 

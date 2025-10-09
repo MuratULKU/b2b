@@ -99,6 +99,7 @@
     {
         selectVirtualPos = virtualPos;
         selectVirtualPos.CreditCards = creditCardService.GetBankCreditCard(virtualPos.CardBrandId).Result;
+        creditCardInstallment = null;
     }
 
     private async void showInstalment()

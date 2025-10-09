@@ -1,0 +1,25 @@
+﻿@page "/pricelist"
+
+@using Business.Abstract
+@using Business.Concrete
+@using CoreUI.Components.DataGrid
+@inject IPriceListService pricelistManager
+<DataGrid TItem="PriceList" Items="priceList">
+    <Columns>
+        <Column Caption="Kodu" Field="@nameof(PriceList.Code)" />
+        <Column Caption="Stok Kodu" Field="@nameof(PriceList.ProductCode)" />
+        <Column Caption="Fiyat" Field="@nameof(PriceList.Price)" />
+    </Columns>
+    <ButtonRowTemplate>
+        <a class="btn btn-primary" href="/pricecard">Ekle</a>
+       @*  <a class="btn btn-secondary" href="/product?code=@product?.Code" disabled>Değiştir</a> *@
+    </ButtonRowTemplate>
+</DataGrid>
+@code {
+    private List<PriceList> priceList { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        priceList = await pricelistManager.GetPriceListAsync();
+    }
+}

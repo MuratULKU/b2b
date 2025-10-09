@@ -1,6 +1,8 @@
 ﻿@page "/creditcard"
 @using Business.Abstract
+@using Core.Abstract
 @using CoreUI.Components
+@using CoreUI.Components.Confirm
 @using CoreUI.Components.DataGrid
 @using CoreUI.Components.Modal
 @using CoreUI.Components.NotificationService
@@ -12,6 +14,7 @@
 @inject ICardBrandService CardBrandService
 @inject IUserIdentityProcessor IdentityProcessor
 @inject NotificationService notification
+@inject ConfirmDialogService confirmDialog
 @implements IDisposable
 @attribute [Authorize]
 
@@ -181,7 +184,14 @@
 
     private async void SearchPrefixEnter()
     {
-        CreditCardPrefixes = CreditCardPrefixes.Where(x => x.Prefix.StartsWith(_prefixFilter)).ToList();
+        CreditCardPrefix cprefix = await CreditCardPrefixService.GetByPrefix(_prefixFilter);
+        if (cprefix != null)
+        {
+            creditCardPrefix = cprefix;
+            CreditCard creditCard = await CreditCardService.Get(cprefix.CreditCardId);
+            selectedCreditCard = creditCard;
+            CreditCardPrefixes = await CreditCardPrefixService.GetByPrefixList(_prefixFilter);
+        }
     }
     private async void NewPrefix()
     {
@@ -211,18 +221,18 @@
                     {
                         foreach (string errMsg in test.Message.Split(','))
                         {
-                            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = errMsg, Duration = 5000 });
+                            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = errMsg, Duration = 5000 });
                         }
                     }
                 }
                 else
                 {
-                    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Kredi Kartı Detayları Bulunamadı Bankayı ve MArkayı Kontrol Edin.", Duration = 5000 });
+                    notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Kredi Kartı Detayları Bulunamadı Bankayı ve MArkayı Kontrol Edin.", Duration = 5000 });
                 }
             }
             else
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Kart Daha Önce Tanımlanmış.", Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Kart Daha Önce Tanımlanmış.", Duration = 5000 });
             }
         }
     }
@@ -250,18 +260,20 @@
                 var test = await CreditCardService.CreateCreditCard(selectedCreditCard);
                 if(test.Status == Core.Abstract.ResultStatus.Error)
                 {
-                    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = test.Message, Duration = 5000 });
+                    notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = test.Message, Duration = 5000 });
                 }
                 else
                 {
                     CreditCardList = await CreditCardService.GetAll();
                     StateHasChanged();
-                    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Onay", Detail = test.Message, Duration = 5000 });
+                    notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "Onay", Detail = test.Message, Duration = 5000 });
                 }
+                _bankId = Guid.Empty;
+                _bankBrand = Guid.Empty;
             }
             else
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Kart Daha Önce Tanımlanmış.", Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Kart Daha Önce Tanımlanmış.", Duration = 5000 });
             }
         }
     }
@@ -293,8 +305,14 @@
     {
         if(selectedCreditCard !=  null)
         {
-            await CreditCardService.DeleteCreditCard(selectedCreditCard);
+            var onay = await confirmDialog.Show("Silme Onay", $"{selectedCreditCard.Name} Kayıt Silinecektir Onaylıyor musunuz.");
+            if (onay)
+            {
+               var result =  await CreditCardService.DeleteCreditCard(selectedCreditCard);
+                notification.Notify(new NotificationMessage { Severity = result.Status, Summary = "İşlem Sonucu", Detail = result.Message, Duration = 5000 });
+            }
             CreditCardList = await CreditCardService.GetAll();
+            StateHasChanged();
         }
     }
     private void bankChanged(BankCard bankCard)
@@ -313,16 +331,22 @@
         }
     }
 
-    private void DeletePrefix()
+    private async void DeletePrefix()
     {
         if (creditCardPrefix != null)
         {
-            CreditCardPrefixService.Delete(creditCardPrefix);
-            StateHasChanged();
+            var onay = await confirmDialog.Show("Silme Onay", $"{selectedCreditCard.Name} Kayıt Silinecektir Onaylıyor musunuz.");
+            if (onay)
+            {
+                CreditCardPrefixService.Delete(creditCardPrefix);
+                CreditCardPrefixes = await CreditCardPrefixService.GetBankList(selectedCreditCard.Id);
+                StateHasChanged();
+            }
         }
     }
     private async void ChangePrefix()
     {
+        
         if (creditCardPrefix != null)
         {
             BankCardList = await BankCardService.GetAllBank();
@@ -344,7 +368,7 @@
                 {
                     foreach (string errMsg in test.Message.Split(','))
                     {
-                        notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = errMsg, Duration = 5000 });
+                        notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = errMsg, Duration = 5000 });
                     }
                 }
 

@@ -44,7 +44,7 @@ namespace Business.Concrete
 
         public async Task<List<User>> GetAllUser()
         {
-            var result = await _unitOfWork.User.GetAllAsync();
+            var result = await _unitOfWork.User.GetAllAsync(x =>x.Include(y=>y.UsersRoles));
             return result;
         }
 
@@ -56,7 +56,7 @@ namespace Business.Concrete
 
         public async Task<User> GetUser(Guid id)
         {
-            var result = await _unitOfWork.User.SingleOrDefaultAsync(x=>x.Id == id);
+            var result = await _unitOfWork.User.SingleOrDefaultAsync(x=>x.Id == id,x=>x.Include(y=>y.UsersRoles));
             return result;
         }
 

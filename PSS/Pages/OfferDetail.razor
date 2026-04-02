@@ -3,6 +3,7 @@
 @using Business.Abstract
 @using CoreUI.Components.InputNumber
 @using CoreUI.Components.NotificationService
+@using CoreUI.Components.UserPanel
 @using CoreUI.Data
 @using Entity
 @using Microsoft.EntityFrameworkCore
@@ -15,6 +16,8 @@
 @inject IOrderService orderService
 @inject IDocumentNoService documentNoService
 @inject NavigationManager navManager
+@inject ICurrencyService currencyService
+@inject IProductService productService
 <div class="container">
 <TabControl ChangedActivePage="OnActiveTabChanged">
     <TabPage Text="Müşteri Seçimi">
@@ -206,7 +209,7 @@
     private User _user { get; set; }
     private Client _client { get; set; } = new();
     private List<Client> _clientList = new List<Client>();
-  
+
     private bool newClient { get; set; } = default!;
 
     private bool pageValid { get; set; }
@@ -284,17 +287,17 @@
         }
         set
         {
-             if (Guid.TryParse(value.ToString(), out Guid guid))
-                 clientid = guid;
-             _client = clientCardManager.GetByGuid(clientid).Result ?? new();
-             if(_client != null)
-            pageValid = true;
+            if (Guid.TryParse(value.ToString(), out Guid guid))
+                clientid = guid;
+            _client = clientCardManager.GetByGuid(clientid).Result ?? new();
+            if(_client != null)
+                pageValid = true;
         }
 
     }
     private void SaveChanged()
     {
-      
+
         orderService.Save(_ordFiche);
         navManager.NavigateTo($"/offer?id={id}");
     }
@@ -314,8 +317,7 @@
 
     private void addproduct(Product product)
     {
-        var s = product;
-        AddCart(product, product.OrderAmount, product.PriceLists[0].Price, 0, UserId);
+        AddCart(product.Id, product.OrderAmount, product.PriceLists[0].Price, 0, UserId);
     }
 
     private async void AddFiche(string ClientCode, Guid UserId)
@@ -338,8 +340,8 @@
                     UserId = UserId,
                     CompanyId =_user.CompanyId?? Guid.Empty,
                     TrCode = 3,
-                    CurrencyId = 1 //döviz kuru seçildiğinde değişecek
-                   
+                    CurrencyId =1,
+
                 };
 
 
@@ -352,13 +354,14 @@
         }
     }
 
-    private async void AddCart(Product product, double Amount, double Price, double Discount, Guid UserId)
+    private async void AddCart(Guid productId, double Amount, double Price, double Discount, Guid UserId)
     {
         AddFiche(_client.Code, UserId);
 
-        OrdLine ordLine = _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == product.Id);
+        OrdLine ordLine = _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == productId);
         if (ordLine == null)
         {
+            Product product = await productService.GetByGuid(productId);
             ordLine = new OrdLine
                 {
                     StockRef = product.LogicalRef,
@@ -367,6 +370,7 @@
                     Total = Amount * Price,
                     Product = product,
                     ProductId = product.Id,
+
                     UomRef = product.UomRef,
                     UsRef = product.UsRef,
                     AvailableStock = 0,
@@ -386,12 +390,14 @@
                     Date_ = _ordFiche.Date_,
                     CurrencyId = 1,
 
-                };
 
+                };
+            ordLine.Product = null;
             _ordFiche.Lines.Add(ordLine);
         }
         else
         {
+           
             ordLine.UpdateDate = DateTime.Now;
             ordLine.UpdateUser = _user.Id;
             ordLine.Amount += Amount;

@@ -84,7 +84,7 @@ namespace CoreUI.BackOrder
                 List<OrdFiche> ordFiche = await _orderService.GetOrderFiche(1, 1);
                 if (ordFiche != null && ordFiche.Count > 0)
                 {
-                    _httpClient.DefaultRequestHeaders.Clear();
+                    //_httpClient.DefaultRequestHeaders.Clear();
                     _httpClient.DefaultRequestHeaders.Accept.Add(
     new MediaTypeWithQualityHeaderValue("application/json"));
                     StringContent content = new StringContent(JsonSerializer.Serialize(ordFiche), Encoding.UTF8, "application/json");

@@ -11,10 +11,12 @@ namespace Entity
     {
         public int InfoType { get; set; }
         public int LineNumber { get; set; }
-        public Guid ProtuctId { get; set; }
+        public Guid ProductId { get; set; }
         public byte[] LData { get; set; }
         [NotMapped]
-       public string Code { get; set; }
+       public string? Code { get; set; }
+        public int Lref { get; set; }
+        public int Inforef { get; set; }
 
     }
 }

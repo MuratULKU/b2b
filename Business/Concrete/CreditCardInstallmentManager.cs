@@ -51,7 +51,7 @@ namespace Business.Concrete
 
         public Task<List<CreditCardInstallment>> GeyBankId(Guid id)
         {
-            return _unitOfWork.CreditCardInstallment.Find(x => x.Id == id);
+            return _unitOfWork.CreditCardInstallment.Find(x => x.CreditCard.BankCardId == id);
         }
 
         public Task<List<CreditCardInstallment>> GeyCreditId(Guid id)

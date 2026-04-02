@@ -2,6 +2,7 @@
 
 using Business.Abstract;
 using Business.Concrete;
+using Core.Logger;
 using CoreUI.Components.Base;
 using CoreUI.Components.Utilities;
 using DataAccess.Abstract;
@@ -34,6 +35,8 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<IOrdFicheRepository, OrdFicheRepository>();
             serviceCollection.AddScoped<IDocumentNoRepository, DocumentNoRepository>();
             serviceCollection.AddScoped<ICompanyRepository, CompanyRepository>();
+            serviceCollection.AddScoped<ICurrenciesRepository, CurrenciesRepository>();
+            
             return serviceCollection;
         }
         public static IServiceCollection AddBusinessService(this IServiceCollection serviceCollection)
@@ -48,6 +51,7 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<IFirmParamService,FirmParamManager>();
             serviceCollection.AddScoped<IDocumentNoService,DocumentNoManager>();
             serviceCollection.AddScoped<ICompanyService, CompanyManager>();
+           serviceCollection.AddScoped<ICurrencyService, CurrencyManager>();
             return serviceCollection;
         }
     }

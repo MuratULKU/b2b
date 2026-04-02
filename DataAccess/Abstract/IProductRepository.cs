@@ -1,4 +1,5 @@
 ﻿using Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Abstract
 {
@@ -17,6 +18,10 @@ namespace DataAccess.Abstract
         Task<Product> GetByLogicalref(int logicalref);
         Task<int> DeleteAll();
         Task<bool> Delete(Product product);
+
+        Task SaveChangesAsync();
+        Task<Guid?> GetIdByCode(string code);
+
 
 
     }

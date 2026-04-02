@@ -3,9 +3,12 @@ using B2C.Components.Base;
 using Business.Abstract;
 using Business.Concrete;
 using Business.SingletonServices;
+using Core.Logger;
+using CoreUI;
 using CoreUI.BackOrder;
 using CoreUI.Components.Base;
 using CoreUI.Components.NotificationService;
+using CoreUI.Components.UserPanel;
 using CoreUI.Data;
 
 using DataAccess.Abstract;
@@ -17,7 +20,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 
-using PSS.Components.UserPanel;
+
 using PSS.Data;
 
 
@@ -36,16 +39,16 @@ QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 builder.Services.AddDbContext<RepositoryContext>(
     options => options.UseSqlite(builder.Configuration.GetConnectionString("sqlConnection"), b => b.MigrationsAssembly("PSS")),
      ServiceLifetime.Transient);
-builder.Services.AddScoped<UserRoleManager>();
-builder.Services.AddScoped<UserManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-builder.Services.AddScoped<IUserIdentityProcessor, UserIdentityProcessor>();
+
+builder.Services.AddBusinessServices(builder.Configuration);
 builder.Services.AddSingleton<FirmParameter>();
 builder.Services.AddBackOrederServices();
 builder.Services.AddHostedService<BackOrder>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IUnitofWork, UnitofWork>();
-
+builder.Services.AddSingleton<ILoggerService>(provider =>
+            new FileLogger("app.log"));
+builder.Services.AddScoped<ITokenService, TokenService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

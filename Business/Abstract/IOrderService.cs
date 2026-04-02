@@ -10,10 +10,12 @@ namespace Business.Abstract
 {
     public interface IOrderService
     {
-        Task Save(OrdFiche ordFiche);
+        Task<IResult> Save(OrdFiche ordFiche);
 
         Task DeleteOrderFiche(OrdFiche ordFiche);
         Task DeleteLine(OrdLine ordLine);
+        Task AddLine(OrdLine ordLine);
+        Task<IResult> UpdateLine(OrdLine ordLine);
         Task<int> GetOrderFicheCount(int trCode);
         Task<int> GetOrderFicheCount(Guid firmId,int trCode);
         Task<List<OrdFiche>> GetOrderFiche(int trCode, int CurrentPage, int PageSize);

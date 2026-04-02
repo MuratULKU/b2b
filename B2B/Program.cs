@@ -8,7 +8,7 @@ using CoreUI.BackOrder;
 using DataAccess.Abstract;
 using DataAccess.Concrete;
 using Microsoft.AspNetCore.Components.Authorization;
-using B2B.Components.UserPanel;
+
 using Business.Abstract;
 using CoreUI.Components.Base;
 using CoreUI.Components.Utilities;
@@ -22,6 +22,8 @@ using Business.SingletonServices;
 using System.Globalization;
 using CoreUI.Components.Confirm;
 using CoreUI.Components.LoadingService;
+using CoreUI.Components.UserPanel;
+using CoreUI;
 
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("tr-TR");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("tr-TR");
@@ -73,39 +75,33 @@ builder.Services.AddScoped<IClientCardService, ClientCardManager>();
 builder.Services.AddScoped<ICharValRepository, CharValRepository>();
 builder.Services.AddScoped<ICharValService,CharValManager>();
 builder.Services.AddScoped<IBankCardRepository, BankCardRepository>();
-builder.Services.AddScoped<IBankCardService, BankCardManager>();
-builder.Services.AddScoped<ICreditCardRepository, CreditCardRepository>();  
-builder.Services.AddScoped<ICreditCardService, CreditCardManager>();
-builder.Services.AddScoped<ICreditCardInstallmentRepository, CreditCardInstallmentRepository>();
-builder.Services.AddScoped<ICreditCardInstallmentService, CreditCardInstallmentManager>();
-builder.Services.AddScoped<ICreditCardPrefixService, CreditCardPrefixManager>();
+
+
+
 //builder.Services.AddScoped<IVirtualPosParameterRepository, VirtualPosParameterRepository>();
-builder.Services.AddScoped<IVirtualPosParameterService, VirtualPosParameterManager>();
-builder.Services.AddScoped<IVirtualPosRepository, VirtualPosRepository>();
-builder.Services.AddScoped<IVirtualPosService,VirtualPosManager>();
-builder.Services.AddScoped<ICardBrandService,CardBrandManager>();
+
+
+
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService,RoleManager>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyManager>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService,PaymentManager>();
-builder.Services.AddScoped<IPaymentProviderFactory, PaymentProviderFactory>();
+
 builder.Services.AddScoped<IClFicheRepository,ClFicheRepository>();
 builder.Services.AddScoped<IClFicheService, ClFicheManager>();
-
+builder.Services.AddScoped<IFirmDocService, FirmDocManager>();
 builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<UserRoleManager>();
-builder.Services.AddScoped<UserManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-builder.Services.AddScoped<IUserIdentityProcessor, UserIdentityProcessor>();
-builder.Services.AddSingleton<ConfirmDialogService>();
+
+builder.Services.AddBusinessServices(builder.Configuration);
+
 builder.Services.AddSingleton<FirmParameter>();
 builder.Services.AddBackOrederServices();
 builder.Services.AddHostedService<BackOrder>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IUnitofWork, UnitofWork>();
-
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 
 builder.Services.AddHttpClient<BackOrder>();
@@ -127,6 +123,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseEndpoints(endpoints =>

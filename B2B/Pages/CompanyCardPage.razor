@@ -3,6 +3,7 @@
 @using Business.Abstract
 @using Core.Abstract
 @using CoreUI.Components.NotificationService
+@using CoreUI.Components.UserPanel
 @using DataAccess.Abstract
 @using Entity
 @using Microsoft.Extensions.Configuration
@@ -126,14 +127,14 @@
         {
 
 
-            // string url = $"/api/v1/client/check?code={company.ProgramCode}";
-            // var response = await _httpClient.GetAsync(url);
-            // if (response.IsSuccessStatusCode)
-            // {
-            //     bool result = bool.Parse(await response.Content.ReadAsStringAsync());
-            //     if (!result)
-            //         throw new Exception("Client Code wrong");
-            // }
+            string url = $"/api/v1/client/check?code={company.ProgramCode}";
+            var response = await _httpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                bool result = bool.Parse(await response.Content.ReadAsStringAsync());
+                if (!result)
+                    throw new Exception("Client Code wrong");
+            }
 
 
             if (company.Id == Guid.Empty)

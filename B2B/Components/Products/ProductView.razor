@@ -1,0 +1,299 @@
+﻿@page "/product"
+
+@using B2B.Data
+@using Business.Abstract
+@using Business.Concrete
+@using Core.Extantaion;
+@using CoreUI.Components.Base
+@using CoreUI.Components.NotificationService
+@using CoreUI.Components.UserPanel
+@using DataAccess.Abstract
+@using Entity
+@using System.Text
+@inject IProductService productManager
+@inject IFirmDocService firmDocManager
+@inject NavigationManager navManager
+@inject NotificationService notification
+@inject IUserIdentityProcessor identity
+@inject CartService cartService
+@inject IUserIdentityProcessor userIdentity
+<style>
+    .preview-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .big-preview img {
+        width: 400px;
+        height: auto;
+        margin-bottom: 10px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+    }
+
+    .thumbnail-list {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+        .thumbnail-list .thumb {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+            .thumbnail-list .thumb:hover {
+                border-color: #666;
+            }
+
+            .thumbnail-list .thumb.active {
+                border-color: #007bff;
+            }
+
+</style>
+<div class="row">
+    <div class="col-sm-6">
+
+        @if (imageUrls?.Count > 0)
+        {
+            <div class="preview-container">
+                <!-- Büyük Görsel -->
+                <div class="big-preview">
+                    <img src="@selectedImage" alt="Büyük Görsel" />
+                </div>
+
+                <!-- Küçük Thumbnails -->
+                <div class="thumbnail-list">
+                    @foreach (var url in imageUrls)
+                    {
+                        <img src="@url" class="thumb @(url == selectedImage ? "active" : "")"
+                             @onclick="() => SelectImage(url)" />
+                    }
+                </div>
+            </div>
+        }
+        <div style="display:flex; align-items:center; justify-content:center; gap:8px; top:50px">
+            <input class="col-amount-input" type="number" value="@product.OrderAmount" @oninput="@((e)=>product.OrderAmount = Convert.ToDouble(e.Value))" />
+            <button class="shop-image-button" type="button" onclick="@(()=>clickAddProduct(product))">
+                <span class="oi oi-cart shop-image" aria-hidden="true"></span>
+            </button>
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <div class="row">
+            <div class="col-sm-4">
+                Stok Kodu
+            </div>
+            <div class="col-sm-8">
+                @product.Code
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Stok Adı
+            </div>
+            <div class="col-sm-8">
+                @product.Name"
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Stok Adı 2
+            </div>
+            <div class="col-sm-8">
+                @product.Name2
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Stok Adı 3
+            </div>
+            <div class="col-sm-8">
+                @product.Name3
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Stok Adı 4
+            </div>
+            <div class="col-sm-8">
+                @product.Name4
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Vergi Oranı
+            </div>
+            <div class="col-sm-8">
+                @product.Vat
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Stok Grup Kodu
+            </div>
+            <div class="col-sm-8">
+                @product.StGrupCode
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Üretici Kodu Kodu
+            </div>
+            <div class="col-sm-8">
+                @product.ProducerCode
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Özel Kod
+            </div>
+            <div class="col-sm-8">
+                @product.SpeCode
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Özel Kod 2
+            </div>
+            <div class="col-sm-8">
+                @product.SpeCode2
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Özel Kod 3
+            </div>
+            <div class="col-sm-8">
+                @product.SpeCode3
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Özel Kod 4
+            </div>
+            <div class="col-sm-8">
+                @product.SpeCode4
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Özel Kod 5
+            </div>
+            <div class="col-sm-8">
+                @product.SpeCode5
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Açıklama 1
+            </div>
+            <div class="col-sm-8">
+                @product.Keyword1
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Açıklama 2
+            </div>
+            <div class="col-sm-8">
+                @product.Keyword2
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Açıklama 3
+            </div>
+            <div class="col-sm-8">
+                @product.Keyword3
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Açıklama 4
+            </div>
+            <div class="col-sm-8">
+                @product.Keyword4
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Açıklama 5
+            </div>
+            <div class="col-sm-8">
+                @product.Keyword5
+            </div>
+        </div>
+        <div class="row mt-sm-1">
+            <div class="col-sm-4">
+                Birim Adı
+            </div>
+            <div class="col-sm-8">
+                @product.Unit
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "code")]
+    public string ProductCode { get; set; }
+
+    private Product product = new Product();
+
+    protected override async void OnParametersSet()
+    {
+        if (string.IsNullOrEmpty(ProductCode))
+        {
+            product = new Product();
+        }
+        else
+        {
+            product = await productManager.GetByCode(ProductCode);
+            product.firmDocs = await firmDocManager.GetAll(product.Id);
+            foreach (var item in product.firmDocs)
+            {
+                imageUrls.Add(product.ToImage(item.LineNumber));
+            }
+
+        }
+        if (imageUrls.Count > 0)
+            selectedImage = imageUrls[0];
+        else
+        {
+            imageUrls.Add(product.ToImage(0));
+        }
+        selectedImage = product.ToImage(0);
+
+    }
+
+
+
+    private List<string> imageUrls = new();
+    private string selectedImage = "";
+
+
+
+    private void SelectImage(string url)
+    {
+        selectedImage = url;
+    }
+
+    private async void clickAddProduct(Product Data)
+    {
+        Guid UserId = await userIdentity.GetCurrentUserId();
+        var result = await cartService.AddUserCart(product.Id, product.PriceLists[0]?.Price ?? 0,1 ,0, UserId);
+        notification.Notify(new NotificationMessage { Severity = result.Status, Summary = result.Status.ToString(), Detail = result.Message, Duration = 2000 });
+    }
+}

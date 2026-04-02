@@ -1,11 +1,12 @@
 ﻿using _3DPayment;
 using _3DPayment.Request;
 using _3DPayment.Results;
-using B2C.Data;
+using CoreUI.Data;
 using B2C.Views.Payment;
 
 using Business.Abstract;
 using Business.SingletonServices;
+using CoreUI.Data;
 using DataAccess.Abstract;
 using Entity;
 using Microsoft.AspNetCore.Mvc;

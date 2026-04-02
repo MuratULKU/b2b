@@ -4,6 +4,7 @@
 @using Business.Abstract
 @using CoreUI.Components.InputNumber
 @using CoreUI.Components.NotificationService
+@using CoreUI.Components.UserPanel
 @using CoreUI.Data
 @using Entity
 @using Microsoft.EntityFrameworkCore
@@ -16,6 +17,7 @@
 @inject IOrderService orderService
 @inject IDocumentNoService documentNoService
 @inject NavigationManager navManager
+@inject IProductService productService
 <div class="container">
 <TabControl ChangedActivePage="OnActiveTabChanged">
     <TabPage Text="Müşteri Seçimi">
@@ -223,6 +225,7 @@
     }
     private void SaveChanged()
     {
+        if(_documentNo != null)
         documentNoService.Update(_documentNo);
         orderService.Save(_ordFiche);
         navManager.NavigateTo("/order");
@@ -246,8 +249,8 @@
 
     private void addproduct(Product product)
     {
-        var s = product;
-        AddCart(product, product.OrderAmount, product.PriceLists[0].Price, 0, UserId);
+
+        AddCart(product.Id, product.OrderAmount, product.PriceLists[0].Price, 0, UserId);
     }
 
     private async void AddFiche(string ClientCode, Guid UserId)
@@ -276,15 +279,17 @@
 
             _ordFiche.Lines = new();
         }
+
     }
 
-    private async void AddCart(Product product, double Amount, double Price, double Discount, Guid UserId)
+    private async void AddCart(Guid productId, double Amount, double Price, double Discount, Guid UserId)
     {
         AddFiche(_client.Code, UserId);
 
-        OrdLine ordLine = _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == product.Id);
+        OrdLine ordLine = _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == productId);
         if (ordLine == null)
         {
+            Product product = await productService.GetByGuid(productId);
             ordLine = new OrdLine
                 {
                     StockRef = product.LogicalRef,
@@ -311,9 +316,9 @@
                     OrdFicheId = _ordFiche.Id,
                     Date_ = _ordFiche.Date_,
                     CurrencyId = 1,
-                   
+
                 };
-      
+            ordLine.Product = null;
             _ordFiche.Lines.Add(ordLine);
         }
         else

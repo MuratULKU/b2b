@@ -1,6 +1,7 @@
 ﻿using Business.Abstract;
 using Core.Abstract;
 using Core.Concrete;
+using Core.Logger;
 using DataAccess.Abstract;
 using Entity;
 using System;
@@ -15,7 +16,7 @@ namespace Business.Concrete
     public class FirmParamManager : IFirmParamService
     {
         private readonly IUnitofWork _unitOfWork;
-
+     
         public FirmParamManager(IUnitofWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -56,8 +57,14 @@ namespace Business.Concrete
             await  _unitOfWork.FirmParam.UpdateAsync(firmParam);
             var result = await _unitOfWork.CommitAsync();
             if (result == 1)
+            {
                 return new Result(ResultStatus.Success, "Kayıt Güncellendi");
-            return new Result(ResultStatus.Error, "Kayıt Güncellenmedi");
+            }
+            else
+            {
+              
+                return new Result(ResultStatus.Error, "Kayıt Güncellenmedi");
+            }
         }
 
 

@@ -1,5 +1,6 @@
 ﻿@page "/userlist"
 @using Business.Abstract
+@using CoreUI.Components.UserPanel
 @using Entity
 @inject IUserService userService
 @inject IRoleService roleService
@@ -76,7 +77,7 @@
                             @foreach (var item in selecetedUser.UsersRoles)
                             {
                                 <tr>
-                                    <td>@item.Role.RoleName</td>
+                                    <td>@item?.Role?.RoleName</td>
                                     <td><button class="btn-danger" value="@item.Id" @onclick="()=>DeleteRole(item.Id)">Sil</button></td>
                                 </tr>
                             }
@@ -173,6 +174,7 @@
                 CreateUser = selecetedUser.CreateUser,
                 UpdateUser = selecetedUser.UpdateUser
             };
+       
         await userService.AddUser(selecetedUser);
         await userRoleService.AddRole(userRole);
 

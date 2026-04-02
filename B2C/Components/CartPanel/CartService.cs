@@ -17,15 +17,16 @@ namespace B2C.Components.CartPanel
         private readonly IOrderService orderService;
         private readonly IDocumentNoService documentNoService;
         private readonly IUnitofWork unitofWork;
+        private readonly IUserIdentityProcessor userIdentityProcessor;
 
         public OrdFiche _ordFiche;
-        public Client Client { get; set; }
-        public User User { get; set; }
+       private Client _client { get; set; }
+        private  Guid UserId { get; set; }
 
 
 
 
-        public CartService(ProtectedLocalStorage sessionStroge, IProductService productServices, IOrderService orderService, IDocumentNoService documentNo, IUnitofWork unitofWork)
+        public CartService(ProtectedLocalStorage sessionStroge, IProductService productServices, IOrderService orderService, IDocumentNoService documentNo, IUnitofWork unitofWork, IUserIdentityProcessor userIdentityProcessor)
         {
 
             _localStorage = sessionStroge;
@@ -34,17 +35,19 @@ namespace B2C.Components.CartPanel
             this.orderService = orderService;
             this.documentNoService = documentNo;
             this.unitofWork = unitofWork;
+            this.userIdentityProcessor = userIdentityProcessor;
+           
         }
 
 
 
-        private DocumentNo _documentNo;
+       
 
 
 
         public EventHandler<CardEventArg> CardChanged;
 
-
+       
 
         public async void AddFiche(string ClientCode, Guid UserId)
         {
@@ -59,7 +62,7 @@ namespace B2C.Components.CartPanel
                     Send = 0,
                     Active = true,
                     ClientCode = ClientCode,
-                    FicheNo = _documentNo.DocNo.ToString(), //fiş numarası 
+                    FicheNo = await documentNoService.GetDocNo(1),
                     UpdateDate = DateTime.Now,
                     CreateDate = DateTime.Now,
                     UpdateUser = UserId,
@@ -73,11 +76,32 @@ namespace B2C.Components.CartPanel
                 _ordFiche.Lines = new();
             }
         }
-        public async void AddCart(Product product, double Amount, double Price, double Discount, Guid UserId)
-        {
-            AddFiche(Client.Code, UserId);
 
-            OrdLine ordLine = _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == product.Id);
+        public async void AddCart(string ProductCode, double Amount, double Price, double Discount)
+        {
+            UserId = await userIdentityProcessor.GetCurrentUserId();
+            if(UserId != Guid.Empty)
+            {
+                _client =await  unitofWork.Client.SingleOrDefaultAsync(x=>x.Id== UserId);
+                AddCart(ProductCode, Amount, Price, Discount,UserId);  
+            }
+            else
+            {
+                _client = new();
+                AddCart(ProductCode, Amount, Price, Discount,Guid.Empty);
+              
+
+                await _localStorage.SetAsync("cart", _ordFiche);
+            }
+            CardChanged?.Invoke(this, new CardEventArg());
+        }
+
+
+        public async void AddCart(string productcode, double Amount, double Price, double Discount, Guid UserId)
+        {
+            AddFiche(_client.Code, UserId);
+            Product product = await productServices.GetByCode(productcode);
+            OrdLine ordLine = _ordFiche.Lines?.FirstOrDefault(x => x.Product.Id == product.Id);
             if (ordLine == null)
             {
                 ordLine = new OrdLine

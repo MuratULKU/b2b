@@ -6,6 +6,6 @@ namespace DataAccess.Abstract
 {
     public interface IFirmDocRepository:IRepository<FirmDoc>
     {
-        
+        Task<int> DeleteAll();
     }
 }

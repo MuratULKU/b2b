@@ -13,9 +13,12 @@
 @inject IUserService userReposiyory
 @inject IRoleService roleRepository
 @inject IUserRoleService userRoleRepository
+@inject UserManager userService
 @inject IUserIdentityProcessor userIdentity
 @inject NavigationManager navManager
 @inject NotificationService notification
+@inject ICompanyService companyService
+@attribute [Authorize]
 <div class="container">
     <div class="row">
         <div class="col-7 usercard">
@@ -38,7 +41,7 @@
                 <input class="form-control" @bind-value="user.Password" />
             </div>
             <div class="col-5">
-                <label>Muhasebe Programı Cari Hesap Kodu</label>
+                <label>Satış Temsilcisi Kodu</label>
             </div>
             <div class="col-7">
                 <input class="form-control" @bind-value="user.AccountCode" />
@@ -47,14 +50,14 @@
                 <label>Firma Ünvanı</label>
             </div>
             <div class="col-7">
-                <input class="form-control" @bind-value="user.AccountName" />
+                <SelectList TItem="Company" Items="company" Selected="selectedCompanyId" DisplayField="Name" ValueField="Id" SelectedChanged="(e)=>selectedCompanyId = new Guid(e.ToString())" />
             </div>
             <AuthorizeView Roles="Admin">
                 <div class="col-5">
                     <label>Kullanıcı Rolü</label>
                 </div>
                 <div class="col-7">
-                    <SelectList TItem="Role" Items="userRole" Selected="@selectedRole.ToString()" DisplayField="RoleName" ValueField="Id" SelectedChanged="(e)=>selectedRole = new Guid(e.ToString())" />
+                    <SelectList TItem="Role" Items="userRole" Selected="@selectedRole" DisplayField="RoleName" ValueField="Id" SelectedChanged="(e)=>selectedRole = new Guid(e.ToString())" />
                 </div>
                 <div class="col-5">
                     <label>İskonto Oranı</label>
@@ -78,12 +81,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (user.UsersRoles != null)
+                        @if (user?.UsersRoles != null)
                         {
                             @foreach (var item in user.UsersRoles)
                             {
                                 <tr>
-                                    <td>@item.Role.RoleName</td>
+                                    <td>@item.Role?.RoleName</td>
                                     <td><button class="btn-danger" value="@item.Id" @onclick="()=>DeleteRole(item.Id)">Sil</button></td>
                                 </tr>
                             }
@@ -105,98 +108,114 @@
     [SupplyParameterFromQuery]
     [Parameter]
     public Guid id { get; set; }
+
     private User user;
     private Guid selectedRole;
+    private Guid selectedCompanyId;
     private List<Role> userRole;
-    private Role SelectedUserRole;
+    private List<Company> company;
+
 
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
 
-    private async void Addrole(Guid RoleId)
+    private async Task Addrole(Guid RoleId)
     {
         UserRole userRole1 = new UserRole();
         userRole1.Id = Guid.NewGuid();
         userRole1.RoleId = RoleId;
         userRole1.UserId = user.Id;
-        userRoleRepository.AddRole(userRole1);
-        user = await userReposiyory.GetUser(await userIdentity.GetCurrentUserId());
-        StateHasChanged();
+        userRole1.Role = (await roleRepository.GetRole(RoleId)).Data;
+        await userRoleRepository.AddRole(userRole1);
+
+        user.UsersRoles = await userReposiyory.GetUserRole(id);
     }
 
-    private async void DeleteRole(Guid userRoleId)
+    private async Task DeleteRole(Guid userRoleId)
     {
         var userRole = await userRoleRepository.GetUserRole(userRoleId);
         if (userRole != null)
-            userRoleRepository.DeleteRole(userRole);
-        user = null;
-        var result = await userReposiyory.GetUser(id);
-       
+        {
+            var result = await userRoleRepository.DeleteRole(userRole);
+            if (result.Status == ResultStatus.Success)
+            {
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+            }
+            else
+            {
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+            }
+        }
+        user.UsersRoles = await userReposiyory.GetUserRole(id);
+
     }
 
     protected async override void OnInitialized()
     {
-        // userReposiyory.UserManagerAsync(authenticationState.Result.User);
-        user = await userReposiyory.GetUser(id);
-        userRole = roleRepository.GetAllRole().Result.Data;
-
-
         if (id == Guid.Empty)
-            selectedRole = userRole.FirstOrDefault().Id;
+            user = new();
         else
-            selectedRole = user.UsersRoles.FirstOrDefault().Role.Id;
-
-            navManager.NavigateTo($"/user/{user.Id}");
-        
-
-
+        {
+            user = await userReposiyory.GetUser(id);
+            user.UsersRoles = await userReposiyory.GetUserRole(id);
+        }
+        userRole = (await roleRepository.GetAllRole()).Data;
+        company = companyService.GetAllAsync(0, 200).Result;
+        selectedCompanyId = user.CompanyId ?? Guid.Empty;
     }
 
     private async void Save()
     {
+        var userId = await userIdentity.GetCurrentUserId();
         if (id == Guid.Empty)
         {
             user.Id = Guid.NewGuid();
             user.CreateDate = DateTime.Now;
             user.UpdateDate = DateTime.Now;
-            user.CreateUser = user.Id;
-            user.UpdateUser = user.Id;
+            user.CreateUser = userId;
+            user.UpdateUser = userId;
             UserRole userRole = new();
             userRole.RoleId = selectedRole;
             userRole.UserId = user.Id;
-            userReposiyory.AddUser(user);
+            await userReposiyory.AddUser(user);
+
             var result = await userRoleRepository.AddRole(userRole);
-            if(result.Status == ResultStatus.Success)
+            if (result.Status == ResultStatus.Success)
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
             }
             else
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = result.Message, Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = result.Message, Duration = 5000 });
             }
         }
         else
         {
             user.UpdateDate = DateTime.Now;
-            user.UpdateUser = user.Id;
-            userReposiyory.UpdateUser(user);
-            UserRole userrole = user.UsersRoles.FirstOrDefault();
-            userrole.RoleId = selectedRole;
-            var result = await userRoleRepository.UpdateRole(userrole);
+            user.UpdateUser = userId;
+            user.CompanyId = selectedCompanyId;
+
+            user.UsersRoles = null;
+            var result = await userReposiyory.UpdateUser(user);
+            // UserRole userrole = user.UsersRoles.FirstOrDefault();
+            // userrole.RoleId = selectedRole;
+
+            // var result = await userRoleRepository.UpdateRole(userrole);
             if (result.Status == ResultStatus.Success)
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
             }
             else
             {
-                notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = result.Message, Duration = 5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = result.Message, Duration = 5000 });
             }
         }
 
-        navManager.NavigateTo("/userlist");
+        navManager.NavigateTo($"/userlist?id={id}");
     }
     private void Back()
     {
-        navManager.NavigateTo("/userlist");
+
+        navManager.NavigateTo(id == Guid.Empty ? "/userlist" : $"/userlist?id={id}");
     }
 }

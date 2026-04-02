@@ -1,11 +1,16 @@
-﻿@using B2B.Components.UserPanel
+﻿@using CoreUI.Components.UserPanel
 @using Entity
 @inject AuthenticationStateProvider authStateProvider
 @inject NavigationManager navManager
-@inject IUserIdentityProcessor userIdentity
+@* @inject IUserIdentityProcessor userIdentity *@
 <nav class="navbar navbar-expand-lg navbar-dark" style="background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%)">
     <div class="container">
-        <a class="navbar-brand" href="#">B2B</a>
+        <a class="navbar-brand" href="#">B2B
+            <div style="font-weight:200; font-size:0.9rem; letter-spacing:1px;  color:HighlightText;">
+                @Version
+            </div>
+
+        </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -74,6 +79,7 @@
             </ul>
 
             <ul class="navbar-nav" style="margin-right:auto !important">
+              
                 <li class="nav-item">
                     <a class="nav-link" href="iletisim"><span class="oi oi-envelope-closed" aria-hidden="true" style="padding-right:5px;" />İletişim</a>
                 </li>
@@ -108,23 +114,30 @@
 </nav>
 @code
 {
+    private string? Version;
     private async void ccreport()
     {
-        var userId = await userIdentity.GetCurrentUserId();
-        if(userId != Guid.Empty)
-        {
-            navManager.NavigateTo($"/paymentreport/{userId}",true);
-        }
-        else
-        {
-            navManager.NavigateTo("/paymentreport",true);
-        }
+        // var userId = await userIdentity.GetCurrentUserId();
+        // if(userId != Guid.Empty)
+        // {
+        //     navManager.NavigateTo($"/paymentreport/{userId}",true);
+        // }
+        // else
+        // {
+        //     navManager.NavigateTo("/paymentreport",true);
+        // }
     }
 
     private async void exitUser()
     {
-        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
-        await customAuthStateProvider.UpdateAuthenticationState(null);
-        navManager.NavigateTo("/", true);
+        // var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        // await customAuthStateProvider.UpdateAuthenticationState(null);
+        // navManager.NavigateTo("/", true);
+    }
+
+    protected override void OnInitialized()
+    {
+        var assembly = typeof(Program).Assembly;
+        Version = assembly.GetName().Version?.ToString();
     }
 }

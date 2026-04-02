@@ -1,7 +1,4 @@
 ﻿.toast_container {
-    position: fixed;
-    top: 100px;
-    right: 20px;
     width: 300px;
     padding: 15px;
     display: flex;
@@ -9,7 +6,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     background-color: #fff;
-    z-index: 1000;
+    position: relative;
     animation: slideInFromRight 0.5s ease-in-out;
 }
 

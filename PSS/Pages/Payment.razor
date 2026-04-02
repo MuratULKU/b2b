@@ -1,0 +1,81 @@
+﻿@page "/payment"
+@using Business.Abstract
+@using Business.Concrete
+@using Entity
+@inject IClientCardService clientCardManager
+@inject NavigationManager navManager
+<div class="container">
+    <div>
+        <div class="row">
+            <div class="col-4">
+
+
+                <label>Müşteri</label>
+                <SelectList TItem="Client" Items="_clientList" DisplayField="Name" ValueField="Id" @bind-Selected="ChangedClient" />
+                <label>Vergi No</label>
+                <input class="form-control" type="tel" @bind-value="_client.VKN" />
+                <label>Vergi Dairesi</label>
+                <input class="form-control" type="text" @bind-value="_client.VatOffice" />
+                <label>Mail Adres</label>
+                <input class="form-control" type="tel" @bind-value="_client.MailAdress" />
+                <label>Telefon Numarası</label>
+                <input class="form-control" type="tel" @bind-value="_client.Phone1" />
+            </div>
+            <div class="col-4">
+                <h3>Adress</h3>
+                <label>Adres</label>
+                <input class="form-control" type="text" @bind-value="_client.Address1" />
+                <label>Adres</label>
+                <input class="form-control" type="text" @bind-value="_client.Address2" />
+                <label>İlçe</label>
+                <input class="form-control" type="text" @bind-value="_client.Town" />
+                <label>İl</label>
+                <input class="form-control" type="text" @bind-value="_client.City" />
+                <label>Ülke</label>
+                <input class="form-control" type="text" @bind-value="_client.Country" />
+            </div>
+            <div class="col-4">
+                <h3>Firma Yetkilisi</h3>
+                <label>Adı</label>
+                <input class="form-control" type="text" @bind-value="_client.FirmExecutiveName" />
+                <label>SoyAdı</label>
+                <input class="form-control" type="text" @bind-value="_client.FirmExecutiveSurName" />
+                <label>Telefon</label>
+                <input class="form-control" type="text" @bind-value="_client.Phone2" />
+                <label>Mail Adres</label>
+                <input class="form-control" type="text" @bind-value="_client.MailAdress2" />
+            </div>
+        </div>
+    </div>
+    <input class="btn btn-success"
+           @onclick="@(() => navManager.NavigateTo("/ccpayment", true))"
+           type="button"
+           value="Kredi Kartı" />
+</div>
+
+
+@code {
+    private Guid clientid { get; set; }
+    private Client _client { get; set; } = new();
+    List<Client> _clientList = new();
+    protected override async void OnInitialized()
+    {
+        _clientList = await clientCardManager.GetAll();
+    }
+
+    private object ChangedClient
+    {
+        get
+        {
+            return clientid;
+        }
+        set
+        {
+            if (Guid.TryParse(value.ToString(), out Guid guid))
+                clientid = guid;
+            _client = clientCardManager.GetByGuid(clientid).Result ?? new();
+            
+        }
+    }
+
+}

@@ -1,0 +1,7 @@
+﻿@page "/virtualposcard"
+@page "/virtualposcard/{id:guid}"
+<CoreUI.Components.Bank.VirtualPosCard id="id"/>
+@code{
+    [Parameter]
+    public Guid id { get; set; }
+}

@@ -32,8 +32,8 @@
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
-            // cartPanel.ReadCart();
-        base.OnAfterRender(firstRender);
+            //cartPanel.ReadCart();
+            base.OnAfterRender(firstRender);
     }
 
     protected override void OnInitialized()
@@ -44,7 +44,7 @@
 
     private void OnCartChanged(object sender, CardEventArg args)
     {
-        // _count = cartPanel.Count();
+        _count += 1;
         StateHasChanged();
     }
 

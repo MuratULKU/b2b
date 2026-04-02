@@ -1,4 +1,5 @@
 ﻿@using Business.Concrete
+@using Core.Abstract
 @using CoreUI.Components.NotificationService
 @using B2C.Components.UserPanel
 
@@ -98,9 +99,9 @@
         {
             // userManager.User.Password = model.Password;
             // userManager.UpdateUser(userManager.User);
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Başarılı", Detail = "Şifreniz Değiştirildi.", Duration = 2000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "Başarılı", Detail = "Şifreniz Değiştirildi.", Duration = 2000 });
         }
-        notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Hata", Detail = "Şifreleri Farklı Girilmiş", Duration = 2000 });
+        notification.Notify(new NotificationMessage { Severity = ResultStatus.Warning, Summary = "Hata", Detail = "Şifreleri Farklı Girilmiş", Duration = 2000 });
     }
 
     private void ClickCancel()

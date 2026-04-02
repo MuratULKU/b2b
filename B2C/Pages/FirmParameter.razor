@@ -321,7 +321,7 @@
         firmParamService.Update(firmParam);
     }
 
-    protected async override void OnInitialized()
+    protected override void OnInitialized()
     {
         firmParamList = firmParamService.FirmParameters;
         stateList.Add(new EvetHayır() { Name = "Hayır", State = false });

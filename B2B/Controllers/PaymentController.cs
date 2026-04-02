@@ -4,6 +4,7 @@ using _3DPayment.Results;
 using B2B.Data;
 using Business.Abstract;
 using Core.Logger;
+using CoreUI.Data;
 using Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -299,7 +300,7 @@ namespace B2B.Controllers
 
             //update payment transaction
             payment.BankResponse = JsonConvert.SerializeObject(form);
-            await _paymentService.Update(payment);
+            await _paymentService.Update(payment); 
             _logger.Info($"Hatalı Ödeme" + verifyRequest.ToString());
             return RedirectToAction(payment.OrderNumber.ToString(), "Fail");
             //bu işlem netpay için sadece başarılı işlemde gönderilecek

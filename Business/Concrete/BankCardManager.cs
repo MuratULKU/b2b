@@ -46,7 +46,7 @@ namespace Business.Concrete
 
         public async Task<IDataResult<BankCard>> GetBank(Guid id)
         {
-            var result =  await _unitOfWork.BankCards.GetByIdAsync(id);
+            var result = await _unitOfWork.BankCards.GetByIdAsync(id);
             if(result != null)
                 return new DataResult<BankCard>(ResultStatus.Success, result);
             return new DataResult<BankCard>(ResultStatus.Error,result!);

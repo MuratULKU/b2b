@@ -5,6 +5,7 @@ using B2C.Components.UserPanel;
 using Business.Concrete;
 using Business.SingletonServices;
 using Core.Logger;
+using CoreUI;
 using CoreUI.BackOrder;
 using CoreUI.Components.Confirm;
 using CoreUI.Components.NotificationService;
@@ -43,15 +44,15 @@ builder.Services.AddScoped<IUnitofWork, UnitofWork>();
 
 builder.Services.AddSingleton<FirmParameter>();
 builder.Services.AddSingleton<ConfirmDialogService>();
-builder.Services.AddScoped<UserManager>();
+
 builder.Services.AddBackOrederServices();
 builder.Services.AddHostedService<BackOrder>();
 
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddHttpClient();
-
+builder.Services.AddSingleton<FirmParameterService>();
 //user aAuthentication
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddBusinessServices(builder.Configuration);
 
 var app = builder.Build();
 //initalize database

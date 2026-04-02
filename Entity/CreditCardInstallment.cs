@@ -13,9 +13,10 @@ namespace Entity
         public decimal InstallmentRate { get; set; }
         public bool Active { get; set; }
         public bool Deleted { get; set; }
-       
+        public Guid VirtualPosId { get; set; }
         public bool Business { get; set; } = false;
         public CreditCard CreditCard { get; set; }
+        public VirtualPos VirtualPos { get; set; }
        
     }
 }

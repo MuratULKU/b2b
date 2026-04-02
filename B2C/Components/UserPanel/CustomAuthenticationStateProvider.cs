@@ -1,4 +1,5 @@
 ﻿using B2C.Data;
+using CoreUI.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.Security.Claims;

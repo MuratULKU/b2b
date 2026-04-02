@@ -1,0 +1,27 @@
+﻿@implements IDisposable
+
+<div class="clock">
+    @currentTime
+</div>
+
+@code {
+    private string currentTime = DateTime.Now.ToString("HH:mm:ss");
+    private System.Timers.Timer? timer;
+
+    protected override void OnInitialized()
+    {
+        // 1 saniyede bir güncelle
+        timer = new System.Timers.Timer(1000);
+        timer.Elapsed += (sender, args) =>
+        {
+            currentTime = DateTime.Now.ToString("HH:mm:ss");
+            InvokeAsync(StateHasChanged); // sadece bu komponenti yeniler
+        };
+        timer.Start();
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}

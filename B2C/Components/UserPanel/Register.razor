@@ -1,11 +1,12 @@
 ﻿@page "/register"
-@using B2C.Data
+@using CoreUI.Data
 @using System.Text.Json
 @using B2C.Validation
 @using Business.Abstract
 @using Business.Concrete
+@using Core.Abstract
 @using CoreUI.Components.NotificationService
-@using CoreUI.Data
+
 @inject ILogger<UserRegisterModel> Logger
 @inject IUserService userManager
 @inject IRoleService roleManager
@@ -140,12 +141,12 @@
                 }
                 else
                 {
-                    notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = test1.Message, Detail = "", Duration = 5000 });
+                    notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = test1.Message, Detail = "", Duration = 5000 });
                 }
             }
             else
             {
-                notification.Notify(new NotificationMessage {Severity=NotificationSeverity.Error,Summary=test.Message,Detail="",Duration=5000 });
+                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = test.Message, Detail = "", Duration = 5000 });
             }
 
         }

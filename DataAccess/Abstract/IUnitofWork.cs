@@ -38,12 +38,15 @@ namespace DataAccess.Abstract
         IClFicheRepository ClFiche { get; }
         IProductRepository Product { get; }
         IFirmDocRepository FirmDoc { get; }
+        ICurrenciesRepository Currencies { get; }
         public void BeginTransaction();
         public Task CommitTransactionAsync();
         public Task RollbackTransactionAsync();
         public IEnumerable<EntityEntry> ChangedEntries();
         public EntityState ChangedEntity<TEntity>(TEntity entity);
         public IEnumerable<string> GetTrackedChanges();
+        public EntityEntry Entry(object entity);
         Task<int> CommitAsync();
+        ChangeTracker ChangeTracker { get; }
     }
 }

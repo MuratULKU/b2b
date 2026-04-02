@@ -5,15 +5,7 @@ using Core.Logger;
 using DataAccess.Abstract;
 using Entity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Business.Concrete
 {
@@ -22,65 +14,123 @@ namespace Business.Concrete
       
 
         private readonly IUnitofWork _unitOfWork;
-        private readonly ILoggerService _logger;
-
-        public OrderManager(IUnitofWork unitOfWork, ILoggerService logger)
+      
+        public OrderManager(IUnitofWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _logger = logger;
         }
 
         public async Task DeleteLine(OrdLine ordLine)
         {
-            await _unitOfWork.OrdLine.Delete(ordLine);
+            var existing = await _unitOfWork.OrdLine.GetByIdAsync(ordLine.Id);
+            if (existing != null)
+            {
+                var entyr = _unitOfWork.Entry(existing);
+                entyr.CurrentValues.SetValues(ordLine);
+                entyr.State = EntityState.Deleted;
+            }
+            else
+            {
+               await _unitOfWork.OrdLine.Delete(ordLine);
+            }
+            await _unitOfWork.CommitAsync();
+        }  
+
+        public async Task AddLine(OrdLine ordLine)
+        {
+            await _unitOfWork.OrdLine.AddAsync(ordLine);
+            await _unitOfWork.CommitAsync();
         }
 
-        public async Task Save(OrdFiche ordFiche)
+        public async Task<IResult> UpdateLine(OrdLine ordLine)
+        {
+            var existing = await _unitOfWork.OrdLine.GetByIdAsync(ordLine.Id);
+            if(existing != null)
+            {
+                // await _unitOfWork.OrdLine.UpdateAsync(ordLine);
+                var entyr = _unitOfWork.Entry(existing);
+                entyr.CurrentValues.SetValues(ordLine);
+                entyr.State = EntityState.Modified;
+                var result = await _unitOfWork.CommitAsync();
+                if (result == 1)
+                    return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+                else
+                    return new Result(ResultStatus.Error, "Hatalı İşlem");
+            }
+            else
+            {
+                await _unitOfWork.OrdLine.UpdateAsync(ordLine);
+                return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+            }
+          
+        }
+
+        public async Task<IResult> Save(OrdFiche ordFiche)
         {
             try
             {
-                var r = _unitOfWork.ChangedEntries().ToArray();
-                if (ordFiche.Lines == null || ordFiche.Lines.Count == 0)
-                 await   _unitOfWork.OrdFiche.Delete(ordFiche);
+                //var deletedEntries = _unitOfWork.ChangedEntries().Where(e => e.State == EntityState.Deleted)
+                //    .ToArray();
 
+                //var addEntries = _unitOfWork.ChangedEntries().Where(e =>e.State == EntityState.Added).ToArray();
+                //var updateEntries = _unitOfWork.ChangedEntries().Where(e =>e.State == EntityState.Modified).Select(e => (OrdLine)e.Entity).ToArray();
+               
+
+                if (ordFiche.Lines == null || ordFiche.Lines.Count == 0)
+                {
+                    var existing = await _unitOfWork.OrdFiche.GetByIdAsync(ordFiche.Id);
+                    if (existing != null)
+                    {
+                        var entyr = _unitOfWork.Entry(existing);
+                        entyr.CurrentValues.SetValues(ordFiche);
+                        entyr.State = EntityState.Deleted;
+                    }
+                    else
+                    {
+                        
+                        await _unitOfWork.OrdFiche.Delete(ordFiche);
+                    }
+                }
                 else
                 {
                     if(ordFiche.Id == Guid.Empty)
                     {
-                        foreach(OrdLine line in ordFiche.Lines)
-                        {
-                            line.Product = null;
-                            await _unitOfWork.OrdLine.AddAsync(line);
-                        }
-                       
-                        await _unitOfWork.OrdFiche.AddAsync(ordFiche);
+                      
+                        var test =  await _unitOfWork.OrdFiche.AddAsync(ordFiche);
                     }
                     else
                     {
-                        if (ordFiche.Lines != null)
+                        // kayıt takip edilyormu diye kontrol etmek gerekiyor
+                        //updateden sonra commit yapılsa bile traked poz. kalıyor.
+                        var existing = await _unitOfWork.OrdFiche.GetByIdAsync(ordFiche.Id);
+                        if (existing != null)
                         {
-                            foreach (OrdLine line in ordFiche.Lines)
-                            {
-                                var entity = _unitOfWork.ChangedEntity<OrdLine>(line);
-                                if (line.Id == Guid.Empty)
-                                {
-                                    line.Product = null;
-                                    await _unitOfWork.OrdLine.AddAsync(line);
-                                }
-                                else
-                                    await _unitOfWork.OrdLine.UpdateAsync(line);
-                            }
+                            var entyr = _unitOfWork.Entry(existing);
+                            entyr.CurrentValues.SetValues(ordFiche);
+                            entyr.State = EntityState.Modified;
+                          
                         }
-                        await _unitOfWork.OrdFiche.UpdateAsync(ordFiche);
+                        else
+                        {
+                            await _unitOfWork.OrdFiche.UpdateAsync(ordFiche);
+                        }
                     }
                 }
-              
-              await  _unitOfWork.CommitAsync();
+
+                var result =  await  _unitOfWork.CommitAsync();
+                if(result > 0)
+                {
+                    return new Result(ResultStatus.Success, "Kayıt Başarılı");
+                }
+                else
+                {
+                    return new Result(ResultStatus.Error, "Kayıt Hatalı");
+                }
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
-               await Task.FromException(ex);
+
+                return new Result(ResultStatus.Error, ex.Message);
             }
 
         }
@@ -113,8 +163,8 @@ namespace Business.Concrete
         {
             var result = await _unitOfWork.OrdFiche.SingleOrDefaultAsync(
                 x => x.Send == send && x.UserId == userId,
-                x => x.Include(x => x.Lines)  // Include the Lines collection
-                      .ThenInclude(line => line.Product).AsNoTracking()  // Then include the Product for each Line
+                x => x.AsNoTracking().Include(x => x.Lines)  // Include the Lines collection
+                      .ThenInclude(line => line.Product) // Then include the Product for each Line
 );
 
             return result;
@@ -124,8 +174,8 @@ namespace Business.Concrete
         {
             var result = await _unitOfWork.OrdFiche.SingleOrDefaultAsync(
                 x => x.Id == id,
-                x => x.Include(x => x.Lines)  // Include the Lines collection
-                      .ThenInclude(line => line.Product).AsNoTracking()  // Then include the Product for each Line
+                x => x.AsNoTracking().Include(x => x.Lines)  // Include the Lines collection
+                      .ThenInclude(line => line.Product)  // Then include the Product for each Line
 );
 
             return result;
@@ -145,6 +195,7 @@ namespace Business.Concrete
         public async Task DeleteOrderFiche(OrdFiche ordFiche)
         {
            await _unitOfWork.OrdFiche.Delete(ordFiche);
+           await _unitOfWork.CommitAsync();
         }
 
         public async Task<OrdFiche> GetOrderFiche(int send, Guid userId)

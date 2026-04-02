@@ -41,6 +41,7 @@ namespace DataAccess.Concrete
         private IClFicheRepository _clFicheRepository;
         private IProductRepository? _productRepository;
         private IFirmDocRepository? _firmDocRepository;
+        private ICurrenciesRepository? _currenciesRepository;
         public UnitofWork(RepositoryContext context, ILoggerService logger)
         {
             this._context = context;
@@ -94,7 +95,7 @@ namespace DataAccess.Concrete
 
         public IProductRepository Product => _productRepository = _productRepository ?? new ProductRepository(_context);
         public IFirmDocRepository FirmDoc => _firmDocRepository = _firmDocRepository ?? new FirmDocRepository(_context);
-
+        public ICurrenciesRepository Currencies => _currenciesRepository = _currenciesRepository ?? new CurrenciesRepository(_context);
         // Commit changes asynchronously
         public async Task<int> CommitAsync()
         {
@@ -153,6 +154,7 @@ namespace DataAccess.Concrete
             return test.State;
         }
 
+        public EntityEntry Entry(object entity) => _context.Entry(entity);
         public IEnumerable<string> GetTrackedChanges()
         {
             var entries = _context.ChangeTracker.Entries()
@@ -187,6 +189,10 @@ namespace DataAccess.Concrete
 
             return changes;
         }
-    
+
+       
+
+        public ChangeTracker ChangeTracker => _context.ChangeTracker;
+
     }
 }

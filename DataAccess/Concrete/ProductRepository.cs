@@ -15,9 +15,25 @@ namespace DataAccess.Concrete
 
         }
 
+        public async Task<Guid?> GetIdByCode(string code)
+        {
+            return await dbContext.Set<Product>()
+                .AsNoTracking() // ✅ Sadece okuma — tracking yok
+                .Where(x => x.Code == code)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await dbContext.SaveChangesAsync();
+        }
+
+
         public List<Product> GetAll()
         {
             return dbContext.Set<Product>()
+                .AsNoTracking()
                 .Include(x => x.PriceLists)
                 .Include(x => x.ProductAmounts)
                 .OrderBy(x => x.Code)
@@ -27,8 +43,9 @@ namespace DataAccess.Concrete
         public List<Product> GetAll(int currentPage, int pageSize)
         {
             return dbContext.Set<Product>()
+                .AsNoTracking()
                 .Include(x => x.PriceLists)
-                .ThenInclude(y => y.Currency)
+                //.ThenInclude(y => y.Currency)
                 .Include(x => x.ProductAmounts)
                 .OrderBy(x => x.Code)
                 .Skip((currentPage - 1) * pageSize)
@@ -166,8 +183,8 @@ namespace DataAccess.Concrete
 
              return Task.FromResult(dbContext.Set<Product>()
                 .FromSqlRaw(queryText)
-                .Include(x => x.PriceLists)
-                .ThenInclude(y => y.Currency)
+                 .AsNoTracking().Include(x => x.PriceLists)
+                //.ThenInclude(y => y.Currency)
                 .Include(x => x.ProductAmounts)
                 .Include(x => x.firmDocs)
                 .Include(x => x.CharAsgn)
@@ -183,8 +200,8 @@ namespace DataAccess.Concrete
 
                 CategoryId == 0
                  ? dbContext.Set<Product>()
-                 .Include(x => x.PriceLists)
-                 .ThenInclude(y => y.Currency)
+                 .AsNoTracking().Include(x => x.PriceLists)
+            //     .ThenInclude(y => y.Currency)
                  .Include(x => x.ProductAmounts)
                  .Include(x => x.firmDocs)
                  .OrderBy(x => x.Code)
@@ -212,7 +229,7 @@ namespace DataAccess.Concrete
                  .ToList()
                 : dbContext.Set<Product>()
                  .Include(x => x.PriceLists)
-                 .ThenInclude(y => y.Currency)
+           //      .ThenInclude(y => y.Currency)
                  .Include(x => x.ProductAmounts)
                  .Include(x => x.firmDocs)
                  .OrderBy(x => x.Code)
@@ -248,9 +265,9 @@ namespace DataAccess.Concrete
         public async Task<Product> GetByCode(string code)
         {
             return await dbContext.Set<Product>()
-                .Include(x => x.firmDocs)
-                .Include(x => x.PriceLists)
-                .ThenInclude(y => y.Currency)
+               .Include(x => x.firmDocs)
+                 .Include(x => x.PriceLists)
+           //      .ThenInclude(y => y.Currency)
                 .Include(x => x.ProductAmounts)
                 .FirstOrDefaultAsync(x => x.Code == code);
         }
@@ -263,13 +280,11 @@ namespace DataAccess.Concrete
         public void Insert(Product product)
         {
             dbContext.Set<Product>().Add(product);
-            dbContext.SaveChanges();
         }
 
         public void InsertImage(FirmDoc firmDoc)
         {
             dbContext.Set<FirmDoc>().Add(firmDoc);
-            dbContext.SaveChanges();
         }
         public async Task<int> DeleteAll()
         {
@@ -345,19 +360,19 @@ namespace DataAccess.Concrete
         public void Update(Product product)
         {
             dbContext.Set<Product>().Update(product);
-            dbContext.SaveChanges();
+            
         }
 
         public void UpdateImage(FirmDoc firmdoc)
         {
             dbContext.Set<FirmDoc>().Update(firmdoc);
-            dbContext.SaveChanges();
+           
         }
-
+        //todo bu kontrol edilmesi lazım
         public Task<bool> Delete(Product product)
         {
             dbContext.Set<Product>().Remove(product);
-            dbContext.SaveChanges();
+           
             return Task.FromResult(true);
         }
 

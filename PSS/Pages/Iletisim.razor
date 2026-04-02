@@ -62,7 +62,7 @@
         mail = "";
         namesurname = "";
         message = "";
-        notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Mesaj Gönderildi", Detail = "Mesajınız Başarılı Şekilde İletildi.", Duration = 5000 });
+        notification.Notify(new NotificationMessage { Severity = Core.Abstract.ResultStatus.Success, Summary = "Mesaj Gönderildi", Detail = "Mesajınız Başarılı Şekilde İletildi.", Duration = 5000 });
 
     }
 }

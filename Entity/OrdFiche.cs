@@ -29,10 +29,11 @@ namespace Entity
         public Guid UserId { get; set; }
         public List<OrdLine>? Lines { get; set; }
         public User User { get; set; }
-        public Currency? Currency { get; set; }
+        public Currency Currency { get; set; }
         public Guid CompanyId { get; set; } = Guid.Empty;
         public Company Company { get; set; } = default!;
         [NotMapped]
         public string Salesman => User != null ? User.AccountCode : "";
+       
     }
 }

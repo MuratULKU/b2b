@@ -12,5 +12,10 @@ namespace DataAccess.Concrete
         {
         }
 
+        public async Task<int> DeleteAll()
+        {
+            dbContext.Set<FirmDoc>().ExecuteDelete();
+            return await dbContext.SaveChangesAsync();
+        }
     }
 }

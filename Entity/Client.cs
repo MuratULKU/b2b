@@ -9,8 +9,8 @@ namespace Entity
 {
     public class Client:BaseEntity
     {
-        public string Code { get; set; }
-        public string Name { get; set; }
+        public string? Code { get; set; }
+        public string? Name { get; set; }
         [MaybeNull]
         public string? VatOffice { get; set; }
         public string? VKN { get; set; }

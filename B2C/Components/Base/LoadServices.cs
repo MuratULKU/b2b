@@ -77,6 +77,8 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<IFirmParamService, FirmParamManager>();
             serviceCollection.AddScoped<ICategoryService, CategoryManager>();
             serviceCollection.AddScoped<IFirmDocService, FirmDocManager>();
+            serviceCollection.AddScoped<ICompanyService, CompanyManager>();
+         
             return serviceCollection;
         }
     }

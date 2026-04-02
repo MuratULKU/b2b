@@ -25,7 +25,7 @@ namespace Business.Concrete
 
         public async Task<IDataResult<PaymentTransaction>> GetByOrderNumber(Guid orderNumber, bool includeBank = false)
         {
-            var result =  await _unitOfWork.Payment.SingleOrDefaultAsync(x=>x.OrderNumber == orderNumber,q=>q.Include(x=>x.VirtualPos).ThenInclude(x=>x.BankCard));
+            var result =  await _unitOfWork.Payment.SingleOrDefaultAsync(x=>x.OrderNumber == orderNumber,q=>q.Include(x=>x.VirtualPos).ThenInclude(x=>x.BankCard).Include(y=>y.Company));
             return new DataResult<PaymentTransaction>(ResultStatus.Success, result);
         }
 
@@ -85,28 +85,31 @@ namespace Business.Concrete
         public  async Task<IResult> Update(PaymentTransaction paymentTransaction)
         {
             await  _unitOfWork.Payment.UpdateAsync(paymentTransaction);
-            var clFiche = await _unitOfWork.ClFiche.GetByIdAsync(paymentTransaction.Id);
-            if (clFiche == null)
+            if (paymentTransaction.Status == PaymentStatus.Paid)
             {
-                await _unitOfWork.Company.GetByIdAsync(paymentTransaction.CompanyId);
-                ClFiche _clFiche = new ClFiche();
-                _clFiche.Id = paymentTransaction.Id;
-                _clFiche.BankCode = paymentTransaction.VirtualPos.AccountCode;
-                _clFiche.CreateUser = paymentTransaction.CreateUser;
-                _clFiche.UpdateUser = paymentTransaction.UpdateUser;
-                _clFiche.CreateDate = paymentTransaction.CreateDate;
-                _clFiche.UpdateDate = paymentTransaction.UpdateDate;
-                _clFiche.TrCode = 70;
-                _clFiche.DocNo = "";
-                _clFiche.Date = paymentTransaction.PaidDate ?? paymentTransaction.CreateDate;
-                _clFiche.CardCode = paymentTransaction.Company.ProgramCode;
-                _clFiche.ModulNr = 8;
-                _clFiche.Sing = 1;
-                _clFiche.Send = 1;
-                _clFiche.LineExp = "";
-                _clFiche.Amount = (double)paymentTransaction.TotalAmount;
+                var clFiche = await _unitOfWork.ClFiche.GetByIdAsync(paymentTransaction.Id);
+                if (clFiche == null)
+                {
+                    await _unitOfWork.Company.GetByIdAsync(paymentTransaction.CompanyId);
+                    ClFiche _clFiche = new ClFiche();
+                    _clFiche.Id = paymentTransaction.Id;
+                    _clFiche.BankCode = paymentTransaction.VirtualPos.AccountCode;
+                    _clFiche.CreateUser = paymentTransaction.CreateUser;
+                    _clFiche.UpdateUser = paymentTransaction.UpdateUser;
+                    _clFiche.CreateDate = paymentTransaction.CreateDate;
+                    _clFiche.UpdateDate = paymentTransaction.UpdateDate;
+                    _clFiche.TrCode = 70;
+                    _clFiche.DocNo = "";
+                    _clFiche.Date = paymentTransaction.PaidDate ?? paymentTransaction.CreateDate;
+                    _clFiche.CardCode = paymentTransaction.Company.ProgramCode;
+                    _clFiche.ModulNr = 8;
+                    _clFiche.Sing = 1;
+                    _clFiche.Send = 1;
+                    _clFiche.LineExp = "";
+                    _clFiche.Amount = (double)paymentTransaction.TotalAmount;
 
-                await _unitOfWork.ClFiche.AddAsync(_clFiche);
+                    await _unitOfWork.ClFiche.AddAsync(_clFiche);
+                }
             }
             var result = await _unitOfWork.CommitAsync();
             if (result == 1)

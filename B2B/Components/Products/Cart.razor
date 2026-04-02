@@ -3,6 +3,7 @@
 
 @using B2B.Data
 @using CoreUI.Components.NotificationService
+@using CoreUI.Components.UserPanel
 @using Entity
 @inject CartService cartService
 @inject IUserIdentityProcessor userIdentity
@@ -49,7 +50,7 @@
                                     <td data-label="Tutar" class="text-end">@cartitem.Total.ToString("N2")</td>
                                     <td data-label="İşlem">
                                         <input type="button" class="cart-delete-button"
-                                               onclick="@(() => { cartService.RemoveCart(cartitem); StateHasChanged(); })"
+                                               onclick="@(() => { cartService.RemoveCart(cartitem); ordlines.Remove(cartitem); StateHasChanged(); })"
                                                value="Sil" />
                                     </td>
                                 </tr>
@@ -137,8 +138,9 @@
 
     private async void ApprovingOrder()
     {
-        cartService.OrderSend();
-        notification.Notify(new NotificationMessage { Severity = Core.Abstract.ResultStatus.Success, Summary = "Kayıt Tamamlandı.", Detail = "Sipariş Kayıt Edildi.", Duration = 2000 });
+        var result = await cartService.OrderSend();
+        notification.Notify(new NotificationMessage { Severity = result.Status, Summary = result.Status.ToString(), Detail = result.Message, Duration = 2000 });
+        if(result.Status == Core.Abstract.ResultStatus.Success)
         navManager.NavigateTo($"/confirmorder/{cartService._ordFiche.Id}");
     }
 

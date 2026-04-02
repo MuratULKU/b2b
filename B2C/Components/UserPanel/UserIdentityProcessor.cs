@@ -5,21 +5,18 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 namespace B2C.Components.UserPanel
 {
-  public class UserIdentityProcessor : IUserIdentityProcessor
-{
-    private readonly AuthenticationStateProvider _authenticationStateAsync;
-
-        [Inject]
-        private UserManager UserManager { get; set; }
-
-    public UserIdentityProcessor(AuthenticationStateProvider authenticationStateAsync)
+    public class UserIdentityProcessor : IUserIdentityProcessor
     {
-        this._authenticationStateAsync = authenticationStateAsync;
-    }
+        private readonly AuthenticationStateProvider AuthStateProvider;
+
+        public UserIdentityProcessor(AuthenticationStateProvider authenticationStateAsync)
+        {
+            AuthStateProvider = authenticationStateAsync;
+        }
 
         public async Task<Guid> GetCurrentUserId()
         {
-            var authState = await _authenticationStateAsync.GetAuthenticationStateAsync();
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
 
             if (authState == null)
             {
@@ -33,6 +30,5 @@ namespace B2C.Components.UserPanel
                 return Guid.Parse(result);
             return Guid.Empty;
         }
-
-}
+    }
 }

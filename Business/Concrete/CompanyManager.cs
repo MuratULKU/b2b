@@ -12,10 +12,9 @@ namespace Business.Concrete
         private readonly IUnitofWork _unitOfWork;
         private readonly ILoggerService _logger;
 
-        public CompanyManager(IUnitofWork unitOfWork, ILoggerService logger = null)
+        public CompanyManager(IUnitofWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _logger = logger;
         }
 
         public async Task<Company> Get(Guid id)

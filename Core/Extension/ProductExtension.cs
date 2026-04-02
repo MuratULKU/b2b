@@ -9,6 +9,7 @@ namespace Core.Extantaion
         {
             if (product.firmDocs?.Count > 0)
             {
+                 lineNo = lineNo >10 ? lineNo -11 :lineNo;
                 var result = "data:image/jpg;base64,";
                 result += Convert.ToBase64String(product.firmDocs[lineNo].LData);
                 return result;
@@ -46,11 +47,11 @@ namespace Core.Extantaion
 
                 if (product.PriceLists[0].IncVat == 1)
                 {
-                    return ((price - discount) / (1 + ((double)product.SellVat / 100))).ToString("N2") + " " + product.PriceLists[0].Currency.CurrencySymbol;
+                    return ((price - discount) / (1 + ((double)product.SellVat / 100))).ToString("N2") + " TL"; //daha sonra döviz tablundan ;
                 }
                 else
                 {
-                    return (price - discount).ToString("N2") + " " + product.PriceLists[0].Currency.CurrencySymbol;
+                    return (price - discount).ToString("N2") + " TL"; // daha sonra doviz tablosundan ;
                 }
             }
             return product.PriceLists.Count > 0 ? product.PriceLists[0].Price.ToString("N2") + " " + product.PriceLists[0].Currency.CurrencySymbol : string.Empty;
@@ -64,11 +65,11 @@ namespace Core.Extantaion
 
                 if (product.PriceLists[0].IncVat == 1)
                 {
-                    return (price - discount).ToString("N2") + " " + product.PriceLists[0].Currency.CurrencySymbol;
+                    return (price - discount).ToString("N2") + " TL"; ;
                 }
                 else
                 {
-                    return ((price - discount) * (1 + ((double)product.SellVat / 100))).ToString("N2") + " " + product.PriceLists[0].Currency.CurrencySymbol;
+                    return ((price - discount) * (1 + ((double)product.SellVat / 100))).ToString("N2") + " TL"; //daha sonra döviz tablosunan;
                 }
             }
             else

@@ -1,8 +1,10 @@
 ﻿
 using Business.Abstract;
+using Business.Concrete;
 using CoreUI.Data;
 using DataAccess.Abstract;
 using Entity;
+using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -32,16 +34,17 @@ namespace CoreUI.BackOrder
                 var _clientService = scope.ServiceProvider.GetRequiredService<IClientCardService>();
 
                 HttpResponseMessage respone;
-
+               
 
                 int currentpage = 1;
                 int totalpage = 0;
                 do
                 {
                     respone = await _httpClient.GetAsync($"/api/v1/Client/clients?page={currentpage}&pageSize=10");
+                  
                     if (respone.IsSuccessStatusCode)
                     {
-                        var pList = respone.Content.ReadFromJsonAsync<PageResult<Client>>().Result;
+                        var pList = await respone.Content.ReadFromJsonAsync<PageResult<Client>>();
                         if (pList != null)
                         {
                             currentpage = pList.CurrentPage + 1;
@@ -75,6 +78,10 @@ namespace CoreUI.BackOrder
                             }
                         }
                     }
+                    else
+                    {
+                        _logger.LogCritical(respone.StatusCode.ToString());
+                    }
                 } while (currentpage <= totalpage);
 
                 return true;
@@ -82,7 +89,6 @@ namespace CoreUI.BackOrder
             catch (Exception ex)
             {
                 _logger.LogCritical(ex.Message);
-                await Task.FromException(ex);
                 return false;
             }
         }
@@ -98,7 +104,7 @@ namespace CoreUI.BackOrder
                 List<ClFiche> clFiche = await _ClFicheService.GetClFicheFiche(70, 1);
                 if (clFiche != null && clFiche.Count > 0)
                 {
-                    _httpClient.DefaultRequestHeaders.Clear();
+                   // _httpClient.DefaultRequestHeaders.Clear();
                     _httpClient.DefaultRequestHeaders.Accept.Add(
     new MediaTypeWithQualityHeaderValue("application/json"));
                     StringContent content = new StringContent(JsonSerializer.Serialize(clFiche), Encoding.UTF8, "application/json");

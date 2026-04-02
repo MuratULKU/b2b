@@ -64,7 +64,7 @@ namespace CoreUI.BackOrder
         {
             using var scope = _serviceProvider.CreateScope();
             _firmDocRepository = scope.ServiceProvider.GetRequiredService<IFirmDocRepository>();
-           // _firmDocRepository.DeleteAll();
+            _firmDocRepository.DeleteAll();
             return Task.CompletedTask;
         }
         private async Task InsertProduct(List<Product> products)
@@ -132,6 +132,7 @@ namespace CoreUI.BackOrder
                         _productRepository.Update(item);
                     }
                 }
+                 await _productRepository.SaveChangesAsync();
             }
         }
 
@@ -235,19 +236,63 @@ namespace CoreUI.BackOrder
 
         private async Task InsertImage(List<FirmDoc> firmDocs)
         {
-            foreach (var firmdoc in firmDocs)
+            foreach (var firmDoc in firmDocs)
             {
-                if (firmdoc.ProtuctId == Guid.Empty)
-                {
-                    var prd = await _productRepository.GetByCode(firmdoc.Code);
-                    if (prd != null)
-                    {
-                        prd.firmDocs.Add(firmdoc);
-                        _productRepository.Update(prd);
-                    }
-                }
+                if (firmDoc.ProductId != Guid.Empty) continue;
+                if (string.IsNullOrEmpty(firmDoc.Code)) continue;
+
+           
+                var productId = await _productRepository.GetIdByCode(firmDoc.Code);
+                if (productId == null || productId == Guid.Empty) continue;
+
+                
+                firmDoc.ProductId= productId.Value;
+               
+                _productRepository.UpdateImage(firmDoc);
             }
+
+            await _productRepository.SaveChangesAsync(); 
         }
+        //public async Task<bool> updateImages(HttpClient _httpClient)
+        //{
+        //    try
+        //    {
+        //        using var scope = _serviceProvider.CreateScope();
+        //        _productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
+        //        _firmDocRepository = scope.ServiceProvider.GetRequiredService<IFirmDocRepository>();
+        //        HttpResponseMessage respone;
+        //        int currentpage = 1;
+        //        int totalpage = 0;
+        //        do
+        //        {
+        //            respone = await _httpClient.GetAsync($"/api/v1/Products/image?PageSize=20&CurrentPage={currentpage}");
+        //            if (respone.IsSuccessStatusCode)
+        //            {
+        //                var pList = await respone.Content.ReadFromJsonAsync<PageResult<FirmDoc>>();
+        //                if (pList != null)
+        //                {
+        //                    currentpage = pList.CurrentPage;
+        //                    totalpage = pList.TotalPages;
+        //                    if (pList.Items.Count > 0)
+        //                        await InsertImage(pList.Items);
+        //                }
+        //            }
+        //        } while (currentpage <= totalpage);
+
+        //        return true;
+
+        //    }
+
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogCritical(ex.Message);
+        //        await Task.FromException(ex);
+        //        return false;
+        //    }
+        //}
+
+        //charset
+
         public async Task<bool> updateImages(HttpClient _httpClient)
         {
             try
@@ -255,35 +300,45 @@ namespace CoreUI.BackOrder
                 using var scope = _serviceProvider.CreateScope();
                 _productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
                 _firmDocRepository = scope.ServiceProvider.GetRequiredService<IFirmDocRepository>();
-                HttpResponseMessage respone;
-                int currentpage = 1;
-                int totalpage = 0;
+
+                int currentPage = 1;
+                int totalPages = 1;
+
                 do
                 {
-                    respone = await _httpClient.GetAsync($"/api/Products/GetItemImage?PageSize=20&CurrentPage={currentpage}");
-                    if (respone.IsSuccessStatusCode)
+                    var response = await _httpClient.GetAsync($"/api/v1/Products/image?PageSize=20&CurrentPage={currentPage}");
+
+                    if (!response.IsSuccessStatusCode)
                     {
-                        var pList = respone.Content.ReadFromJsonAsync<ListPage<FirmDoc>>().Result;
-                        currentpage = pList.CurrentPage;
-                        totalpage = pList.PageCount;
-                        if (pList.Lines.Count > 0)
-                            await InsertImage(pList.Lines);
+                        _logger.LogWarning("Failed to fetch page {Page}. Status: {Status}", currentPage, response.StatusCode);
+                        break;
                     }
-                } while (currentpage <= totalpage);
+
+                    var pList = await response.Content.ReadFromJsonAsync<PageResult<FirmDoc>>();
+
+                    if (pList == null)
+                    {
+                        _logger.LogWarning("Null response on page {Page}", currentPage);
+                        break;
+                    }
+
+                    totalPages = pList.TotalPages; // ✅ Set total from first/each response
+
+                    if (pList.Items?.Count > 0)
+                        await InsertImage(pList.Items);
+
+                    currentPage++; // ✅ Always advance the page
+
+                } while (currentPage <= totalPages);
 
                 return true;
-
             }
-
             catch (Exception ex)
             {
-                _logger.LogCritical(ex.Message);
-                Task.FromException(ex);
+                _logger.LogCritical(ex, "UpdateImages failed"); // ✅ Pass ex object, not just message
                 return false;
             }
         }
-
-        //charset
         public async Task CharSetDeleteAll()
         {
             using (var scope = _serviceProvider.CreateScope())

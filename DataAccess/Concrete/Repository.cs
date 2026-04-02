@@ -81,14 +81,14 @@ namespace DataAccess.Concrete
 
         public async Task<T> GetByIdAsync(Guid id)
         {
-            var result = await dbContext.Set<T>().FindAsync(id);
-            return result!;
+            var t =  await dbContext.Set<T>().SingleOrDefaultAsync(x => id == id);
+            return t;
+           
         }
 
         public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate)
         {
            return await dbContext.Set<T>().AsNoTracking().SingleOrDefaultAsync(predicate);
-           
         }
 
         public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes)
@@ -112,7 +112,7 @@ namespace DataAccess.Concrete
                 query = includes(query);
             }
 
-            return await query.FirstOrDefaultAsync(predicate);
+            return await query.AsNoTracking().FirstOrDefaultAsync(predicate);
         }
 
         public async Task<T> UpdateAsync(T entity)

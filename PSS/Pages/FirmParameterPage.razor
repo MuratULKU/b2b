@@ -1,14 +1,21 @@
 ﻿@page "/firmparam"
 
 @using Business.Abstract;
+@using Business.SingletonServices
+@using Core.Abstract
 @using CoreUI.Components.DataGrid
+@using CoreUI.Components.NotificationService
 @using CoreUI.Components.SelectList
 @using Entity
 @using System.Text;
 @using System.Reflection
 @attribute [Authorize(Roles = "Admin")]
 @inject IFirmParamService firmParamService
+@inject IVirtualPosService virtualPosService
+@inject FirmParameter firmParamater
+@inject NotificationService notification
 
+@attribute [Authorize]
 <div class="container">
     <div class="row">
         <div class="col-sm-6">
@@ -46,7 +53,7 @@
                                 </div>
                                 <div class="row my-2">
                                     <div class="row my-2">
-                                        <SelectList  TItem="VirtualPos" Items="virtualPosList" DisplayField="Name" ValueField="Id" @bind-Selected="ParamValue" />
+                                        <SelectList TItem="VirtualPos" Items="virtualPosList" DisplayField="Name" ValueField="Id" @bind-Selected="ParamValue" />
                                     </div>
                                 </div>
                             </div>
@@ -310,14 +317,18 @@
         firmParam.Value = Encoding.UTF8.GetBytes(value.Value.ToString());
     }
 
-    private void Save()
+    private async void Save()
     {
         if (firmParamService.ToBoolean(22))
         {
             firmParam = firmParamList.FirstOrDefault(x => x.No == 8);
             firmParam.Value = Encoding.UTF8.GetBytes("01.01.1980");
         }
-        firmParamService.Update(firmParam);
+        var result = await firmParamService.Update(firmParam);
+
+        notification.Notify(new NotificationMessage { Severity = result.Status, Summary = "Hatalı İşlem", Detail = result.Message, Duration = 2000 });
+
+        firmParamater.FirmParameters = firmParamService.GetAll().Result;
     }
 
     protected async override void OnInitialized()
@@ -332,7 +343,7 @@
     }
     protected async override Task OnParametersSetAsync()
     {
-         
+        virtualPosList = await virtualPosService.GetVirtualListsAsync();
     }
 
 

@@ -19,7 +19,25 @@
                         <a class="nav-link" href="order"><span class="oi oi-credit-card" aria-hidden="true" style="padding-right:5px;" />Sipariş</a>
                     </li>
                 </AuthorizeView>
-             
+                <AuthorizeView Roles="Admin,Payment">
+                    <li class="nav-item">
+                        <a class="nav-link" href="payment"><span class="oi oi-credit-card" aria-hidden="true" style="padding-right:5px;" />Tahsilat</a>
+                    </li>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin,Bank">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="oi oi-list-rich" aria-hidden="true" style="padding-right:5px;" />
+                            Banka
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="bank"><span class="oi oi-home" aria-hidden="true" style="padding-right:5px;" />Banka Tanımları</a>
+                            <a class="dropdown-item" href="creditcard"><span class="oi oi-credit-card" aria-hidden="true" style="padding-right:5px;" />Kredi Kartı Tanımları</a>
+                            <a class="dropdown-item" href="virtualpos"><span class="oi oi-laptop" aria-hidden="true" style="padding-right:5px;" />Sanalpos Tanımları</a>
+
+                        </div>
+                    </li>
+                </AuthorizeView>
                 <AuthorizeView Roles="Admin,UserReport">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

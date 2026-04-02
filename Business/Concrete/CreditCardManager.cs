@@ -16,11 +16,10 @@ namespace Business.Concrete
     public class CreditCardManager : ICreditCardService
     {
         private readonly IUnitofWork _unitOfWork;
-        private readonly ILoggerService _logger;
-        public CreditCardManager(IUnitofWork unitOfWork, ILoggerService logger)
+     
+        public CreditCardManager(IUnitofWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _logger = logger;
         }
 
         public async Task<IResult> CreateCreditCard(CreditCard creditCard)
@@ -37,7 +36,7 @@ namespace Business.Concrete
             }
             catch (Exception ex)
             {
-                _logger.Error(ex);
+              
                 return new Result(ResultStatus.Error, $"Beklenmedik bir hata oluştu: {ex.Message}");
             }
         }
@@ -57,7 +56,7 @@ namespace Business.Concrete
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
+               
                 return new Result(ResultStatus.Error, "Hatalı İşlem");
             }
 
@@ -93,10 +92,11 @@ namespace Business.Concrete
         public async Task<CreditCard> GetCreditCardByPrefix(string prefix, bool includeInstallments = false)
         {
             var result = await _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x => x.Prefix == prefix);
-            var creditCard = await _unitOfWork.CreditCards.SingleOrDefaultAsync(x => x.Id == result.CreditCardId);
+            var creditCard = await _unitOfWork.CreditCards.SingleOrDefaultAsync(x => x.Id == result.CreditCardId,x=>x.Include(x=>x.Bank));
+            
             if (creditCard != null)
             {
-                var instalment = await _unitOfWork.CreditCardInstallment.Find(x => x.CreditCardId == creditCard.Id);
+                var instalment = await _unitOfWork.CreditCardInstallment.Find(x => x.CreditCardId == creditCard.Id );
                 creditCard.Installments = instalment;
             }
 
@@ -106,6 +106,11 @@ namespace Business.Concrete
         public Task<List<CreditCard>> GetFiltered(string filter)
         {
             return _unitOfWork.CreditCards.GetFilteredAsync(x => x.Name.ToLower().Contains(filter), x => x.Include(x => x.CardBrand));
+        }
+
+        public async Task<List<CreditCardInstallment>> GetPosIdCreditCard(Guid posid)
+        {
+            return await _unitOfWork.CreditCardInstallment.Find(x => x.VirtualPosId == posid,x=>x.Include(x=>x.CreditCard));
         }
 
         public async Task<IResult> UpdateCreditCard(CreditCard creditCard)

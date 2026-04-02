@@ -1,5 +1,6 @@
-﻿@using CoreUI.Components.NotificationService
-@using PSS.Components.UserPanel
+﻿@using CoreUI.Components.Confirm
+@using CoreUI.Components.NotificationService
+@using CoreUI.Components.UserPanel
 
 @inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -7,6 +8,7 @@
 
     <main>
         <PSSMenu />
+          <Confirm />
         <MNotification />
         <article class="content px-4">
             @Body

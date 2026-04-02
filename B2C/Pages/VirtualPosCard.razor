@@ -4,6 +4,7 @@
 @using B2C.Data
 @using Business.Abstract
 @using Business.Concrete
+@using Core.Abstract
 @using CoreUI.Components.Confirm
 @using CoreUI.Components.DataGrid
 @using CoreUI.Components.Modal
@@ -231,7 +232,7 @@
     {
         if (virtualPos.VirtualPosParameters.Count > 0)
         {
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hata", Detail = "Parametreleri Olan Kart Silinemez.", Duration = 5000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Parametreleri Olan Kart Silinemez.", Duration = 5000 });
             return;
         }
         var onay = await confirm.ShowAsync("Silme Onay", $"{virtualPos.Name} Kayıt Silinecektir Onaylıyor musunuz.");

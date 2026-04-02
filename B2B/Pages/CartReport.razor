@@ -1,9 +1,12 @@
 ﻿@page "/cartreport"
 @using Business.Abstract
 @using Core.Enum
+@using CoreUI.Components.Confirm
 @using CoreUI.Components.DataGrid
 @using Entity
 @inject IOrderService orderService
+@inject ICompanyService companyService
+@inject ConfirmDialogService confirmDialog
 @attribute [Authorize]
 <div class="container">
     <DataGrid TItem="OrdFiche" Items="cartList" RowCount="rowCount" Pager SelectedPageChange="selectedPageChange" 
@@ -11,6 +14,17 @@
          <Columns>
             <Column Caption="Tarih" Field="@nameof(OrdFiche.Date_)" />
             <Column Caption="FişNo" Field="@nameof(OrdFiche.Docode)" />
+            <Column Caption="Cari Kodu">
+                <CellTemplate>
+                    @context.Item.ClientCode
+                </CellTemplate>
+            </Column>
+            <Column Caption="Cari Unvan">
+                <CellTemplate>
+                    @ClientName(context.Item.CompanyId).Result                   
+                    
+                </CellTemplate>
+            </Column>
             <Column Caption="Ara Toplam" Field="@nameof(OrdFiche.GrossTotal)" TextAlign="TextAlignmet.Right" />
             <Column Caption="Vergi" Field="@nameof(OrdFiche.TotalVat)" TextAlign="TextAlignmet.Right" />
             <Column Caption="Toplam" Field="@nameof(OrdFiche.Total)" TextAlign="TextAlignmet.Right" />
@@ -60,9 +74,14 @@
                     <td class="text-end">@ordLines.Sum(x=>x.Total).ToString("N2")</td>
                   </FooterTemplate>
                 </DataGrid>
+               
             }
 
         </DetailRowTemplate>
+        <ButtonRowTemplate>
+            <button class="btn btn-success" disabled="@(ordFiche == null || ordFiche.Send == 2)" style="text-justify:auto" @onclick="ConfirmCart">Sepeti Onayla</button>
+            <button class="btn btn-danger" disabled="@(ordFiche == null || ordFiche.Send == 2)" style="text-justify:auto" @onclick="DeleteCart">Sepeti Sil</button>
+        </ButtonRowTemplate>
     </DataGrid>
 </div>
 @code {
@@ -75,7 +94,7 @@
     {
         totalCount = await orderService.GetOrderFicheCount(1);
         cartList = await orderService.GetOrderFiche(1, 0, rowCount);
-       
+
     }
     private async void selectedPageChange(int page)
     {
@@ -85,5 +104,54 @@
     {
         this.ordFiche = ordFiche;
         ordLines = ordFiche.Lines;
+    }
+
+    private async Task<string> ClientName(Guid id)
+    {
+        var name = await companyService.Get(id);
+        return name.Name;
+    }
+
+    private async Task DeleteCart()
+    {
+        var dialog = await confirmDialog.Show("Onay", "Ksayıt Silinecek Onaylıyor musunuz.");
+        if(dialog)
+        {
+            try
+            {
+                await orderService.DeleteOrderFiche(ordFiche);
+                OnInitialized();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task ConfirmCart()
+    {
+        var dialog = await confirmDialog.Show("Onay", "Sepet Onaylanacak.");
+        if (dialog)
+        {
+            try
+            {
+                ordFiche.Send = 1;
+                await orderService.Save(ordFiche);
+            }
+            catch (Exception ex)
+            {
+                // Hata mesajı göster
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                StateHasChanged();
+            }
+        }
     }
 }

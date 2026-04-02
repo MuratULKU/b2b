@@ -5,6 +5,7 @@
 @using CoreUI.Components.Base
 @using CoreUI.Components.NotificationService
 @using CoreUI.Components.Pagenation
+@using CoreUI.Components.UserPanel
 @using Entity
 @inject CartService cartService
 @inject IUserIdentityProcessor userIdentity
@@ -33,28 +34,30 @@
         PagerPageChanged(0);
     }
 
-    private async void addproduct(Product Data)
+    private async void addproduct(Product product)
     {
         Guid UserId = await userIdentity.GetCurrentUserId();
-        if (Data != null &&  Data.PriceLists?.Count > 0 && Data.OrderAmount > 0 && UserId != Guid.Empty)
-        {
-            try
-            {
-                await cartService.AddUserCart(Data, Data.PriceLists[0].Price, Data.OrderAmount, 0, UserId);
-                notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "", Detail = "Sepete Eklendi.", Duration = 2000 });
-            }
-            catch (Exception)
-            {
+        var result1 = await cartService.AddUserCart(product.Id, product.PriceLists[0]?.Price ?? 0, product.OrderAmount, 0, UserId);
+        notification.Notify(new NotificationMessage { Severity = result1.Status, Summary = result1.Status.ToString(), Detail = result1.Message, Duration = 2000 });
+        // if (Data != null &&  Data.PriceLists?.Count > 0 && Data.OrderAmount > 0 && UserId != Guid.Empty)
+        // {
+        //     try
+        //     {
+        //         var result = await cartService.AddUserCart(Data, Data.PriceLists[0].Price, Data.OrderAmount, 0, UserId);
+        //         notification.Notify(new NotificationMessage { Severity = ResultStatus.Success, Summary = "", Detail = "Sepete Eklendi.", Duration = 2000 });
+        //     }
+        //     catch (Exception)
+        //     {
                 
-                notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Ürün Eklenmedi", Duration = 2000 });
-            }
+        //         notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Ürün Eklenmedi", Duration = 2000 });
+        //     }
             
            
-        }
-        else
-        {
-            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Ürün Bilgileri Hatalı", Duration = 2000 });
-        }
+        // }
+        // else
+        // {
+        //     notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Ürün Bilgileri Hatalı", Duration = 2000 });
+        // }
 
     }
    

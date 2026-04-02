@@ -1,7 +1,8 @@
 ﻿@using System.Collections.Specialized;
 
-<div style="position:fixed; z-index:1002; top:50px; float:right; right:10px;@Style">
-    <div class="toast_close" ></div>
+<div style="position:fixed; z-index:1002; top:50px; right:10px;
+            display:flex; flex-direction:column; gap:8px;">
+    <div class="toast_close"></div>
     @for (var i = 0; i < Service.Messages.Count; i++)
     {
         @DrawMessage(i, Service.Messages[i])

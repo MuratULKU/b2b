@@ -12,6 +12,7 @@ namespace Business.Abstract
     {
         Task<List<CreditCard>> GetAll();
         Task<List<CreditCard>> GetBankCreditCard(Guid bankid);
+        Task<List<CreditCardInstallment>> GetPosIdCreditCard(Guid posid);
         Task<CreditCard> Get(Guid id);
         Task<CreditCard> Get(Guid bankId, Guid brandId);
         Task<IResult> CreateCreditCard(CreditCard creditCard);

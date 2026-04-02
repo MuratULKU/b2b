@@ -15,6 +15,7 @@ namespace Business.Abstract
         Task<IResult> UpdateVirtualPos(VirtualPos virtualPos);
         Task<VirtualPos> GetByBrandId(Guid id);
         Task<VirtualPos> GetByBankId(Guid id);
+        Task<List<VirtualPos>> GetByBrandCode(Guid id);
         Task<VirtualPos> GetVirtualPosAsync(Guid virtualPosId);
         Task<IDataResult<List<VirtualPosParameter>>> GetVirtualPosParameters(Guid bankId);
         Task<List<VirtualPos>> GetVirtualListsAsync();

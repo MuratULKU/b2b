@@ -1,20 +1,4 @@
-﻿window.BlazorDownloadFile = (fileName, contentType, byteArray) => {
-    const blob = new Blob([new Uint8Array(byteArray)], { type: contentType });
-    const url = URL.createObjectURL(blob);
-
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = fileName;
-    anchor.click();
-
-    URL.revokeObjectURL(url);
-};
-
-
-
-
-
-function postToPage(data, url) {
+﻿function postToPage(data, url) {
     // Formu oluşturma
     var form = document.createElement("form");
     form.setAttribute("method", "post");

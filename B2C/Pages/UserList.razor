@@ -2,35 +2,76 @@
 
 @using Business.Abstract
 @using CoreUI.Components.DataGrid
+@using Entity
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject IUserService UserManager
+@inject ProtectedLocalStorage localStorage
+@inject NavigationManager navManager
 @attribute [Authorize(Roles = "Admin")]
-<DataGrid TItem="User"
-          Items="userList"
-          Virtualize
-          SelectedItemChanged="selectedItemChandeg"
-          Pager>
-    <Columns>
-        <Column Caption="User Name" Field="@nameof(User.Username)" />
-        <Column Caption="Mail Adresi" Field="@nameof(User.Email)" />
-        <Column Caption="Şifre" Field="@nameof(User.Password)" />
-        <Column Caption="Muhasebe Kodu" Field="@nameof(User.AccountCode)" />
-    </Columns>
-    <ButtonRowTemplate>
-      
-          <a class="btn btn-primary" href="/user">Ekle</a>
-          <a class="btn btn-secondary" href="/user?id=@user?.Id" disabled>Değiştir</a>
-    </ButtonRowTemplate>
-</DataGrid>
+<div class="container">
+    <DataGrid TItem="User"
+              Items="userList"
+              SelectedItemChanged="selectedItemChandeg"
+              SelectedItem="user"
+              Pager="true"
+              Virtualize="true"
+              RowCount="RowCount"
+              TotalCount="userList.Count"
+              CurrentPage="CurrentPage"
+              RowsPerPage="rowsPerPage"
+              SelectedPageChange="selectedPageChange">
+        <Columns>
+            <Column Caption="User Name" Field="@nameof(User.Username)" />
+            <Column Caption="Mail Adresi" Field="@nameof(User.Email)" />
+            <Column Caption="Şifre" Field="@nameof(User.Password)" />
+            @*   <Column Caption="Muhasebe Kodu" Field="@nameof(User.AccountCode)" /> *@
+        </Columns>
+        <ButtonRowTemplate>
+
+            <a class="btn btn-primary" href="/user">Ekle</a>
+            <input class="btn btn-secondary" disabled="@(user == null? true:false)" onclick="@changeClick" value="Değiştir" />
+        </ButtonRowTemplate>
+    </DataGrid>
+</div>
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public Guid? Id { get; set; } // URL’den id'yi almak için
+
     private List<User> userList;
     private User user;
+    private int CurrentPage { get; set; }
+    private int RowCount { get; set; } = 10;
     protected async override void OnInitialized()
     {
         userList = await UserManager.GetAllUser();
+        if (Id.HasValue)
+        {
+            int index = userList.FindIndex(x => x.Id == Id);
+            CurrentPage = (index / RowCount) + 1;
+            user = userList[index];
+
+        }
     }
 
     private void selectedItemChandeg(User user)
     {
         this.user = user;
+
+    }
+
+    private void selectedPageChange(int page)
+    {
+        CurrentPage = page + 1; //dönen değer 1 eksik olduğu için
+    }
+
+    private void rowsPerPage(int rowPerPage)
+    {
+        RowCount = rowPerPage;
+    }
+
+    private void changeClick()
+    {
+        navManager.NavigateTo($"/user?id={user?.Id}");
     }
 }

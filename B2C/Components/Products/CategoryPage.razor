@@ -3,6 +3,7 @@
 @* @page "/category/{refno:int}" *@
 @using Business.Abstract
 @using Business.Concrete
+@using Core.Abstract
 @using CoreUI.Components.NotificationService
 @inject ICategoryService categoryManager
 @inject NavigationManager navManager
@@ -80,7 +81,7 @@
         if (result.Status == Core.Abstract.ResultStatus.Success)
             navManager.NavigateTo("/categories");
             else
-            notification.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Hatalı İşlem", Detail = result.Message, Duration = 2000 });
+            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hatalı İşlem", Detail = result.Message, Duration = 2000 });
     }
     private async void deleteCategory()
     {

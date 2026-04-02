@@ -32,7 +32,7 @@ namespace Business.Concrete
 
         public Task<List<FirmDoc>> GetAll(Guid ByProductId)
         {
-           return  _unitOfWork.FirmDoc.Find(x=>x.ProtuctId == ByProductId);
+           return  _unitOfWork.FirmDoc.Find(x=>x.ProductId == ByProductId);
         }
 
         public async Task<IResult> Save(FirmDoc doc)

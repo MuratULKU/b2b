@@ -1,4 +1,7 @@
 ﻿@page "/creditcard"
+<CoreUI.Components.Bank.CreditCardPageList />
+
+@* @page "/creditcard"
 @using Business.Abstract
 @using Core.Abstract
 @using CoreUI.Components
@@ -7,6 +10,7 @@
 @using CoreUI.Components.Modal
 @using CoreUI.Components.NotificationService
 @using CoreUI.Components.SelectList
+@using CoreUI.Components.UserPanel
 @using Entity
 @inject ICreditCardService CreditCardService
 @inject ICreditCardPrefixService CreditCardPrefixService
@@ -29,6 +33,7 @@
 
                 </form>
             </div>
+            
             <DataGrid TItem="CreditCard" Items="CreditCardList" SelectedItemChanged="SelectedCreditCardChange"
                       Pager RowCount="10" Virtualize="true" TotalCount="@CreditCardList.Count">
                 <Columns>
@@ -401,3 +406,4 @@
 
     }
 }
+ *@

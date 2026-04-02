@@ -26,7 +26,7 @@ namespace SanalMagaza.DataAccess.Concrete
                 query = query.Include(include);
             }
 
-            return await query.SingleOrDefaultAsync(x => x.Id == id);
+            return await query.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id);
         }
     }
 }

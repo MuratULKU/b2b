@@ -1,9 +1,10 @@
 ﻿using Business.Abstract;
-using Business.Concrete;
-using CoreUI.Data;
+
+using Business.ValidationRules;
+using Core.Abstract;
+using Core.Concrete;
+
 using Entity;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Microsoft.EntityFrameworkCore;
 
 namespace B2B.Data
 {
@@ -74,7 +75,7 @@ namespace B2B.Data
 
 
 
-        public async Task AddUserCart(Product product, double Price, double Amount, double Discount, Guid userId)
+        public async Task<Core.Abstract.IResult> AddUserCart(Guid productId, double Price, double Amount, double Discount, Guid userId)
         {
             user = await userService.GetUser(userId);
 
@@ -102,11 +103,12 @@ namespace B2B.Data
                     _ordFiche.CurrencyId = 1; //döviz kuru seçildiğinde değişecek
                     _ordFiche.CompanyId = user.CompanyId ?? default;
                 }
-                OrdLine ordLine =  _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == product.Id);
+                OrdLine ordLine =  _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == productId);
                 if (ordLine == null)
                 {
+                    var product = await productServices.GetByGuid(productId);
                     ordLine = new();
-                    ordLine.Id = Guid.Empty;
+                    ordLine.Id = Guid.NewGuid();
                     ordLine.StockRef = product.LogicalRef;
                     ordLine.Amount = Amount;
                     ordLine.Price = Price;
@@ -143,7 +145,21 @@ namespace B2B.Data
                     ordLine.Date_ = _ordFiche.Date_;
                     ordLine.CurrencyId = 1;
                     _ordFiche.Lines.Add(ordLine);
-                    
+                    var valid = ordLine.Validation();
+                    if (valid.Count == 0)
+                    {
+                        await orderService.AddLine(ordLine);
+                    }
+                    else
+                    {
+                        string msg = "";
+                        foreach (var item in valid)
+                        {
+                            msg += item.ToString();
+                        }
+
+                        return new Result(ResultStatus.Error, msg);
+                    }
                 }
                 else
                 {
@@ -160,12 +176,16 @@ namespace B2B.Data
                     }
                     ordLine.VatMatrah = Math.Round((ordLine.Total - ordLine.Distdisc), 2);
                     ordLine.VatAmnt = Math.Round((ordLine.VatMatrah * ordLine.Vat / 100), 2);
+                    await orderService.UpdateLine(ordLine);
+                    
                 }
                 CalculateFiche();
                
-               await orderService.Save(_ordFiche);
-            }
+                await orderService.Save(_ordFiche);
 
+                
+            }
+          return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
         }
 
         private void CalculateFiche()
@@ -179,14 +199,15 @@ namespace B2B.Data
         }
 
 
-        public void RemoveCart(OrdLine ordLine)
+        public async void RemoveCart(OrdLine ordLine)
         {
             if (ordLine.Id != Guid.Empty)
             {
                 _ordFiche.Lines?.Remove(ordLine);
-                orderService.DeleteLine(ordLine);
+                await orderService.DeleteLine(ordLine);
                 CalculateFiche();
-                orderService.Save(_ordFiche);
+                //fişdeki toplam değişikliği için
+               await orderService.Save(_ordFiche);
             }
         }
 
@@ -194,12 +215,10 @@ namespace B2B.Data
         {
 
         }
-        public async void OrderSend()
+        public async Task<Core.Abstract.IResult> OrderSend()
         {
-            if (_ordFiche == null) return;
             _ordFiche.Send = 1;
-            await orderService.Save(_ordFiche);
-          
+           return await orderService.Save(_ordFiche);
         }
 
         public void Dispose()

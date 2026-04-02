@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace Entity
         public bool Priorty { get; set; }
         [NotMapped]
         public List<CardBrand> CardBrands { get; set; }
-        [NotMapped]
+        public List<CreditCardInstallment>  CreditCardInstallments { get; set; }
         public List<CreditCard> CreditCards { get; set; }
      
         public List<VirtualPosParameter> VirtualPosParameters { get; set; } = new List<VirtualPosParameter>();

@@ -134,11 +134,13 @@ namespace CoreUI.BackOrder
                     }
                     if ((DateTime.Now - _lastSendCheck).TotalMinutes >= 1)
                     {
+                        DateTime? lastUpdateDate = Convert.ToDateTime(_firmParameterService.ToString(8));
+
                         _backOrderOder.SentData(_httpClient);
                         _clientService.SentData(_httpClient);
-                        await _backOrderOder.OrderFicheState(_httpClient);
+                        await _backOrderOder.OrderFicheState(lastUpdateDate,_httpClient);
                         _logger.LogInformation("SendData");
-                        DateTime? lastUpdateDate = Convert.ToDateTime(_firmParameterService.ToString(8));
+                      
                         string updatedate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
                         if (_firmParameterService.ToString(22) == "True")
@@ -180,7 +182,7 @@ namespace CoreUI.BackOrder
                         if (_firmParameterService.ToString(27) == "True")
                         {
                             await _productService.DeleteImages();
-                            await _productService.updateImages(_httpClient);
+                            await _productService.updateImages(lastUpdateDate,_httpClient);
                             _firmParameterService.Set(27, "False");
                         }
                         _logger.LogInformation("Image table updated");
@@ -195,7 +197,7 @@ namespace CoreUI.BackOrder
                         await _clientService.UpdateClient(lastUpdateDate, _httpClient);
 
                         var time = Convert.ToInt32(_firmParameterService.ToString(18));
-                        _logger.LogCritical($"Completed Connection Api...{DateTime.Now}");
+                        _logger.LogCritical($"Completed Connection Api...{lastUpdateDate.Value.ToString()} -- {DateTime.Now}");
                         _lastSendCheck = DateTime.Now;
                     }
                   

@@ -48,7 +48,7 @@ namespace Business.Concrete
         {
             await _unitOfWork.VirtualPosParameter.UpdateAsync(bankParameter);
             var result = await _unitOfWork.CommitAsync();
-            if (result == 1)
+            if (result > 0)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
             return new Result(ResultStatus.Error, "Hatalı İşlem");
         }

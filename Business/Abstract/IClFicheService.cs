@@ -13,5 +13,7 @@ namespace Business.Abstract
         Task<IResult> Insert(ClFiche clFiche);
         Task<IResult> Update(ClFiche clFiche);
         Task<List<ClFiche>> GetClFicheFiche(int trCode, byte send);
+        Task<ClFiche> GetClFiche(Guid id);
+        Task<ClFiche> GetPaymetId(Guid id);
     }
 }

@@ -1,0 +1,38 @@
+﻿@page "/fail/{guid}"
+@using B2C.Data;
+@using Business.Abstract
+@using DataAccess.Abstract;
+@using Entity;
+@using _3DPayment.Results;
+@attribute [Authorize]
+@inject IPaymentService paymentTransaction;
+<div class="container">
+    <div>
+        <label>Ödeme İşlemi Sonucu Hatalı</label>
+    </div>
+    <div>
+        <label>@paymet.BankErrorMessage</label>
+       @if(!string.IsNullOrWhiteSpace(ErrorMessage))
+       {
+       <label>@ErrorMessage</label>
+       }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string guid { get; set; }
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public string ErrorMessage { get; set; }
+
+
+
+    PaymentTransaction paymet;
+    protected override void OnInitialized()
+    {
+      
+        paymet = paymentTransaction.GetByOrderNumber(Guid.Parse(guid)).Result.Data;
+    }
+
+    }

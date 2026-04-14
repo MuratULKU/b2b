@@ -15,7 +15,7 @@ namespace CoreUI.BackOrder
     public interface IBackOrderOder
     {
         void SentData(HttpClient _httpClient);
-        Task<bool> OrderFicheState(HttpClient _httpClient);
+        Task<bool> OrderFicheState(DateTime? date, HttpClient _httpClient);
     }
     public class BackOrderOrder : IBackOrderOder
     {
@@ -29,7 +29,7 @@ namespace CoreUI.BackOrder
             _logger = logger;
         }
 
-        public async Task<bool> OrderFicheState(HttpClient _httpClient)
+        public async Task<bool> OrderFicheState(DateTime? date, HttpClient _httpClient)
         {
             try
             {
@@ -40,7 +40,7 @@ namespace CoreUI.BackOrder
                 int totalpage = 0;
                 do
                 {
-                    respone = await _httpClient.GetAsync($"/api/v1/Orders/ordersstate?PageSize=20&Page={currentpage}");
+                    respone = await _httpClient.GetAsync($"/api/v1/Orders/ordersstate?PageSize=20&Page={currentpage}&date={date.Value.ToString("MM.dd.yyyy HH:mm:ss")}");
                     if (respone.IsSuccessStatusCode)
                     {
                         var pList = respone.Content.ReadFromJsonAsync<PageResult<ResposeStateModel>>().Result;
@@ -49,7 +49,7 @@ namespace CoreUI.BackOrder
                         foreach (var item in pList.Items)
                         {
                             var _ordFiche = await _orderService.GetOrderFiche(item.logicalref);
-                            if(_ordFiche != null && (item.status == 4 || item.status == 2))
+                            if (_ordFiche != null && (item.status == 4 || item.status == 2))
                             {
                                 if (item.status == 4)
                                     _ordFiche.Send = 4;
@@ -60,6 +60,7 @@ namespace CoreUI.BackOrder
                         }
                         currentpage++;
                     }
+                   
                 } while (currentpage <= totalpage);
 
                 return true;

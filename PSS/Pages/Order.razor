@@ -9,6 +9,7 @@
 @inject IOrderService orderService
 @inject IClientCardService clientCardService
 @inject NavigationManager navManager
+@attribute [Authorize]
 <div class="container">
     <div class="offer">
         <input class="btn btn-success" type="button" value="Yeni Sipariş" onclick="@(()=>NewOrderButtonClick())" />
@@ -83,6 +84,7 @@
     private void OrderOK()
     {
         ordFiche.Send = 1;
+        ordFiche.Date_ = DateTime.Now;
         orderService.Save(ordFiche);
 
     }

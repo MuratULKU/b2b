@@ -1,5 +1,6 @@
 ﻿@page "/virtualposcard"
 @page "/virtualposcard/{id:guid}"
+@attribute [Authorize]
 <CoreUI.Components.Bank.VirtualPosCard id="id"/>
 @code{
     [Parameter]

@@ -1,5 +1,5 @@
 ﻿@page "/extre"
-@using B2B.Data
+
 @using Business.Abstract
 @using CoreUI.Components.DataGrid
 
@@ -11,6 +11,7 @@
 @inject IConfiguration configuration
 @inject ICompanyService companyService
 @inject ILogger<ConfirmOrder> _logger
+
 @attribute [Authorize]
 <div class="container">
     <div class="row">

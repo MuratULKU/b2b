@@ -3,6 +3,7 @@ using _3DPayment.Results;
 using _3DPayment;
 using Business.Abstract;
 using Core.Logger;
+using CoreUI.Data;
 using Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,9 +11,8 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Net;
-using CoreUI.Data;
 
-namespace CoreUI.Controllers
+namespace PSS.Controllers
 {
     public class PaymentController : Controller
     {
@@ -84,7 +84,7 @@ namespace CoreUI.Controllers
                     Explanation = model.Explanation,
                     CreateUser = model.UserId,
                     CompanyId = model.CompanyId,
-
+                    ClientCode = model.ClientCode,
                 };
 
                 payment.MarkAsCreated();

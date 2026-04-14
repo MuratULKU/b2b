@@ -60,7 +60,7 @@ namespace B2C.Migrations
                     b.HasIndex("BankCode")
                         .IsUnique();
 
-                    b.ToTable("BankCards", (string)null);
+                    b.ToTable("BankCards");
                 });
 
             modelBuilder.Entity("Entity.CardBrand", b =>
@@ -92,7 +92,7 @@ namespace B2C.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("CardBrands", (string)null);
+                    b.ToTable("CardBrands");
                 });
 
             modelBuilder.Entity("Entity.Category", b =>
@@ -132,7 +132,7 @@ namespace B2C.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Entity.CharAsgn", b =>
@@ -196,7 +196,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("CharAsgns", (string)null);
+                    b.ToTable("CharAsgns");
                 });
 
             modelBuilder.Entity("Entity.CharCode", b =>
@@ -237,7 +237,7 @@ namespace B2C.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("CharCodes", (string)null);
+                    b.ToTable("CharCodes");
                 });
 
             modelBuilder.Entity("Entity.CharSet", b =>
@@ -274,7 +274,7 @@ namespace B2C.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("CharSets", (string)null);
+                    b.ToTable("CharSets");
                 });
 
             modelBuilder.Entity("Entity.CharVal", b =>
@@ -316,7 +316,7 @@ namespace B2C.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("CharVals", (string)null);
+                    b.ToTable("CharVals");
                 });
 
             modelBuilder.Entity("Entity.ClFiche", b =>
@@ -353,6 +353,9 @@ namespace B2C.Migrations
                     b.Property<short>("ModulNr")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("PaymentTransactionId")
+                        .HasColumnType("TEXT");
+
                     b.Property<byte>("Send")
                         .HasColumnType("INTEGER");
 
@@ -370,7 +373,7 @@ namespace B2C.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ClFiches", (string)null);
+                    b.ToTable("ClFiches");
                 });
 
             modelBuilder.Entity("Entity.Client", b =>
@@ -438,7 +441,7 @@ namespace B2C.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clients", (string)null);
+                    b.ToTable("Clients");
                 });
 
             modelBuilder.Entity("Entity.Company", b =>
@@ -492,7 +495,7 @@ namespace B2C.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Companies", (string)null);
+                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("Entity.CreditCard", b =>
@@ -551,7 +554,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("VirtualPosId");
 
-                    b.ToTable("CreditCards", (string)null);
+                    b.ToTable("CreditCards");
                 });
 
             modelBuilder.Entity("Entity.CreditCardInstallment", b =>
@@ -599,7 +602,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("VirtualPosId");
 
-                    b.ToTable("CreditCardInstallments", (string)null);
+                    b.ToTable("CreditCardInstallments");
                 });
 
             modelBuilder.Entity("Entity.CreditCardPrefix", b =>
@@ -649,7 +652,7 @@ namespace B2C.Migrations
                     b.HasIndex("Prefix")
                         .IsUnique();
 
-                    b.ToTable("CreditCardPrefixes", (string)null);
+                    b.ToTable("CreditCardPrefixes");
                 });
 
             modelBuilder.Entity("Entity.Currency", b =>
@@ -668,7 +671,7 @@ namespace B2C.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Currencies", (string)null);
+                    b.ToTable("Currencies");
 
                     b.HasData(
                         new
@@ -693,7 +696,7 @@ namespace B2C.Migrations
 
                     b.HasKey("DocType");
 
-                    b.ToTable("DocumentNo", (string)null);
+                    b.ToTable("DocumentNo");
 
                     b.HasData(
                         new
@@ -745,7 +748,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("FirmDocs", (string)null);
+                    b.ToTable("FirmDocs");
                 });
 
             modelBuilder.Entity("Entity.FirmParam", b =>
@@ -779,7 +782,7 @@ namespace B2C.Migrations
                     b.HasIndex("No")
                         .IsUnique();
 
-                    b.ToTable("FirmParams", (string)null);
+                    b.ToTable("FirmParams");
                 });
 
             modelBuilder.Entity("Entity.OrdFiche", b =>
@@ -861,7 +864,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("OrdFiches", (string)null);
+                    b.ToTable("OrdFiches");
                 });
 
             modelBuilder.Entity("Entity.OrdLine", b =>
@@ -956,7 +959,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrdLine", (string)null);
+                    b.ToTable("OrdLine");
                 });
 
             modelBuilder.Entity("Entity.PaymentTransaction", b =>
@@ -981,6 +984,10 @@ namespace B2C.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CardPrefix")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ClientCode")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("CompanyId")
@@ -1057,7 +1064,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("VirtualPosId");
 
-                    b.ToTable("PaymentTransactions", (string)null);
+                    b.ToTable("PaymentTransactions");
                 });
 
             modelBuilder.Entity("Entity.PriceList", b =>
@@ -1115,7 +1122,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("PriceLists", (string)null);
+                    b.ToTable("PriceLists");
                 });
 
             modelBuilder.Entity("Entity.Product", b =>
@@ -1239,7 +1246,7 @@ namespace B2C.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Entity.ProductAmount", b =>
@@ -1277,7 +1284,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductAmounts", (string)null);
+                    b.ToTable("ProductAmounts");
                 });
 
             modelBuilder.Entity("Entity.Role", b =>
@@ -1304,89 +1311,89 @@ namespace B2C.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d59540bf-6dce-4e8f-b242-98f8ec17d405"),
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4000),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            Id = new Guid("94316f25-8588-4727-bab7-1b69c541076c"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9791),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             RoleName = "Admin",
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4008),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09")
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9798),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1")
                         },
                         new
                         {
-                            Id = new Guid("219f368d-ea87-443e-98e6-f861a03923bf"),
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4016),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            Id = new Guid("a7598eb4-a5af-40bd-85bc-21668ed7d4c6"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9809),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             RoleName = "User",
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4017),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09")
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9809),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1")
                         },
                         new
                         {
-                            Id = new Guid("b7ea3dee-0071-4c07-ae78-5224ad044bce"),
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4018),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            Id = new Guid("2712f2e4-3c91-4508-a87f-a0f4b6ac9510"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9810),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             RoleName = "B2C",
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4018),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09")
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9810),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1")
                         },
                         new
                         {
-                            Id = new Guid("84638b4e-c49d-4982-8d3c-ea8abaa362a4"),
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4019),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            Id = new Guid("4c248d18-e104-41e2-a106-0e0c2328195b"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9811),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             RoleName = "Managment",
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4020),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09")
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9811),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1")
                         },
                         new
                         {
-                            Id = new Guid("45d79d5f-ef1d-4296-aa7b-738e610daf50"),
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4026),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            Id = new Guid("672d403a-ff9c-48ca-9fa0-8a3f6d029de3"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9812),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             RoleName = "Payment",
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4026),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09")
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9812),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1")
                         },
                         new
                         {
-                            Id = new Guid("c4d7cdfe-9341-47fc-b96e-6bb531cc4337"),
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4027),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            Id = new Guid("186f3d4d-6d95-4094-963f-f9ae769b41b4"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9813),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             RoleName = "Dashboard",
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4028),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09")
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9813),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1")
                         },
                         new
                         {
-                            Id = new Guid("937d015b-cccb-4117-af28-68a75f62758c"),
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4029),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            Id = new Guid("5f85a81a-9f8f-4556-ab1c-bfc896726f04"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9814),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             RoleName = "UserReport",
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4029),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09")
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9814),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1")
                         },
                         new
                         {
-                            Id = new Guid("6312484b-762f-445d-b8c0-5c9e92d7634a"),
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4030),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            Id = new Guid("dd588eca-e2e5-42d1-a8a8-38ea1e0e08f6"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9815),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             RoleName = "Bank",
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4030),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09")
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9815),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1")
                         },
                         new
                         {
-                            Id = new Guid("55abaf63-f078-40d6-96c4-9f337edd8abc"),
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4031),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            Id = new Guid("cd4a699e-0d9b-4821-b0d8-9c76a895c159"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9818),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             RoleName = "Sales",
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4032),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09")
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9819),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1")
                         });
                 });
 
@@ -1470,7 +1477,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ShipAdresses", (string)null);
+                    b.ToTable("ShipAdresses");
                 });
 
             modelBuilder.Entity("Entity.User", b =>
@@ -1525,19 +1532,19 @@ namespace B2C.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            Id = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             AccountCode = "",
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4057),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9836),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             Email = "murat@ulkubilgisayar.com",
                             Password = "Admin",
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4057),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9837),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
                             Username = "Admin"
                         });
                 });
@@ -1569,18 +1576,18 @@ namespace B2C.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles", (string)null);
+                    b.ToTable("UserRoles");
 
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
-                            RoleId = new Guid("d59540bf-6dce-4e8f-b242-98f8ec17d405"),
-                            CreateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4066),
-                            CreateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09"),
-                            Id = new Guid("44da1727-792e-4574-93aa-f49523f0715e"),
-                            UpdateDate = new DateTime(2026, 3, 28, 11, 12, 17, 724, DateTimeKind.Local).AddTicks(4066),
-                            UpdateUser = new Guid("73bd18d7-37f1-461b-bdd0-4ecbf7b3cc09")
+                            UserId = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
+                            RoleId = new Guid("94316f25-8588-4727-bab7-1b69c541076c"),
+                            CreateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9844),
+                            CreateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1"),
+                            Id = new Guid("32c0d8fd-7165-4876-9980-3da4796c90ac"),
+                            UpdateDate = new DateTime(2026, 4, 4, 12, 29, 8, 855, DateTimeKind.Local).AddTicks(9844),
+                            UpdateUser = new Guid("34cced71-1182-4daa-869e-ddd8e6e918e1")
                         });
                 });
 
@@ -1630,7 +1637,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("BankCardId");
 
-                    b.ToTable("VirtualPos", (string)null);
+                    b.ToTable("VirtualPos");
                 });
 
             modelBuilder.Entity("Entity.VirtualPosParameter", b =>
@@ -1666,7 +1673,7 @@ namespace B2C.Migrations
 
                     b.HasIndex("VirtualPosId");
 
-                    b.ToTable("VirtualPosParameters", (string)null);
+                    b.ToTable("VirtualPosParameters");
                 });
 
             modelBuilder.Entity("Entity.CharAsgn", b =>
@@ -1739,7 +1746,7 @@ namespace B2C.Migrations
                         .IsRequired();
 
                     b.HasOne("Entity.VirtualPos", "VirtualPos")
-                        .WithMany()
+                        .WithMany("CreditCardInstallments")
                         .HasForeignKey("VirtualPosId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1973,6 +1980,8 @@ namespace B2C.Migrations
 
             modelBuilder.Entity("Entity.VirtualPos", b =>
                 {
+                    b.Navigation("CreditCardInstallments");
+
                     b.Navigation("CreditCards");
 
                     b.Navigation("VirtualPosParameters");

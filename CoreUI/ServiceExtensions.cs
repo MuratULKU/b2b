@@ -44,6 +44,13 @@ namespace CoreUI
             //virtualpos servisleri
             services.AddScoped<IVirtualPosParameterService, VirtualPosParameterManager>();
             services.AddScoped<IVirtualPosRepository, VirtualPosRepository>();
+
+            //payment servileri
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IPaymentService, PaymentManager>();
+
+            services.AddScoped<IClFicheRepository, ClFicheRepository>();
+            services.AddScoped<IClFicheService, ClFicheManager>();
             return services;
         }
     }

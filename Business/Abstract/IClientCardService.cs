@@ -14,8 +14,8 @@ namespace Business.Abstract
         Task<Client> GetByCode(string Code);
         Task<Client> GetByGuid(Guid id);
         List<Client> GetAll(int currentPage, int pageSize);
-        Task<List<Client>> GetAllAsync(string Filtre, int CategoryId, int CurrentPage, int PageSize);
-        Task<int> TotalCount(string Filtre, int CategoryId, int CurrentPage, int PageSize);
+        Task<List<Client>> GetAllAsync(string Filtre,  int CurrentPage, int PageSize);
+        Task<int> TotalCount(string Filtre, int CurrentPage, int PageSize);
         Task<bool> Insert(Client client);
         Task<bool> Update(Client client);
     }

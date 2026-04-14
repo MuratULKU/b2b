@@ -1,0 +1,8 @@
+﻿@page "/paymentreport"
+@page "/paymentreport/{id:guid}"
+
+<h3>PaymentReport</h3>
+
+@code {
+    [Parameter] public Guid id { get; set; } = default!;
+}

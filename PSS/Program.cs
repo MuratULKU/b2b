@@ -66,6 +66,29 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+    name: "Ok",
+    pattern: "payment/ok/{paymentId:Guid?}",
+    defaults: new { action = "OkUrl", controller = "Payment" });
+    endpoints.MapControllerRoute(
+     name: "Fail",
+     pattern: "payment/fail/{paymentId:Guid?}",
+     defaults: new { action = "FailUrl", controller = "Payment" });
+    endpoints.MapControllerRoute(
+       name: "Confirm",
+       pattern: "payment/confirm/{paymentId:Guid?}",
+       defaults: new { action = "Confirm", controller = "Payment" });
+    endpoints.MapControllerRoute(
+        name: "Callback",
+        pattern: "payment/callback/{paymentId:Guid?}",
+        defaults: new { action = "Callback", controller = "Payment" });
+
+    endpoints.MapRazorPages();
+    endpoints.MapDefaultControllerRoute();
+
+});
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

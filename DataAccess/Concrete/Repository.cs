@@ -79,12 +79,6 @@ namespace DataAccess.Concrete
             return query.Where(predicate).ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(Guid id)
-        {
-            var t =  await dbContext.Set<T>().SingleOrDefaultAsync(x => id == id);
-            return t;
-           
-        }
 
         public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate)
         {
@@ -127,5 +121,6 @@ namespace DataAccess.Concrete
             return result;
         }
 
+       
     }
 }

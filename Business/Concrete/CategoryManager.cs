@@ -48,7 +48,7 @@ namespace Business.Concrete
 
         public async Task<Category> Get(Guid id)
         {
-           return await _unitOfWork.Category.GetByIdAsync(id);
+           return await _unitOfWork.Category.SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<Category> GetByCode(string code)

@@ -1,4 +1,4 @@
-﻿namespace B2B.Data
+﻿namespace CoreUI.Data
 {
     public class ClientFiche
     {

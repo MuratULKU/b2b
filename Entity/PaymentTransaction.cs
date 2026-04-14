@@ -37,6 +37,7 @@ namespace Entity
         public Guid CompanyId { get; set; }
       
         public Company Company { get; set; }
+        public string ClientCode { get; set; }
 
         public PaymentStatus Status
         {

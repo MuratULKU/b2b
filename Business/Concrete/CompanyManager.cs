@@ -19,7 +19,7 @@ namespace Business.Concrete
 
         public async Task<Company> Get(Guid id)
         {
-            return await _unitOfWork.Company.GetByIdAsync(id);
+            return await _unitOfWork.Company.SingleOrDefaultAsync(x => x.Id == id);
            
         }
 
@@ -36,7 +36,7 @@ namespace Business.Concrete
 
         public async Task<Company> GetByUserId(Guid userId)
         {
-            var user = await _unitOfWork.User.GetByIdAsync(userId);
+            var user = await _unitOfWork.User.SingleOrDefaultAsync(x=>x.Id == userId);
             var company = await _unitOfWork.Company.SingleOrDefaultAsync(x => x.Id == user.CompanyId);
             return company;
 

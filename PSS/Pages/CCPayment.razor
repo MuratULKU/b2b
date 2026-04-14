@@ -1,6 +1,8 @@
 ﻿@page "/ccpayment"
-<h3>CCPayment</h3>
-<CoreUI.Components.Payment.Payment></CoreUI.Components.Payment.Payment>
+
+<CoreUI.Components.Payment.Payment ClientCode= "@Code"></CoreUI.Components.Payment.Payment>
 @code {
+    [SupplyParameterFromQuery]
+    [Parameter] public string Code { get; set; } = string.Empty;
 
 }

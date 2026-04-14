@@ -75,7 +75,7 @@ namespace Business.Concrete
         public async Task<IResult> Insert(PaymentTransaction paymentTransaction)
         {
           await _unitOfWork.Payment.AddAsync(paymentTransaction);
-           await _unitOfWork.VirtualPoses.GetByIdAsync(paymentTransaction.VirtualPosId);
+          // await _unitOfWork.VirtualPoses.GetByIdAsync(paymentTransaction.VirtualPosId);
             var result = await _unitOfWork.CommitAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
@@ -85,34 +85,9 @@ namespace Business.Concrete
         public  async Task<IResult> Update(PaymentTransaction paymentTransaction)
         {
             await  _unitOfWork.Payment.UpdateAsync(paymentTransaction);
-            if (paymentTransaction.Status == PaymentStatus.Paid)
-            {
-                var clFiche = await _unitOfWork.ClFiche.GetByIdAsync(paymentTransaction.Id);
-                if (clFiche == null)
-                {
-                    await _unitOfWork.Company.GetByIdAsync(paymentTransaction.CompanyId);
-                    ClFiche _clFiche = new ClFiche();
-                    _clFiche.Id = paymentTransaction.Id;
-                    _clFiche.BankCode = paymentTransaction.VirtualPos.AccountCode;
-                    _clFiche.CreateUser = paymentTransaction.CreateUser;
-                    _clFiche.UpdateUser = paymentTransaction.UpdateUser;
-                    _clFiche.CreateDate = paymentTransaction.CreateDate;
-                    _clFiche.UpdateDate = paymentTransaction.UpdateDate;
-                    _clFiche.TrCode = 70;
-                    _clFiche.DocNo = "";
-                    _clFiche.Date = paymentTransaction.PaidDate ?? paymentTransaction.CreateDate;
-                    _clFiche.CardCode = paymentTransaction.Company.ProgramCode;
-                    _clFiche.ModulNr = 8;
-                    _clFiche.Sing = 1;
-                    _clFiche.Send = 1;
-                    _clFiche.LineExp = "";
-                    _clFiche.Amount = (double)paymentTransaction.TotalAmount;
-
-                    await _unitOfWork.ClFiche.AddAsync(_clFiche);
-                }
-            }
+           
             var result = await _unitOfWork.CommitAsync();
-            if (result == 1)
+            if (result > 0 )
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
             return new Result(ResultStatus.Error, "Hatalı İşlem");
         }

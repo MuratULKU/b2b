@@ -197,13 +197,19 @@
     private Company company { get; set; } = default!;
     [Parameter] public Guid OrderId { get; set; }
 
+
+    [Parameter] public string ClientCode { get; set; } = string.Empty;
+
     protected async override void OnInitialized()
     {
-       user = await userManager.GetUser(await userIdentity.GetCurrentUserId());
-       company = await companyService.Get(user.CompanyId ?? Guid.Empty);
+        user = await userManager.GetUser(await userIdentity.GetCurrentUserId());
+        company = await companyService.Get(user.CompanyId ?? Guid.Empty);
         if (company == null)
             return;
-
+        if (ClientCode == string.Empty)
+            ClientCode = company.ProgramCode;
+        if (ClientCode == string.Empty)
+            return;
         if (OrderId != Guid.Empty)
         {
             ordFiche = await orderService.GetOrderFiche(OrderId);
@@ -449,8 +455,8 @@
                         OrderId = OrderId,
                         UserId = user.Id,
                         Explanation = explanation,
-                        CompanyId = company.Id
-
+                        CompanyId = company.Id,
+                        ClientCode = ClientCode
                     };
 
 

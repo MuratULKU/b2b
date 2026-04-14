@@ -18,6 +18,7 @@ namespace Entity
         public double Amount { get; set; }
         public string? LineExp { get; set; }
         public byte Send { get; set; }
+        public Guid PaymentTransactionId { get; set; } = Guid.NewGuid();
 
     }
 }

@@ -18,8 +18,11 @@
 @inject IDocumentNoService documentNoService
 @inject NavigationManager navManager
 @inject IProductService productService
+@attribute [Authorize]
 <div class="container">
 <TabControl ChangedActivePage="OnActiveTabChanged">
+     @if (q != "1")
+        {
     <TabPage Text="Müşteri Seçimi">
         <h1>Müşteri</h1>
         <div>
@@ -72,6 +75,7 @@
         <div>
         </div>
     </TabPage>
+        }
     <TabPage Text="Ürün Seçimi" IsValid="pageValid" >
         <div class="container">
   <div class="findarea">
@@ -193,7 +197,9 @@
 
     [Parameter]
     public Guid id { get; set; } 
-    private Guid clientid {get;set;}
+    [SupplyParameterFromQuery(Name = "cid")]
+    [Parameter]
+    public Guid clientid {get;set;}
     private OrdFiche _ordFiche { get; set; }
     private User _user { get; set; }
     private Client _client { get; set; } = new();
@@ -226,7 +232,7 @@
     private void SaveChanged()
     {
         if(_documentNo != null)
-        documentNoService.Update(_documentNo);
+            documentNoService.Update(_documentNo);
         orderService.Save(_ordFiche);
         navManager.NavigateTo("/order");
     }
@@ -257,15 +263,16 @@
     {
         if (_ordFiche == null)
         {
-
+            var ficheno = await documentNoService.GetDocNo(2);
             _ordFiche = new OrdFiche
                 {
-                    Docode = "12",
+
                     Date_ = DateTime.Now,
                     Send = 0,
                     Active = true,
                     ClientCode = ClientCode,
-                    FicheNo = await documentNoService.GetDocNo(2),
+                    FicheNo = ficheno,
+                    Docode = ficheno,
                     UpdateDate = DateTime.Now,
                     CreateDate = DateTime.Now,
                     UpdateUser = UserId,
@@ -318,8 +325,9 @@
                     CurrencyId = 1,
 
                 };
-            ordLine.Product = null;
+            
             _ordFiche.Lines.Add(ordLine);
+            notification.Notify(new NotificationMessage { Severity = Core.Abstract.ResultStatus.Information, Summary = "Bilgi", Detail = "Kayıt Eklendi", Duration = 5000 });
         }
         else
         {
@@ -359,7 +367,15 @@
 
     protected async override Task OnInitializedAsync()
     {
-        _clientList = await clientCardManager.GetAll();
+        if (q != "1")
+        {
+            _clientList = await clientCardManager.GetAll();
+        }
+        else
+        {
+            _client = await clientCardManager.GetByGuid(clientid);
+            pageValid = true;
+        }
 
     }
     protected async override Task OnAfterRenderAsync(bool firstRender)

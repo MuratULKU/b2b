@@ -2,7 +2,7 @@
 <div class="container">
     <div class="row">
 
-        <CreditCardPage OrderId="OrderId" />
+        <CreditCardPage OrderId="@OrderId" ClientCode="@ClientCode" />
 
 
 
@@ -53,7 +53,8 @@
 @code {
 
     [Parameter] public Guid OrderId { get; set; }
-
+    
+    [Parameter] public string ClientCode { get; set; }
 
 
   

@@ -17,6 +17,7 @@
 @inject IUserService userService
 @inject IJSRuntime JSRuntime
 @inject ICompanyService companyService
+@inject IClFicheService clFicheService
 
 
 
@@ -39,9 +40,36 @@
         if (payment == null)
             throw new Exception("Hatalı Sipariş Nuraması");
         var param = firmParam.Get(1);
-        var user = (await authenticationState).User.Claims.FirstOrDefault(x => x.Type == System.Security.Claims.ClaimTypes.Sid).Value;
-        company = await companyService.GetByUserId(Guid.Parse(user));
+        //var user = (await authenticationState).User.Claims.FirstOrDefault(x => x.Type == System.Security.Claims.ClaimTypes.Sid).Value;
+        company = await companyService.GetByUserId(payment.UserId);
         payment.User = await userService.GetUser(payment.UserId);
+
+        if (payment.Status == PaymentStatus.Paid)
+        {
+            var clFiche = await clFicheService.GetPaymetId(payment.Id);
+            if (clFiche == null)
+            {
+                // await _unitOfWork.Company.SingleOrDefaultAsync(x => x.Id == paymentTransaction.CompanyId);
+                ClFiche _clFiche = new ClFiche();
+                _clFiche.Id = payment.Id;
+                _clFiche.BankCode = payment.VirtualPos?.AccountCode;
+                _clFiche.CreateUser = payment.CreateUser;
+                _clFiche.UpdateUser = payment.UpdateUser;
+                _clFiche.CreateDate = payment.CreateDate;
+                _clFiche.UpdateDate = payment.UpdateDate;
+                _clFiche.TrCode = 70;
+                _clFiche.DocNo = "";
+                _clFiche.Date = payment.PaidDate ?? payment.CreateDate;
+                _clFiche.CardCode = payment.ClientCode;
+                _clFiche.ModulNr = 8;
+                _clFiche.Sing = 1;
+                _clFiche.Send = 1;
+                _clFiche.LineExp = "";
+                _clFiche.Amount = (double)payment.TotalAmount;
+
+                await clFicheService.Insert(_clFiche);
+            }
+        }
 
         // OrdFiche ordFiche = orderService.GetFiche(payment.OrderNumber);
         // if (ordFiche != null)
@@ -52,8 +80,8 @@
         // }
         EMailSender es = new EMailSender(firmParam.ToString(11), firmParam.ToInteger(12), firmParam.ToBoolean(13), firmParam.ToString(14), firmParam.ToString(15));
           await es.SendEmailAsync(firmParam.ToString(7), "Kredi Kartı Tahsilat Maili", GenerateEmailContent());
-          if (payment.User != null || firmParam.ToString(7) != payment.User.Email)
-             await es.SendEmailAsync(payment.User.Email, "Kredi Kartı Tahsilat Maili",GenerateEmailContent());
+          if (payment.User != null || firmParam.ToString(7) != payment.User?.Email)
+             await es.SendEmailAsync(payment.User?.Email, "Kredi Kartı Tahsilat Maili",GenerateEmailContent());
 
     }
 

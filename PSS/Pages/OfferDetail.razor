@@ -18,10 +18,13 @@
 @inject NavigationManager navManager
 @inject ICurrencyService currencyService
 @inject IProductService productService
+@attribute [Authorize]
 <div class="container">
 <TabControl ChangedActivePage="OnActiveTabChanged">
-    <TabPage Text="Müşteri Seçimi">
-        <h1>Müşteri</h1>
+    @if (q != "1")
+        {
+            <TabPage Text="Müşteri Seçimi">
+                <h1>Müşteri</h1>
         <div>
             <div class="row">
                 <div class="col-4">
@@ -72,6 +75,7 @@
         <div>
         </div>
     </TabPage>
+        }
     <TabPage Text="Ürün Seçimi" IsValid="pageValid">
         <div class="container">
             <div class="findarea">
@@ -87,6 +91,7 @@
             <Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="pdata.PageSize" RowCount="pdata.RowCount" OnPageSizeChanged="pageSizeOnchanged" />
         </div>
     </TabPage>
+    
     <TabPage Text="Toplamlar" IsValid="pageValid">
         <div class="basket-container">
             <div class="cart-basket">
@@ -204,7 +209,11 @@
     [Parameter]
     public Guid id { get; set; }
 
-    private Guid clientid { get; set; }
+
+    [SupplyParameterFromQuery(Name ="cid")]
+    [Parameter]
+    public Guid clientid { get; set; }
+
     private OrdFiche _ordFiche { get; set; }
     private User _user { get; set; }
     private Client _client { get; set; } = new();
@@ -298,8 +307,9 @@
     private void SaveChanged()
     {
 
-        orderService.Save(_ordFiche);
-        navManager.NavigateTo($"/offer?id={id}");
+        var result = orderService.Save(_ordFiche);
+        if(result.Status != TaskStatus.Faulted)
+            navManager.NavigateTo($"/offer?id={id}");
     }
 
     private async void RemoveLine(OrdLine line)
@@ -324,15 +334,15 @@
     {
         if (_ordFiche == null)
         {
-
+            var ficheno = await documentNoService.GetDocNo(1);
             _ordFiche = new OrdFiche
                 {
-                    Docode = "11",
+                    Docode = ficheno,
                     Date_ = DateTime.Now,
                     Send = 0,
                     Active = true,
                     ClientCode = ClientCode,
-                    FicheNo = await documentNoService.GetDocNo(1),
+                    FicheNo = ficheno,
                     UpdateDate = DateTime.Now,
                     CreateDate = DateTime.Now,
                     UpdateUser = UserId,
@@ -376,7 +386,7 @@
                     AvailableStock = 0,
                     Discper = Discount,
                     LineType = 0,
-                    LineNo = (short)(_ordFiche.Lines.Count + 1),  // Assuming Lines is always initialized
+                    LineNo = (short)(_ordFiche.Lines.Count + 1),  
                     TrCode = 1,
                     Vat = product.SellVat ?? 0,
                     VatMatrah = Math.Round((Amount * Price - Discount) / (1 + (product.SellVat ?? 0) / 100), 2),
@@ -392,12 +402,13 @@
 
 
                 };
-            ordLine.Product = null;
+            // ordLine.Product = null;
             _ordFiche.Lines.Add(ordLine);
+            notification.Notify(new NotificationMessage { Severity = Core.Abstract.ResultStatus.Information, Summary = "Bilgi", Detail = "Kayıt Eklendi", Duration = 5000 });
         }
         else
         {
-           
+
             ordLine.UpdateDate = DateTime.Now;
             ordLine.UpdateUser = _user.Id;
             ordLine.Amount += Amount;
@@ -433,7 +444,15 @@
 
     protected async override Task OnInitializedAsync()
     {
-        _clientList = await clientCardManager.GetAll();
+        if (q != "1")
+        {
+            _clientList = await clientCardManager.GetAll();
+        }
+        else
+        {
+            _client = await clientCardManager.GetByGuid(clientid);
+            pageValid = true;
+        }
 
     }
     protected async override Task OnAfterRenderAsync(bool firstRender)

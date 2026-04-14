@@ -20,10 +20,20 @@ namespace Business.Concrete
             _unitOfWork = unitOfWork;
         }
 
+        public Task<ClFiche> GetClFiche(Guid id)
+        {
+           return _unitOfWork.ClFiche.SingleOrDefaultAsync(c => c.Id == id);
+        }
+
         public async Task<List<ClFiche>> GetClFicheFiche(int trCode, byte send)
         {
            var result = await _unitOfWork.ClFiche.Find(x=>x.Send == send && x.TrCode == trCode);
             return result;
+        }
+
+        public Task<ClFiche> GetPaymetId(Guid id)
+        {
+            return _unitOfWork.ClFiche.SingleOrDefaultAsync(x=>x.PaymentTransactionId == id);
         }
 
         public async Task<IResult> Insert(ClFiche clFiche)

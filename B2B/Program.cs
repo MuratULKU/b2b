@@ -86,11 +86,9 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService,RoleManager>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyManager>();
-builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-builder.Services.AddScoped<IPaymentService,PaymentManager>();
 
-builder.Services.AddScoped<IClFicheRepository,ClFicheRepository>();
-builder.Services.AddScoped<IClFicheService, ClFicheManager>();
+
+
 builder.Services.AddScoped<IFirmDocService, FirmDocManager>();
 builder.Services.AddScoped<NotificationService>();
 

@@ -1,0 +1,90 @@
+﻿@page "/clientlist"
+@using Business.Abstract
+@using Entity
+@inject IClientCardService cardService
+@inject NavigationManager navManager
+@attribute [Authorize]
+<div class="container">
+    <div class="row">
+        <div class="col-sm-4">
+           
+              
+                <input class="form-control" type="search" @bind="@searchText" oninput="@searchClick">
+             
+        
+           
+        </div>
+      <div class="col-sm-8">
+            <button type="button" class="btn btn-outline-primary" onclick="@(()=>navManager.NavigateTo($"/extre/{selectedClient.Code}"))">Cari Hesap Extresi</button>
+            <button type="button" class="btn btn-outline-primary" onclick="@(() => navManager.NavigateTo($"/ccpayment?code={selectedClient.Code}", true))">Tahsilat</button>
+            <button type="button" class="btn btn-outline-primary" onclick="@(() => navManager.NavigateTo($"/OrderDetail?cid={selectedClient.Id}&q=1", true))">Sipariş</button>
+            <button type="button" class="btn btn-outline-primary" onclick="@(() => navManager.NavigateTo($"/OfferDetail?cid={selectedClient.Id}&q=1", true))">Teklif</button>
+      </div>
+       
+    </div>
+    <div>
+        <DataGrid TItem="Client" Items="clientList" Pager 
+            TotalCount="totalCount" RowsPerPage="rowsPerPageChange" 
+            SelectedPageChange="selectedPageChange" 
+            SelectedItemChanged="selectItemChange">
+            <Columns>
+                <Column Caption="Kodu" Field="@nameof(Client.Code)" />
+                <Column Caption="Unvanı" Field="@nameof(Client.Name)" />
+                <Column Caption="Vkn" Field="@nameof(Client.VKN)" />
+               
+            </Columns>
+        </DataGrid>
+        
+    </div>
+</div>
+@code {
+    private Guid userId { get; set; }
+    private DateTime? firstDate { get; set; }
+    private DateTime? lastDate { get; set; }
+    private int _currentPage { get; set; } = 0;
+    private int _rowsPerPage { get; set; } = 10;
+
+    private int totalCount{ get; set; }
+
+    private List<Client> clientList = new();
+    private string searchText = string.Empty;
+    private Client selectedClient{ get; set; }
+
+    protected override async void OnInitialized()
+    {
+        clientList = await cardService.GetAllAsync(searchText, _currentPage, _rowsPerPage);
+        totalCount = await cardService.TotalCount(searchText, _currentPage, _rowsPerPage);
+    }
+
+    private async void searchClick()
+    {
+        clientList = await cardService.GetAllAsync(searchText,_currentPage,_rowsPerPage);
+        totalCount = await cardService.TotalCount(searchText, _currentPage, _rowsPerPage);
+        StateHasChanged();
+    }
+
+    private void extreClick()
+    {
+        navManager.NavigateTo($"/extre/{selectedClient.Code}");
+    }
+
+    private void selectItemChange(Client item)
+    {
+        selectedClient = item;
+    }
+
+    private async void rowsPerPageChange(int rowsPerPage)
+    {
+        _rowsPerPage = rowsPerPage;
+        clientList = await cardService.GetAllAsync(searchText, _currentPage, _rowsPerPage);
+    }
+    private async void selectedPageChange(int currentPage)
+    {
+        _currentPage = currentPage;
+        clientList = await cardService.GetAllAsync(searchText, _currentPage, _rowsPerPage);
+    }
+
+
+
+
+}

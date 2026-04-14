@@ -3,6 +3,7 @@
 @using Business.Abstract
 @using Business.SingletonServices
 @using Core.Enum
+@using CoreUI.Components.NotificationService
 @using CoreUI.Components.TabControl
 @using CoreUI.Components.DataGrid
 @using Entity
@@ -14,10 +15,10 @@
 @inject IOrderService orderService
 @inject IClientCardService clientCardService
 @inject NavigationManager navManager
-
+@inject NotificationService notification
 
 @inject IDocumentNoService documentNoService
-
+@attribute [Authorize]
 <div class="container">
     <div class="offer">
         <input class="btn btn-success" type="button" value="Yeni Sipariş" onclick="@(()=>NewOrderButtonClick())" />
@@ -100,7 +101,8 @@
     {
         ordFiche.TrCode = 1;
         ordFiche.FicheNo = ((await documentNoService.GetDocNo(2)) + "-" + ordFiche.FicheNo);
-        await orderService.Save(ordFiche);
+        var test = await orderService.Save(ordFiche);
+        notification.Notify(new NotificationMessage { Severity = test.Status, Summary = test.Status.ToString(), Detail = test.Message, Duration = 5000 });
         dataGridTotalCount = await orderService.GetOrderFicheCount(3);
         ordFiches = await orderService.GetOrderFiche(3, 0, pageCount);
     }

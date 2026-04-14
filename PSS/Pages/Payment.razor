@@ -4,6 +4,7 @@
 @using Entity
 @inject IClientCardService clientCardManager
 @inject NavigationManager navManager
+@attribute [Authorize]
 <div class="container">
     <div>
         <div class="row">
@@ -48,7 +49,7 @@
         </div>
     </div>
     <input class="btn btn-success"
-           @onclick="@(() => navManager.NavigateTo("/ccpayment", true))"
+           @onclick="@(() => navManager.NavigateTo($"/ccpayment?code={_client.Code}", true))"
            type="button"
            value="Kredi Kartı" />
 </div>

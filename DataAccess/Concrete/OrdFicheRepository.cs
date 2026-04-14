@@ -14,6 +14,7 @@ namespace DataAccess.Concrete
         public async Task<OrdFiche> GetOrderFiche(int Logicalref)
         {
             return await base.dbContext.Set<OrdFiche>()
+                .Include(x=>x.Lines)
                    .FirstOrDefaultAsync(x => x.LogicalRef == Logicalref);
 
         }

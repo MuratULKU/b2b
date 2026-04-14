@@ -10,7 +10,7 @@ namespace DataAccess.Abstract
 {
     public interface IRepository<T> where T : class
     {
-        Task<T> GetByIdAsync(Guid id);
+     
         Task<List<T>> GetAllAsync(Func<IQueryable<T>, IQueryable<T>> includes = null);
         Task<List<T>> GetFilteredAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null);
         Task<T> AddAsync(T entity);

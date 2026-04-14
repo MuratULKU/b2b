@@ -100,9 +100,9 @@
         <Modal @ref="modal" Title="Parametre Giriş">
             <BodyTemplate>
                 <label for="key">Key</label>
-                <input class="form-control" id="key" type="text" @bind:event="oninput" @bind="virtualPosParameter.Key" />
+                <InputText class="form-control"  @bind-Value="virtualPosParameter.Key" />
                 <label for="value">Value</label>
-                <input class="form-control" id="value" type="text" @bind:event="oninput" @bind="virtualPosParameter.Value" />
+                <InputText class="form-control"  @bind-Value="virtualPosParameter.Value" />
             </BodyTemplate>
         </Modal>
     </EditForm>
@@ -170,8 +170,8 @@
     }
 
 
-   
-   
+
+
     private async void AddParameter()
     {
         virtualPosParameter = new()
@@ -184,7 +184,9 @@
             };
         if (modal != null && await modal.ShowAsync())
         {
-            await virtualPosParameterService.CreateBankParameter(virtualPosParameter);
+            var result = await virtualPosParameterService.CreateBankParameter(virtualPosParameter);
+            notification.Notify(new NotificationMessage { Severity = result.Status, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
+            virtualPos = await virtualPosService.GetVirtualPosAsync(id);
             StateHasChanged();
         }
     }
@@ -206,13 +208,11 @@
     {
         if (modal != null && await modal.ShowAsync())
         {
-            var onay = await confirmDialog.Show("Değişirme Onay", $"{virtualPosParameter.Key} Kayıt Değiştirilecektir Onaylıyor musunuz.");
-            if (onay)
-            {
-                await virtualPosParameterService.UpdateBankParameter(virtualPosParameter);
-            }
+           
+            var result = await virtualPosParameterService.UpdateBankParameter(virtualPosParameter);
+            notification.Notify(new NotificationMessage { Severity = result.Status, Summary = "Bilgi", Detail = result.Message, Duration = 5000 });
             StateHasChanged();
-
+        
         }
     }
     private async void Save()

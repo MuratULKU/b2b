@@ -85,6 +85,7 @@ namespace B2B.Controllers
                     Explanation = model.Explanation,
                     CreateUser = model.UserId,
                     CompanyId = model.CompanyId,
+                    ClientCode = model.ClientCode,
 
                 };
 

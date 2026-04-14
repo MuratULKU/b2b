@@ -16,7 +16,7 @@ namespace CoreUI.BackOrder
         Task<bool> updateProducts(DateTime? date, HttpClient _httpClient);
         Task deleteProducts();
         Task DeleteImages();
-        Task<bool> updateImages(HttpClient _httpClient);
+        Task<bool> updateImages(DateTime? date, HttpClient _httpClient);
         Task<bool> DeleteProduct(DateTime? date, HttpClient _httpClient);
         Task CharSetDeleteAll();
         Task CharAsgnDeleteAll();
@@ -191,7 +191,7 @@ namespace CoreUI.BackOrder
                     int totalpage = 0;
                     do
                     {
-                        respone = await _httpClient.GetAsync($"/api/v1/Products/items?page={currentpage}&pageSize=10");
+                        respone = await _httpClient.GetAsync($"/api/v1/Products/items?page={currentpage}&pageSize=10&date={date.Value.ToString("MM.dd.yyyy HH:mm:ss")}");
                         if (respone.IsSuccessStatusCode)
                         {
                             var pList = respone.Content.ReadFromJsonAsync<PageResult<Product>>().Result;
@@ -293,7 +293,7 @@ namespace CoreUI.BackOrder
 
         //charset
 
-        public async Task<bool> updateImages(HttpClient _httpClient)
+        public async Task<bool> updateImages(DateTime? date, HttpClient _httpClient)
         {
             try
             {
@@ -306,7 +306,7 @@ namespace CoreUI.BackOrder
 
                 do
                 {
-                    var response = await _httpClient.GetAsync($"/api/v1/Products/image?PageSize=20&CurrentPage={currentPage}");
+                    var response = await _httpClient.GetAsync($"/api/v1/Products/image?PageSize=20&CurrentPage={currentPage}&date={date.Value.ToString("MM.dd.yyyy HH:mm:ss")}");
 
                     if (!response.IsSuccessStatusCode)
                     {

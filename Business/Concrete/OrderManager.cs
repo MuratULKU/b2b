@@ -22,7 +22,7 @@ namespace Business.Concrete
 
         public async Task DeleteLine(OrdLine ordLine)
         {
-            var existing = await _unitOfWork.OrdLine.GetByIdAsync(ordLine.Id);
+            var existing = await _unitOfWork.OrdLine.SingleOrDefaultAsync(x=>x.Id == ordLine.Id);
             if (existing != null)
             {
                 var entyr = _unitOfWork.Entry(existing);
@@ -44,7 +44,7 @@ namespace Business.Concrete
 
         public async Task<IResult> UpdateLine(OrdLine ordLine)
         {
-            var existing = await _unitOfWork.OrdLine.GetByIdAsync(ordLine.Id);
+            var existing = await _unitOfWork.OrdLine.SingleOrDefaultAsync(x=>x.Id == ordLine.Id);
             if(existing != null)
             {
                 // await _unitOfWork.OrdLine.UpdateAsync(ordLine);
@@ -72,13 +72,14 @@ namespace Business.Concrete
                 //var deletedEntries = _unitOfWork.ChangedEntries().Where(e => e.State == EntityState.Deleted)
                 //    .ToArray();
 
-                //var addEntries = _unitOfWork.ChangedEntries().Where(e =>e.State == EntityState.Added).ToArray();
-                //var updateEntries = _unitOfWork.ChangedEntries().Where(e =>e.State == EntityState.Modified).Select(e => (OrdLine)e.Entity).ToArray();
+                //var addEntries = _unitOfWork.ChangeTracker.Entries();
+                //if(addEntries.)
+                //var updateEntries = _unitOfWork.ChangedEntries().Where(e =>e.State == EntityState.Modified).ToArray();
                
 
                 if (ordFiche.Lines == null || ordFiche.Lines.Count == 0)
                 {
-                    var existing = await _unitOfWork.OrdFiche.GetByIdAsync(ordFiche.Id);
+                    var existing = await _unitOfWork.OrdFiche.SingleOrDefaultAsync(x => x.Id == ordFiche.Id);
                     if (existing != null)
                     {
                         var entyr = _unitOfWork.Entry(existing);
@@ -87,33 +88,31 @@ namespace Business.Concrete
                     }
                     else
                     {
-                        
+
                         await _unitOfWork.OrdFiche.Delete(ordFiche);
                     }
                 }
                 else
                 {
-                    if(ordFiche.Id == Guid.Empty)
+                    if (ordFiche.Id == Guid.Empty)
                     {
-                      
-                        var test =  await _unitOfWork.OrdFiche.AddAsync(ordFiche);
+                        foreach(OrdLine ordLine in ordFiche.Lines)
+                        {
+                            ordLine.Product = null;
+                        }
+                      await _unitOfWork.OrdFiche.AddAsync(ordFiche);
                     }
                     else
                     {
                         // kayıt takip edilyormu diye kontrol etmek gerekiyor
                         //updateden sonra commit yapılsa bile traked poz. kalıyor.
-                        var existing = await _unitOfWork.OrdFiche.GetByIdAsync(ordFiche.Id);
-                        if (existing != null)
-                        {
-                            var entyr = _unitOfWork.Entry(existing);
-                            entyr.CurrentValues.SetValues(ordFiche);
-                            entyr.State = EntityState.Modified;
-                          
-                        }
-                        else
-                        {
-                            await _unitOfWork.OrdFiche.UpdateAsync(ordFiche);
-                        }
+                        var trackedOrdFiche = _unitOfWork.ChangeTracker
+                            .Entries<OrdFiche>()
+                            .Where(e => e.Entity.Id == ordFiche.Id)
+                            .ToList();
+                        foreach (var entry in trackedOrdFiche)
+                            entry.State = EntityState.Detached;
+                        _unitOfWork.Entry(ordFiche).State = EntityState.Modified;
                     }
                 }
 

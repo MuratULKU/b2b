@@ -25,9 +25,9 @@ namespace Business.Concrete
             return GetAll().Result;
         }
 
-        public Task<List<Client>> GetAllAsync(string Filtre, int CategoryId, int CurrentPage, int PageSize)
+        public Task<List<Client>> GetAllAsync(string Filtre, int CurrentPage, int PageSize)
         {
-            throw new NotImplementedException();
+            return _unitOfWork.Client.Find(x=>x.Name.ToLower().Contains(Filtre.ToLower()),null,CurrentPage,PageSize);
         }
 
         public async Task<Client> GetByCode(string Code)
@@ -54,9 +54,9 @@ namespace Business.Concrete
             return false;
         }
 
-        public Task<int> TotalCount(string Filtre, int CategoryId, int CurrentPage, int PageSize)
+        public Task<int> TotalCount(string Filtre, int CurrentPage, int PageSize)
         {
-            throw new NotImplementedException();
+            return _unitOfWork.Client.RowCount(x => x.Name.ToLower().Contains(Filtre.ToLower()));
         }
 
         public async Task<bool> Update(Client client)

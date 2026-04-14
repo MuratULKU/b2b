@@ -21,7 +21,7 @@
 <div class="container">
     <div class="row">
 
-        <CoreUI.Components.Payment.CreditCardPage  OrderId="OrderId" />
+        <CoreUI.Components.Payment.CreditCardPage  OrderId="OrderId"  />
 
 
 
@@ -72,7 +72,8 @@
 @code {
 
     [Parameter] public Guid OrderId { get; set; }
-
+   
+     //şirket tablosunda programcode yi alacağız.
 
 
   

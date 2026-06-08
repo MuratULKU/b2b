@@ -13,5 +13,6 @@ namespace Entity
         public string Name { get; set; }
         public Guid CharCodeId { get; set; }
         public CharCode CharCode { get; set; }
+        public List<CharAsgn> CharAsgns { get; set; }
     }
 }

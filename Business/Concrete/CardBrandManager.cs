@@ -21,12 +21,12 @@ namespace Business.Concrete
 
         public async Task<List<CardBrand>> GetCardBrand()
         {
-            return await _unitOfWork.BrandCards.GetAllAsync();
+            return await _unitOfWork.Repository<CardBrand>().GetAllAsync();
         }
 
         public async Task<CardBrand> GetCardBrandById(Guid brandId)
         {
-            return await _unitOfWork.BrandCards.FirstOrDefaultAsync(x => x.Id == brandId);
+            return await _unitOfWork.Repository<CardBrand>().FirstOrDefaultAsync(x => x.Id == brandId);
         }
     }
 }

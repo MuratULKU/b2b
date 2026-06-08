@@ -1,5 +1,6 @@
 ﻿
 @using Business.Concrete
+@using CoreUI.BackOrder
 @using CoreUI.Data
 @using Entity
 @using Microsoft.AspNetCore.Components.Authorization
@@ -10,6 +11,7 @@
 @inject NavigationManager navManager
 @inject UserManager _userManager
 @inject UserRoleManager _userRoleManager
+@inject ApiStrategyFactory apiStrategyFactory
 
 <style>
     .login-wrapper {
@@ -195,6 +197,9 @@
     private async Task Authenticate()
     {
         mymarkup = null;
+        //apiye göre şifrele kontrol edilecek
+        var strategy = apiStrategyFactory.GetStrategy();
+      
         Entity.User user = await _userManager.GetUser(model.Username, model.Password);
         if (user == null)
         {
@@ -202,7 +207,7 @@
             _logger.LogCritical($"Failed login attempt for user {model.Username}");
             return;
         }
-        List<UserRole> roles = _userRoleManager.GetAll(user.Id).Result;
+        List<UserRole> roles = await _userRoleManager.GetAll(user.Id);
         string[] roleNames = roles.Select(r => r.Role.RoleName).ToArray();
         var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
         await customAuthStateProvider.UpdateAuthenticationState(new UserSession

@@ -6,30 +6,32 @@ using CoreUI.Data;
 using DataAccess.Abstract;
 using DataAccess.Concrete;
 using Entity;
+using System;
+using System.Net.Http.Headers;
 
 
-namespace CoreUI.BackOrder
+namespace CoreUI.BackOrder.Ulku
 {
     public interface IBackOrderProductService
     {
-        Task<bool> isApiActiveted(HttpClient _httpClient);
-        Task<bool> updateProducts(DateTime? date, HttpClient _httpClient);
+        Task<bool> isApiActiveted();
+        Task<bool> updateProducts(DateTime? date);
         Task deleteProducts();
         Task DeleteImages();
-        Task<bool> updateImages(DateTime? date, HttpClient _httpClient);
-        Task<bool> DeleteProduct(DateTime? date, HttpClient _httpClient);
+        Task<bool> updateImages(DateTime? date);
+        Task<bool> DeleteProduct(DateTime? date);
         Task CharSetDeleteAll();
         Task CharAsgnDeleteAll();
         Task CharCodeDeleteAll();
         Task PriceListDeleteAll();
         Task CategoriesDeleteAll();
         Task ProductAmountDeleteAll();
-        Task<bool> CharSetUpdate(DateTime? date, HttpClient _httpClient);
-        Task<bool> CharAsgnUpdate(DateTime? date, HttpClient _httpClient);
-        Task<bool> CharCodeUpdate(DateTime? date, HttpClient _httpClient);
-        Task<bool> PriceListUpdate(DateTime? date, HttpClient _httpClient);
-        Task<bool> CategoryUpdate(DateTime? date, HttpClient _httpClient);
-        Task<bool> ProductAmountUpdate(DateTime? date, HttpClient _httpClient);
+        Task<bool> CharSetUpdate(DateTime? date);
+        Task<bool> CharAsgnUpdate(DateTime? datet);
+        Task<bool> CharCodeUpdate(DateTime? date);
+        Task<bool> PriceListUpdate(DateTime? date);
+        Task<bool> CategoryUpdate(DateTime? date);
+        Task<bool> ProductAmountUpdate(DateTime? date);
 
     }
     public class BackOrderProductService : IBackOrderProductService
@@ -40,24 +42,25 @@ namespace CoreUI.BackOrder
         private readonly IServiceProvider _serviceProvider;
         private IProductRepository _productRepository;
         private IFirmDocRepository _firmDocRepository;
-
+        private readonly HttpClient _httpClient;
         private readonly ILogger<BackOrderProductService> _logger;
 
-        public BackOrderProductService(IServiceProvider serviceProvider, ILogger<BackOrderProductService> logger)
+        public BackOrderProductService(IServiceProvider serviceProvider, ILogger<BackOrderProductService> logger, HttpClient httpClient)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
+            _httpClient = httpClient;
         }
 
 
 
-        public Task deleteProducts()
+        public async Task deleteProducts()
         {
             using var scope = _serviceProvider.CreateScope();
             _productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
-            DeleteImages();
-            _productRepository.DeleteAll();
-            return Task.CompletedTask;
+            await DeleteImages();
+            await _productRepository.DeleteAll();
+
         }
 
         public Task DeleteImages()
@@ -71,6 +74,12 @@ namespace CoreUI.BackOrder
         {
             using var scope = _serviceProvider.CreateScope();
             var _charSetRepository = scope.ServiceProvider.GetRequiredService<ICharSetService>();
+          
+            var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+            var tokenResponse = await tokenService.GetToken();
+            _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", tokenResponse);
+
             foreach (var product in products)
             {
                 if (product.Code is not null && product.Name is not null)
@@ -132,11 +141,11 @@ namespace CoreUI.BackOrder
                         _productRepository.Update(item);
                     }
                 }
-                 await _productRepository.SaveChangesAsync();
+                await _productRepository.SaveChangesAsync();
             }
         }
 
-        public async Task<bool> DeleteProduct(DateTime? date, HttpClient _httpClient)
+        public async Task<bool> DeleteProduct(DateTime? date)
         {
             try
             {
@@ -177,31 +186,43 @@ namespace CoreUI.BackOrder
                 return false;
             }
         }
-        public async Task<bool> updateProducts(DateTime? date, HttpClient _httpClient)
+        public async Task<bool> updateProducts(DateTime? date)
         {
             try
             {
                 using var scope = _serviceProvider.CreateScope();
+                var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                var tokenResponse = await tokenService.GetToken();
+                _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", tokenResponse);
+
+               
                 _productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
                 _firmDocRepository = scope.ServiceProvider.GetRequiredService<IFirmDocRepository>();
                 HttpResponseMessage respone;
 
-               
-                    int currentpage = 1;
-                    int totalpage = 0;
-                    do
+
+                int currentpage = 1;
+                int totalpage = 0;
+                do
+                {
+                    string url = $"/api/v1/Products/items?page={currentpage}&pageSize=10";
+                    if (date.HasValue)
                     {
-                        respone = await _httpClient.GetAsync($"/api/v1/Products/items?page={currentpage}&pageSize=10&date={date.Value.ToString("MM.dd.yyyy HH:mm:ss")}");
-                        if (respone.IsSuccessStatusCode)
-                        {
-                            var pList = respone.Content.ReadFromJsonAsync<PageResult<Product>>().Result;
-                            currentpage = pList.CurrentPage + 1;
-                            totalpage = pList.TotalPages;
-                            if (pList.Items.Count > 0)
-                                await InsertProduct(pList.Items);
-                        }
-                    } while (currentpage <= totalpage);
-                
+                        url += $"&updateDate={date.Value.ToString("MM.dd.yyyy HH:mm")}";
+                    }
+
+                    respone = await _httpClient.GetAsync(url);
+                    if (respone.IsSuccessStatusCode)
+                    {
+                        var pList = respone.Content.ReadFromJsonAsync<PageResult<Product>>().Result;
+                        currentpage = pList.CurrentPage + 1;
+                        totalpage = pList.TotalPages;
+                        if (pList.Items.Count > 0)
+                            await InsertProduct(pList.Items);
+                    }
+                } while (currentpage <= totalpage);
+
                 return true;
             }
             catch (Exception ex)
@@ -213,7 +234,7 @@ namespace CoreUI.BackOrder
 
         }
 
-        public async Task<bool> isApiActiveted(HttpClient _httpClient)
+        public async Task<bool> isApiActiveted()
         {
             try
             {
@@ -241,17 +262,17 @@ namespace CoreUI.BackOrder
                 if (firmDoc.ProductId != Guid.Empty) continue;
                 if (string.IsNullOrEmpty(firmDoc.Code)) continue;
 
-           
+
                 var productId = await _productRepository.GetIdByCode(firmDoc.Code);
                 if (productId == null || productId == Guid.Empty) continue;
 
-                
-                firmDoc.ProductId= productId.Value;
-               
+
+                firmDoc.ProductId = productId.Value;
+
                 _productRepository.UpdateImage(firmDoc);
             }
 
-            await _productRepository.SaveChangesAsync(); 
+            await _productRepository.SaveChangesAsync();
         }
         //public async Task<bool> updateImages(HttpClient _httpClient)
         //{
@@ -293,13 +314,19 @@ namespace CoreUI.BackOrder
 
         //charset
 
-        public async Task<bool> updateImages(DateTime? date, HttpClient _httpClient)
+        public async Task<bool> updateImages(DateTime? date)
         {
             try
             {
                 using var scope = _serviceProvider.CreateScope();
                 _productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
                 _firmDocRepository = scope.ServiceProvider.GetRequiredService<IFirmDocRepository>();
+               
+                var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                var tokenResponse = await tokenService.GetToken();
+                _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", tokenResponse);
+
 
                 int currentPage = 1;
                 int totalPages = 1;
@@ -396,21 +423,27 @@ namespace CoreUI.BackOrder
             }
         }
 
-        public async Task<bool> CharSetUpdate(DateTime? date, HttpClient _httpClient)
+        public async Task<bool> CharSetUpdate(DateTime? date)
         {
             try
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
+                   
+                    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                    var tokenResponse = await tokenService.GetToken();
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                            new AuthenticationHeaderValue("Bearer", tokenResponse);
+
                     var charsetRepository = scope.ServiceProvider.GetRequiredService<ICharSetService>();
                     HttpResponseMessage response;
                     //http://localhost:5023/api/v1/Products/charsets?page=1&pageSize=10&updateDate=01.01.2020
-                 
+
                     int currentPage = 0;
                     int totalPage = 1;
                     do
                     {
-                        string url = $"/api/v1/Products/charsets?page={currentPage+1}&pageSize=10";
+                        string url = $"/api/v1/Products/charsets?page={currentPage + 1}&pageSize=10";
                         if (date.HasValue)
                         {
                             url += $"&updateDate={date.Value.ToString("MM.dd.yyyy HH:mm")}";
@@ -419,7 +452,7 @@ namespace CoreUI.BackOrder
                         if (response.IsSuccessStatusCode)
                         {
                             var pList = await response.Content.ReadFromJsonAsync<PageResult<CharSet>>();
-                           
+
                             if (pList != null)
                             {
                                 currentPage = pList.CurrentPage;
@@ -451,7 +484,7 @@ namespace CoreUI.BackOrder
 
                     } while (currentPage < totalPage);
 
-                
+
                     return true;
                 }
             }
@@ -464,16 +497,22 @@ namespace CoreUI.BackOrder
 
 
 
-        public async Task<bool> CategoryUpdate(DateTime? date, HttpClient _httpClient)
+        public async Task<bool> CategoryUpdate(DateTime? date)
         {
             try
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
+                   
+                    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                    var tokenResponse = await tokenService.GetToken();
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                            new AuthenticationHeaderValue("Bearer", tokenResponse);
+
                     var _categoryRepository = scope.ServiceProvider.GetRequiredService<ICategoryService>();
                     HttpResponseMessage response;
                     int currentPage = 0;
-                    int totalPage = 1; 
+                    int totalPage = 1;
 
                     do
                     {
@@ -521,7 +560,7 @@ namespace CoreUI.BackOrder
                         {
 
                             _logger.LogError($"HTTP Error: {response.StatusCode}");
-                            return false; 
+                            return false;
                         }
                     }
                     while (currentPage < totalPage);
@@ -537,12 +576,18 @@ namespace CoreUI.BackOrder
         }
 
 
-        public async Task<bool> CharAsgnUpdate(DateTime? date, HttpClient _httpClient)
+        public async Task<bool> CharAsgnUpdate(DateTime? date)
         {
             try
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
+                   
+                    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                    var tokenResponse = await tokenService.GetToken();
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                            new AuthenticationHeaderValue("Bearer", tokenResponse);
+
                     var _charCodeManager = scope.ServiceProvider.GetRequiredService<ICharCodeService>();
                     var _charValManager = scope.ServiceProvider.GetRequiredService<ICharValService>();
                     var _charAsgnManager = scope.ServiceProvider.GetRequiredService<ICharAsgnService>();
@@ -552,7 +597,7 @@ namespace CoreUI.BackOrder
                     int totalPage = 1;
                     do
                     {
-                        string url = $"/api/v1/Products/charasgn?page={currentPage+1}&pageSize=10";
+                        string url = $"/api/v1/Products/charasgn?page={currentPage + 1}&pageSize=10";
                         if (date.HasValue)
                         {
                             url += $"&updateDate={date.Value.ToString("MM.dd.yyyy HH:mm")}";
@@ -584,12 +629,12 @@ namespace CoreUI.BackOrder
                                                 charAsgn.CharCodeName = charcode.Name;
                                                 charAsgn.CharValName = charval.Name;
                                                 await _charAsgnManager.Insert(charAsgn);
-                                                
+
                                             }
                                         }
                                         else
                                         {
-                                           await _charAsgnManager.Update(charAsgn);
+                                            await _charAsgnManager.Update(charAsgn);
                                         }
                                     }
 
@@ -617,13 +662,19 @@ namespace CoreUI.BackOrder
             }
         }
 
-        public async Task<bool> CharCodeUpdate(DateTime? date, HttpClient _httpClient)
+        public async Task<bool> CharCodeUpdate(DateTime? date)
         {
             try
             {
                 using var scope = _serviceProvider.CreateScope();
                 var charCodeManager = scope.ServiceProvider.GetRequiredService<ICharCodeService>();
                 var charValManager = scope.ServiceProvider.GetRequiredService<ICharValService>();
+              
+                var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                var tokenResponse = await tokenService.GetToken();
+                _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", tokenResponse);
+
                 HttpResponseMessage response;
 
                 int currentPage = 0;
@@ -653,7 +704,7 @@ namespace CoreUI.BackOrder
                                     var item = await charCodeManager.GetByCode(charCode.Code);
                                     if (item == null)
                                     {
-                                       
+
                                         await charCodeManager.Insert(charCode);
                                     }
                                     else
@@ -687,13 +738,19 @@ namespace CoreUI.BackOrder
         }
 
 
-        public async Task<bool> PriceListUpdate(DateTime? date, HttpClient _httpClient)
+        public async Task<bool> PriceListUpdate(DateTime? date)
         {
             try
             {
                 using var scope = _serviceProvider.CreateScope();
                 var priceListManager = scope.ServiceProvider.GetRequiredService<IPriceListService>();
                 var productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
+              
+                var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                var tokenResponse = await tokenService.GetToken();
+                _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", tokenResponse);
+
                 HttpResponseMessage response;
 
                 int currentPage = 0;
@@ -774,13 +831,19 @@ namespace CoreUI.BackOrder
         }
 
 
-        public async Task<bool> ProductAmountUpdate(DateTime? date, HttpClient _httpClient)
+        public async Task<bool> ProductAmountUpdate(DateTime? date)
         {
             try
             {
                 using var scope = _serviceProvider.CreateScope();
                 var productAmountManager = scope.ServiceProvider.GetRequiredService<IProductAmountService>();
                 var productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
+             
+                var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                var tokenResponse = await tokenService.GetToken();
+                _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", tokenResponse);
+
                 HttpResponseMessage response;
 
                 int currentPage = 0;

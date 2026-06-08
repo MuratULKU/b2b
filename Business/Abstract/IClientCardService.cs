@@ -18,5 +18,7 @@ namespace Business.Abstract
         Task<int> TotalCount(string Filtre, int CurrentPage, int PageSize);
         Task<bool> Insert(Client client);
         Task<bool> Update(Client client);
+        Task<int> DeleteAll();
+        Task<List<Client>> Search(string Filtre);
     }
 }

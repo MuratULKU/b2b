@@ -115,8 +115,9 @@
     private Guid userId;
     protected override async void OnInitialized()
     {
-        companies = companyService.GetAll(0, 10);
+        companies = await companyService.GetAllAsync(1, 10);
         userId = await userIdentity.GetCurrentUserId();
+        StateHasChanged();
     }
     private void selectedCompanyChanged(Company company)
     {

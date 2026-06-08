@@ -24,6 +24,40 @@ namespace DataAccess.Concrete
             dbContext = context;
         }
 
+        public async Task<List<T>> GetPagedAsync<TKey>(
+            int pageNumber,
+            int pageSize,
+            Expression<Func<T, bool>> predicate = null,
+            Func<IQueryable<T>, IQueryable<T>> includes = null,
+            Expression<Func<T, TKey>> orderBy = null)
+        {
+            IQueryable<T> query = dbContext.Set<T>();
+
+
+            if (predicate != null)
+                query = query.Where(predicate);
+
+
+            if (includes != null)
+                query = includes(query);
+            if (orderBy != null)
+                query = query.OrderBy(orderBy);
+
+
+            query = query.Skip((pageNumber - 1) * pageSize)
+                         .Take(pageSize);
+
+            return await query.ToListAsync();
+
+        }
+
+        public async Task<TProperty> MaxAsync<TProperty>(
+         Expression<Func<T, TProperty>> selector)
+        {
+            return await dbContext.Set<T>()
+                .MaxAsync(selector);
+        }
+
         public async Task<T> AddAsync(T entity)
         {
             await dbContext.Set<T>().AddAsync(entity);
@@ -32,23 +66,25 @@ namespace DataAccess.Concrete
 
         public async Task<T> Delete(T entity)
         {
-          
+
             dbContext.Set<T>().Remove(entity);
             return entity;
         }
 
-        public async Task<List<T>> Find(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null, int currentPage = 0, int pageSize = 10000)
+        public async Task<List<T>> Find(Expression<Func<T, bool>> predicate,
+                        Func<IQueryable<T>, IQueryable<T>> includes = null,
+                        int currentPage = 0, int pageSize = 100)
         {
-            int skip = currentPage * pageSize;
-
             IQueryable<T> query = dbContext.Set<T>();
-
             query = includes?.Invoke(query) ?? query;
+            query = query.Where(predicate);
             if (pageSize > 0)
+            {
+                int skip = currentPage * pageSize;
                 query = query.Skip(skip).Take(pageSize);
+            }
 
-            return await query.AsNoTracking().AsNoTracking().Where(predicate).ToListAsync();
-
+            return await query.AsNoTracking().ToListAsync();
         }
 
         public async Task<int> RowCount(Expression<Func<T, bool>> predicate)
@@ -59,13 +95,24 @@ namespace DataAccess.Concrete
 
         public async Task<List<T>> GetAllAsync(Func<IQueryable<T>, IQueryable<T>> includes = null)
         {
-            IQueryable<T> query = dbContext.Set<T>();
-
-            if (includes != null)
+            try
             {
-                query = includes(query);
+                IQueryable<T> query = dbContext.Set<T>();
+
+                if (includes != null)
+                {
+                    query = includes(query);
+                }
+                var test = await query.ToListAsync();
+                return test;
             }
-            return await query.AsNoTracking().ToListAsync();
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            return null;
         }
 
         public Task<List<T>> GetFilteredAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null)
@@ -82,7 +129,7 @@ namespace DataAccess.Concrete
 
         public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate)
         {
-           return await dbContext.Set<T>().AsNoTracking().SingleOrDefaultAsync(predicate);
+            return await dbContext.Set<T>().AsNoTracking().SingleOrDefaultAsync(predicate);
         }
 
         public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes)
@@ -99,7 +146,7 @@ namespace DataAccess.Concrete
 
         public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null)
         {
-            IQueryable<T> query = dbContext.Set<T>().AsNoTracking();
+            IQueryable<T> query = dbContext.Set<T>();
 
             if (includes != null)
             {
@@ -121,6 +168,6 @@ namespace DataAccess.Concrete
             return result;
         }
 
-       
+
     }
 }

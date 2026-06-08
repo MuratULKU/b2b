@@ -22,8 +22,8 @@ namespace Business.Concrete
 
         public async Task<IResult> CreateBankParameter(VirtualPosParameter bankParameter)
         {
-            await _unitOfWork.VirtualPosParameter.AddAsync(bankParameter);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<VirtualPosParameter>().AddAsync(bankParameter);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
             return new Result(ResultStatus.Error, "Hatalı İşlem");
@@ -31,8 +31,8 @@ namespace Business.Concrete
 
         public async Task<IResult> DeleteBankParameter(VirtualPosParameter bankParameter)
         {
-             await _unitOfWork.VirtualPosParameter.Delete(bankParameter);
-            var result =await _unitOfWork.CommitAsync();
+             await _unitOfWork.Repository<VirtualPosParameter>().Delete(bankParameter);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
             return new Result(ResultStatus.Error, "Hatalı İşlem");
@@ -40,14 +40,14 @@ namespace Business.Concrete
 
         public async Task<List<VirtualPosParameter>> GetAll(Guid BankId)
         {
-            var result = await _unitOfWork.VirtualPosParameter.GetAllAsync();
+            var result = await _unitOfWork.Repository<VirtualPosParameter>().GetAllAsync();
             return result;
         }
 
         public async Task<IResult> UpdateBankParameter(VirtualPosParameter bankParameter)
         {
-            await _unitOfWork.VirtualPosParameter.UpdateAsync(bankParameter);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<VirtualPosParameter>().UpdateAsync(bankParameter);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
             return new Result(ResultStatus.Error, "Hatalı İşlem");

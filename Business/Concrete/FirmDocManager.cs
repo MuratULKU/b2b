@@ -22,7 +22,7 @@ namespace Business.Concrete
 
         public void Delete(FirmDoc doc)
         {
-            _unitOfWork.FirmDoc.Delete(doc);
+            _unitOfWork.Repository<FirmDoc>().Delete(doc);
         }
 
         public Task<int> DeleteAll()
@@ -32,21 +32,21 @@ namespace Business.Concrete
 
         public Task<List<FirmDoc>> GetAll(Guid ByProductId)
         {
-           return  _unitOfWork.FirmDoc.Find(x=>x.ProductId == ByProductId);
+           return  _unitOfWork.Repository<FirmDoc>().Find(x=>x.ProductId == ByProductId);
         }
 
         public async Task<IResult> Save(FirmDoc doc)
         {
             if (doc.Id == Guid.Empty)
             {
-               await _unitOfWork.FirmDoc.AddAsync(doc);
-                await _unitOfWork.CommitAsync();
+               await _unitOfWork.Repository<FirmDoc>().AddAsync(doc);
+                await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Kayıt Başarılı");
             }
             else
             {
-                await _unitOfWork.FirmDoc.UpdateAsync(doc);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<FirmDoc>().UpdateAsync(doc);
+                await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Kayıt Başarılı");
             }
           
@@ -55,8 +55,8 @@ namespace Business.Concrete
 
         public void Update(FirmDoc doc)
         {
-            _unitOfWork.FirmDoc.UpdateAsync(doc);
-            _unitOfWork.CommitAsync();
+            _unitOfWork.Repository<FirmDoc>().UpdateAsync(doc);
+            _unitOfWork.SaveChangesAsync();
         }
     }
 }

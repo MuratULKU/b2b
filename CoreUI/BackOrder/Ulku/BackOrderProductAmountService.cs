@@ -2,7 +2,7 @@
 using Entity;
 
 
-namespace CoreUI.BackOrder
+namespace CoreUI.BackOrder.Ulku
 {
     public interface IBackOrderProductAmountService
     {
@@ -13,7 +13,7 @@ namespace CoreUI.BackOrder
     public class BackOrderProductAmountService : IBackOrderProductAmountService
     {
 
-       
+
         private readonly IServiceProvider _serviceProvider;
         private IProductAmountRepository _productAmountRepository;
         private IProductRepository _productRepository;
@@ -41,7 +41,7 @@ namespace CoreUI.BackOrder
                 _productAmountRepository = scope.ServiceProvider.GetRequiredService<IProductAmountRepository>();
                 _productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
                 HttpResponseMessage respone;
-                
+
                 if (date.HasValue)
                     respone = await _httpClient.GetAsync($"/api/productsamount/{date.Value.ToString("MM.dd.yyyy")}");
                 else

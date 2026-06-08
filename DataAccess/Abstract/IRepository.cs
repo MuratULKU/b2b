@@ -10,7 +10,16 @@ namespace DataAccess.Abstract
 {
     public interface IRepository<T> where T : class
     {
-     
+        Task<List<T>> GetPagedAsync<TKey>(
+            int pageNumber,
+            int pageSize,
+            Expression<Func<T, bool>> predicate = null,
+            Func<IQueryable<T>, IQueryable<T>> includes = null,
+            Expression<Func<T, TKey>> order = null);
+
+        Task<TProperty> MaxAsync<TProperty>(
+          Expression<Func<T, TProperty>> selector);
+
         Task<List<T>> GetAllAsync(Func<IQueryable<T>, IQueryable<T>> includes = null);
         Task<List<T>> GetFilteredAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null);
         Task<T> AddAsync(T entity);
@@ -18,9 +27,9 @@ namespace DataAccess.Abstract
         Task<T> Delete(T entity);
         Task<int> RowCount();
         Task<int> RowCount(Expression<Func<T, bool>> predicate);
-        Task<List<T>> Find(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null,int CurrentPage = 0, int PageSize=0);
+        Task<List<T>> Find(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null, int CurrentPage = 0, int PageSize = 0);
         Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes);
-        Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes =null);
+        Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> includes = null);
     }
 }

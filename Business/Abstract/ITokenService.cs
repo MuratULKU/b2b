@@ -8,6 +8,6 @@ namespace Business.Abstract
 {
     public interface ITokenService
     {
-        Task<string> GetToken(HttpClient _httpClient);
+        Task<string> GetToken();
     }
 }

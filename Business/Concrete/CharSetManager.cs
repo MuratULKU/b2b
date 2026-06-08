@@ -25,13 +25,13 @@ namespace Business.Concrete
         {
             try
             {
-                var charsets = await _unitOfWork.CharSet.GetAllAsync();
+                var charsets = await _unitOfWork.Repository<CharSet>().GetAllAsync();
                 foreach (var charset in charsets)
                 {
-                    await _unitOfWork.CharSet.Delete(charset);
+                    await _unitOfWork.Repository<CharSet>().Delete(charset);
                 }
-                await _unitOfWork.CommitAsync();
-               
+                var result = await _unitOfWork.SaveChangesAsync();
+
             }
             catch (Exception ex)
             {
@@ -43,7 +43,7 @@ namespace Business.Concrete
 
         public async Task<CharSet> GetByCode(string code)
         {
-            return  await _unitOfWork.CharSet.SingleOrDefaultAsync(x => x.Code == code);
+            return  await _unitOfWork.Repository<CharSet>().SingleOrDefaultAsync(x => x.Code == code);
          
         }
 
@@ -51,8 +51,8 @@ namespace Business.Concrete
         {
             try
             {
-                await _unitOfWork.CharSet.AddAsync(charSet);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<CharSet>().AddAsync(charSet);
+                var result = await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Character set inserted successfully.");
             }
             catch (Exception ex)
@@ -65,8 +65,8 @@ namespace Business.Concrete
         {
             try
             {
-               await _unitOfWork.CharSet.UpdateAsync(charSet);
-                await _unitOfWork.CommitAsync();
+               await _unitOfWork.Repository<CharSet>().UpdateAsync(charSet);
+                var result = await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Character set updated successfully.");
             }
             catch (Exception ex)

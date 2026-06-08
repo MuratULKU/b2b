@@ -3,92 +3,259 @@
 @typeparam TItem
 
 <CascadingValue IsFixed="true" Value="this">@Columns</CascadingValue>
-@* <CascadingValue IsFixed="true" Value="this">@DataGridAggregates</CascadingValue> *@
 <CascadingValue IsFixed="true" Value="this">
 
-    <div @ref=_gridElement class="container-fluid">
-        <table @attributes="Attributes">
-            <thead>
-                <tr class="Header">
-                    @foreach (var column in RenderedColumns)
-                    {
-                        @HeaderText(column)
-                    }
-                </tr>
-            </thead>
-            <tbody class="Body">
-                @if (_items != null && _items.Count > 0)
-                {
-                    var rowIndex = 0;
+    <div @ref=_gridElement class="datagrid-container">
 
-
-                    <MVirtualize IsEnabled="Virtualize" Items="CurrentPageItems" Context="item">
-                        @{
-                            RowClass = (item.Equals(SelectedItem)) ? "selectedRow" : "";
-                            var rowclass = new CssBuilder(RowClass).Build();
-                        }
-                        @*  <tr class="@rowclass" @key="item" @onclick="@((args) => OnRowClickedAsync(args, item, rowIndex))"> *@
-                        <tr class="@rowclass" onclick="@(()=>OnRowClickedAsync(item, rowIndex))">
-
-                            @foreach (var column in RenderedColumns)
-                            {
-                                @if (column.ChildContent != null)
-                                {
-                                    @column.ChildContent
-                                }
-                                else
-                                {
-                                    @Cell(column, item)
-                                }
-
-                            }
-                        </tr>
-                        @if(DetailRowTemplate != null)
+    
+        <div class="datagrid-table-wrapper">
+            <table @attributes="Attributes" class="datagrid-table">
+                <thead>
+                    <tr class="Header">
+                        @foreach (var column in RenderedColumns)
                         {
-                            if (DetailRowVisible(item))
-                            {
-                                <tr>
-                                    <td colspan="@RenderedColumns.Count">
-                                        @DetailRowTemplate
-                                    </td>
-                                </tr>
-                            }
+                            @HeaderText(column)
                         }
-                        
-                    </MVirtualize>
-                }
-                else
-                {
-                    if (NoDataTemplate != null)
+                    </tr>
+                </thead>
+                <tbody class="Body">
+                    @if (_items != null && _items.Count > 0)
                     {
-                        @NoDataTemplate
+                        var rowIndex = 0;
+                        <MVirtualize IsEnabled="Virtualize" Items="CurrentPageItems" Context="item">
+                            @{
+                                RowClass = (item.Equals(SelectedItem)) ? "selectedRow" : "";
+                                var rowclass = new CssBuilder(RowClass).Build();
+                            }
+                            <tr class="@rowclass" onclick="@(()=>OnRowClickedAsync(item, rowIndex))">
+                                @foreach (var column in RenderedColumns)
+                                {
+                                    @if (column.ChildContent != null)
+                                    {
+                                        @column.ChildContent
+                                    }
+                                    else
+                                    {
+                                        @Cell(column, item)
+                                    }
+                                }
+                            </tr>
+                            @if (DetailRowTemplate != null)
+                            {
+                                if (DetailRowVisible(item))
+                                {
+                                    <tr>
+                                        <td colspan="@RenderedColumns.Count">
+                                            @DetailRowTemplate
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </MVirtualize>
                     }
-                }
-            </tbody>
-            <tfoot class="Footer">
-             
-                @if (FooterTemplate != null)
-                {
-                    @FooterTemplate
-                }
-            </tfoot>
-        </table>
+                    else
+                    {
+                        if (NoDataTemplate != null)
+                        {
+                            @NoDataTemplate
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="@RenderedColumns.Count" class="no-data">Veri bulunamadı.</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot class="Footer">
+                    @if (FooterTemplate != null)
+                    {
+                        @FooterTemplate
+                    }
+                </tfoot>
+            </table>
+        </div>
 
-        <div style="margin-top:20px;max-width:100%;margin-bottom:20px;">
+    
+        <div class="datagrid-cards">
+            @if (_items != null && _items.Count > 0)
+            {
+                var rowIndex = 0;
+                <MVirtualize IsEnabled="Virtualize" Items="CurrentPageItems" Context="item">
+                    @{
+                        var isSelected = item.Equals(SelectedItem);
+                    }
+                    <div class="datagrid-card  @(isSelected ? "card-selected" : "") @RowClass"
+                         onclick="@(()=>OnRowClickedAsync(item, rowIndex))">
+                        @foreach (var column in RenderedColumns)
+                        {
+                            <div class="card-row">
+                                <span class="card-label">
+                                    @(column.Caption ?? column.Title)
+                                </span>
+                                <span class="card-value">
+                                    @if (column.ChildContent != null)
+                                    {
+                                        @column.ChildContent
+                                    }
+                                    else
+                                    {
+                                        @Cell(column, item)
+                                    }
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </MVirtualize>
+            }
+            else
+            {
+                <div class="no-data">Veri bulunamadı.</div>
+            }
+        </div>
 
+       
+        <div class="datagrid-footer">
             @if (Pager)
             {
-                <DataGridPager TItem="TItem"  TotalCount="@TotalCount"/>
+                <DataGridPager TItem="TItem" TotalCount="@TotalCount" />
             }
             @if (ButtonRowTemplate != null)
             {
-                <div>
-                    @ButtonRowTemplate
-                </div>
+                <div>@ButtonRowTemplate</div>
             }
         </div>
     </div>
 </CascadingValue>
+
+<style>
+    .datagrid-container {
+        width: 100%;
+        padding: 0;
+    }
+
+    /* ── TABLO (≥ 768px) ── */
+    .datagrid-table-wrapper {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 6px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .datagrid-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+
+    .datagrid-table thead tr.Header th {
+        background: #f1f3f5;
+        padding: 10px 12px;
+        text-align: left;
+        font-weight: 600;
+        white-space: nowrap;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .datagrid-table tbody tr {
+        border-bottom: 1px solid #e9ecef;
+        transition: background .15s;
+    }
+
+    .datagrid-table tbody tr:hover {
+        background: #f8f9fa;
+        cursor: pointer;
+    }
+
+    .datagrid-table tbody tr.selectedRow {
+        background: #d0ebff;
+    }
+
+    .datagrid-table td {
+        padding: 8px 12px;
+        vertical-align: middle;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 2rem;
+        color: #868e96;
+        font-style: italic;
+    }
+
+    .datagrid-cards {
+        display: none;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .datagrid-card {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,.06);
+        cursor: pointer;
+        transition: box-shadow .15s;
+    }
+
+    .datagrid-card:hover {
+        box-shadow: 0 3px 8px rgba(0,0,0,.12);
+    }
+
+    .datagrid-card.card-selected {
+        border-color: #339af0;
+        background: #e7f5ff;
+    }
+
+    .card-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 4px 0;
+        border-bottom: 1px solid #f1f3f5;
+        font-size: 0.85rem;
+    }
+
+    .card-row:last-child {
+        border-bottom: none;
+    }
+
+    .card-label {
+        font-weight: 600;
+        color: #495057;
+        flex: 0 0 40%;
+        padding-right: 0.5rem;
+    }
+
+    .card-value {
+        color: #212529;
+        text-align: right;
+        flex: 1;
+    }
+
+    .datagrid-footer {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        width:100%;
+    }
+
+    
+   
+
+    /* ── BREAKPOINT ── */
+    @@media (max-width: 767.98px) {
+        .datagrid-table-wrapper {
+            display: none;
+        }
+
+        .datagrid-cards {
+            display: flex;
+        }
+    }
+</style>
+
 @code {
 
     [Parameter(CaptureUnmatchedValues = true)]
@@ -96,6 +263,7 @@
 
     private ElementReference _gridElement;
     private List<TItem> _items;
+
     internal void AddColumn(Column<TItem> column)
     {
         RenderedColumns.Add(column);
@@ -106,153 +274,106 @@
         DataGridAggregatesColumns.Add(aggregate);
     }
 
-    [Parameter,EditorRequired]
+    [Parameter, EditorRequired]
     public List<TItem> Items
     {
-        get
-        {
-            return _items;
-        }
+        get => _items;
         set
         {
             if (_items == value) return;
             _items = value;
-
             if (PagerStateHasChangedEvent != null)
                 InvokeAsync(PagerStateHasChangedEvent);
         }
     }
 
+    // Kart görünümü için salt değer okuyucu (düzenleme yok)
+    private string CardCellValue(Column<TItem> column, TItem item)
+    {
+        var cell = new Cell<TItem>(this, column, item);
+        if (column.DataType == typeof(double) || column.DataType == typeof(decimal))
+            return Convert.ToDouble(cell.Value).ToString("N2");
+        return cell.Value?.ToString() ?? "";
+    }
 
-
-
-
-    internal
-     RenderFragment HeaderText(Column<TItem> column)
+    internal RenderFragment HeaderText(Column<TItem> column)
     {
         return @<text>
-        <th style="@column.CssStyle" @key="column" onclick="@(column.IsSortable ? () => OnHeaderColumnClickedAysnc(column.Value, column.Field) : null)">
+        <th style="@column.CssStyle" @key="column"
+            onclick="@(column.IsSortable ? () => OnHeaderColumnClickedAysnc(column.Value, column.Field) : null)">
             @if (column.Caption != null)
-            @column.Caption
-        else
-            @column.Title
-
-
+            {
+                @column.Caption
+            }
+            else
+            {
+                @column.Title
+            }
             @if (_sortColumn == column.Field)
-        {
-        if (_ascending)
-        {
-        column.SortDirection = SortDirection.Asc;
-            <svg style="margin-left:5px;" fill="#000000" width="16px" height="16px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                <title>down</title>
-                <path d="M11.125 16.313l7.688-7.688 3.594 3.719-11.094 11.063-11.313-11.313 3.5-3.531z"></path>
-            </svg>
-        }
-        else
-        {
-        column.SortDirection = SortDirection.Desc;
-            <svg style="margin-left:5px;" fill="#000000" width="16px" height="16px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                <title>up</title>
-                <path d="M11.25 15.688l-7.656 7.656-3.594-3.688 11.063-11.094 11.344 11.344-3.5 3.5z"></path>
-            </svg>
-        }
-        }
+            {
+                if (_ascending)
+                {
+                    column.SortDirection = SortDirection.Asc;
+                    <svg style="margin-left:5px;" fill="#000000" width="16px" height="16px" viewBox="0 0 32 32">
+                        <path d="M11.125 16.313l7.688-7.688 3.594 3.719-11.094 11.063-11.313-11.313 3.5-3.531z"></path>
+                    </svg>
+                }
+                else
+                {
+                    column.SortDirection = SortDirection.Desc;
+                    <svg style="margin-left:5px;" fill="#000000" width="16px" height="16px" viewBox="0 0 32 32">
+                        <path d="M11.25 15.688l-7.656 7.656-3.594-3.688 11.063-11.094 11.344 11.344-3.5 3.5z"></path>
+                    </svg>
+                }
+            }
         </th>
     </text>;
     }
 
-
-    // internal RenderFragment Cell(Column<TItem> column, TItem item)
-    // {
-    //     return
-    // @<text>
-    //     @{
-    // var cell = new Cell<TItem>(this, column, item);
-    //     }
-    //     <td style="@column.CssStyle">
-    //         @if (column.IsEditable && !ReadOnly && Editable)
-    //     {
-    //         @if (column.CellTemplate != null)
-    //     {
-    //         @column.CellTemplate(cell.cellContext)
-    //     }
-
-    //         @if (column.DataType == typeof(string))
-    //     {
-    //         <input style="border:0px;" type="text" value="@cell.Value" @onchange="@(cell.StringValueChangedAsync)" />
-    //     }
-    //     else if (column.DataType == typeof(double) | column.DataType == typeof(decimal))
-    //     {
-    //         <input style="border:0px;float:right;text-align:right;width:@column.Width.ToString()px" type="number" value="@cell.Value" @onchange="@(cell.NumberValueChangedAsync)" />
-    //     }
-    //     }
-    //     else
-    //     {
-    //         @if (column.CellTemplate != null)
-    //     {
-    //         @column.CellTemplate(cell.cellContext)
-    //     }
-    //     else
-    //     {
-    //         @cell.Value
-    //     }
-    //     }
-    //     </td>
-    // </text>
-    // ;
-    // }
-
-
     internal RenderFragment Cell(Column<TItem> column, TItem item)
     {
-        return
-    @<text>
+        return @<text>
         @{
-    var cell = new Cell<TItem>(this, column, item);
+            var cell = new Cell<TItem>(this, column, item);
         }
         <td style="@column.CssStyle">
             @if (column.IsEditable && !ReadOnly && Editable)
-        {
-            @if (column.CellTemplate != null)
-        {
-            @column.CellTemplate(cell.cellContext)
-        }
-
-            @if (column.DataType == typeof(string))
-        {
-            <input style="border:0px;" type="text" value="@cell.Value" @onchange="@(cell.StringValueChangedAsync)" />
-        }
-        else if (column.DataType == typeof(double) || column.DataType == typeof(decimal))
-        {
-            <input style="border:0px;float:right;text-align:right;width:@column.Width.ToString()px"
-                   type="number"
-                   value="@cell.Value"
-                   @onchange="@(cell.NumberValueChangedAsync)" />
-        }
-        }
-        else
-        {
-            @if (column.CellTemplate != null)
-        {
-            @column.CellTemplate(cell.cellContext)
-        }
-        else
-        {
-        if (column.DataType == typeof(double) || column.DataType == typeof(decimal))
-        {
-            @Convert.ToDouble(cell.Value).ToString("N2")
-        ;
-        }
-        else
-        {
-            @cell.Value
-        }
-        }
-        }
+            {
+                @if (column.CellTemplate != null)
+                {
+                    @column.CellTemplate(cell.cellContext)
+                }
+                @if (column.DataType == typeof(string))
+                {
+                    <input style="border:0px;" type="text" value="@cell.Value"
+                           @onchange="@(cell.StringValueChangedAsync)" />
+                }
+                else if (column.DataType == typeof(double) || column.DataType == typeof(decimal))
+                {
+                    <input style="border:0px;float:right;text-align:right;width:@column.Width.ToString()px"
+                           type="number" value="@cell.Value"
+                           @onchange="@(cell.NumberValueChangedAsync)" />
+                }
+            }
+            else
+            {
+                @if (column.CellTemplate != null)
+                {
+                    @column.CellTemplate(cell.cellContext)
+                }
+                else
+                {
+                    if (column.DataType == typeof(double) || column.DataType == typeof(decimal))
+                    {
+                        @Convert.ToDouble(cell.Value).ToString("N2")
+                    }
+                    else
+                    {
+                        @cell.Value
+                    }
+                }
+            }
         </td>
-    </text>
-;
+    </text>;
     }
-
-
 }

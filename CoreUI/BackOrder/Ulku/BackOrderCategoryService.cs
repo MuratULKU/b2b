@@ -1,8 +1,8 @@
 ﻿using Business.Abstract;
-
+using Core.Logger;
 using Entity;
 
-namespace CoreUI.BackOrder
+namespace CoreUI.BackOrder.Ulku
 {
     public interface IBackOrderCategoryService
     {
@@ -11,10 +11,10 @@ namespace CoreUI.BackOrder
     }
     public class BackOrderCategoryService : IBackOrderCategoryService
     {
-        
+
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<BackOrderCategoryService> _logger;
-        public BackOrderCategoryService(IServiceProvider serviceProvider, ILogger<BackOrderCategoryService> logger = null)
+        private readonly ILoggerService _logger;
+        public BackOrderCategoryService(IServiceProvider serviceProvider, ILoggerService logger = null)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -27,14 +27,14 @@ namespace CoreUI.BackOrder
             var l = _categoryRepository.DeleteAll();
             return Task.CompletedTask;
         }
-        public async Task<bool> updateCategory(DateTime? date,HttpClient _httpClient)
+        public async Task<bool> updateCategory(DateTime? date, HttpClient _httpClient)
         {
             try
             {
                 using var scope = _serviceProvider.CreateScope();
                 var _categoryRepository = scope.ServiceProvider.GetRequiredService<ICategoryService>();
                 HttpResponseMessage respone;
-                
+
                 if (date.HasValue)
                     respone = await _httpClient.GetAsync($"/api/categories/{date.Value.ToString("MM.dd.yyyy HH:mm")}");
                 else
@@ -49,28 +49,28 @@ namespace CoreUI.BackOrder
                             Category item = await _categoryRepository.GetByCode(category.Code);
                             if (item is null)
                             {
-                               await _categoryRepository.Insert(category);
+                                await _categoryRepository.Insert(category);
                             }
                             else
                             {
                                 item.Name = category.Name;
                                 item.Parent = category.Parent;
-                               await _categoryRepository.Update(item);
+                                await _categoryRepository.Update(item);
                             }
                         }
 
                     }
-                    
+
                 }
                 return true;
             }
             catch (Exception ex)
             {
-               Task.FromException(ex);
-                _logger.LogCritical(ex.Message);
+                Task.FromException(ex);
+                _logger.Error(ex.Message);
                 return false;
             }
-            
+
         }
     }
 }

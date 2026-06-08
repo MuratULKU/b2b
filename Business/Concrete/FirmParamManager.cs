@@ -24,8 +24,8 @@ namespace Business.Concrete
 
         public async Task<IResult> Create(FirmParam firmParam)
         {
-            await _unitOfWork.FirmParam.AddAsync(firmParam);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<FirmParam>().AddAsync(firmParam);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Başarılı");
             return new Result(ResultStatus.Error, "Kayıt İşlemi Hatalı");
@@ -33,8 +33,8 @@ namespace Business.Concrete
 
         public async Task<IResult> Delete(FirmParam firmParam)
         {
-            _unitOfWork.FirmParam.Delete(firmParam);
-            var result = await _unitOfWork.CommitAsync();
+            _unitOfWork.Repository<FirmParam>().Delete(firmParam);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt Silindi");
             return new Result(ResultStatus.Error, "Kayıt Silinemedi");
@@ -42,20 +42,20 @@ namespace Business.Concrete
 
         public async  Task<FirmParam> Get(int no)
         {
-           var result = await _unitOfWork.FirmParam.SingleOrDefaultAsync(x=>x.No == no);
+           var result = await _unitOfWork.Repository<FirmParam>().SingleOrDefaultAsync(x=>x.No == no);
             return result;
         }
 
         public async Task<List<FirmParam>> GetAll()
         {
-            var result = await _unitOfWork.FirmParam.GetAllAsync();
+            var result = await _unitOfWork.Repository<FirmParam>().GetAllAsync();
             return result;
         }
 
         public async Task<IResult> Update(FirmParam firmParam)
         {
-            await  _unitOfWork.FirmParam.UpdateAsync(firmParam);
-            var result = await _unitOfWork.CommitAsync();
+            await  _unitOfWork.Repository<FirmParam>().UpdateAsync(firmParam);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
             {
                 return new Result(ResultStatus.Success, "Kayıt Güncellendi");

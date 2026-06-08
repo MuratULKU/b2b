@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Migrations; // Eklendi: Migrate uzantısı için gerekli
 
 
 namespace DataAccess.EFCore
@@ -19,24 +20,31 @@ namespace DataAccess.EFCore
         public static IApplicationBuilder InitializeDatabase(this IApplicationBuilder app)
         {
             using (IServiceScope scope = app.ApplicationServices.CreateScope())
-            using (RepositoryContext context = scope.ServiceProvider.GetRequiredService<RepositoryContext>())
             {
+                // ✅ using kaldırıldı — context'i DI yönetsin
+                var context = scope.ServiceProvider.GetRequiredService<RepositoryContext>();
                 try
                 {
-                    Debug.WriteLine(context.Database.GetConnectionString());
+                    // Hangi provider ve connection string kullanıldığını görmek için
+                    Debug.WriteLine($"Provider: {context.Database.ProviderName}");
+                    Debug.WriteLine($"Connection: {context.Database.GetConnectionString()}");
+
+                    // Bekleyen migration'ları görmek için
+                    var pending = context.Database.GetPendingMigrations().ToList();
+                    Debug.WriteLine($"Pending migrations: {string.Join(", ", pending)}");
+
                     context.Database.Migrate();
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine(ex);
+                    throw; // ✅ hatayı yut, fırlat — sessiz geçme
                 }
 
-                //seed data
-                //SeedData(context);
+                SeedData(context);
             }
             return app;
         }
-
 
         private static void SeedData(RepositoryContext dataContext)
         {

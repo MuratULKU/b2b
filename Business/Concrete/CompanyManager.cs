@@ -19,33 +19,29 @@ namespace Business.Concrete
 
         public async Task<Company> Get(Guid id)
         {
-            return await _unitOfWork.Company.SingleOrDefaultAsync(x => x.Id == id);
-           
+            return await _unitOfWork.Repository<Company>().SingleOrDefaultAsync(x => x.Id == id);
+
         }
 
-        public List<Company> GetAll(int currentPage, int pageSize)
-        {
-            return GetAllAsync(currentPage, pageSize).Result;
-        }
-
+       
         public async Task<List<Company>> GetAllAsync(int CurrentPage, int PageSize)
         {
-            var result = await _unitOfWork.Company.GetPagedCompanies(CurrentPage, PageSize);
-            return result;
+            return await _unitOfWork.Repository<Company>().GetPagedAsync(CurrentPage, PageSize, order: x => x.Id);
+
         }
 
         public async Task<Company> GetByUserId(Guid userId)
         {
-            var user = await _unitOfWork.User.SingleOrDefaultAsync(x=>x.Id == userId);
-            var company = await _unitOfWork.Company.SingleOrDefaultAsync(x => x.Id == user.CompanyId);
+            var user = await _unitOfWork.Repository<User>().SingleOrDefaultAsync(x => x.Id == userId);
+            var company = await _unitOfWork.Repository<Company>().SingleOrDefaultAsync(x => x.Id == user.CompanyId);
             return company;
 
         }
 
         public async Task<bool> Insert(Company company)
         {
-            await _unitOfWork.Company.AddAsync(company);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<Company>().AddAsync(company);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
             {
                 return true;
@@ -57,11 +53,11 @@ namespace Business.Concrete
         {
             try
             {
-                _unitOfWork.BeginTransaction();
-                await _unitOfWork.Company.AddAsync(company);
-                await _unitOfWork.User.AddAsync(user);
-                await _unitOfWork.UserRole.AddAsync(userRole);
-                
+                await _unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.Repository<Company>().AddAsync(company);
+                await _unitOfWork.Repository<User>().AddAsync(user);
+                await _unitOfWork.Repository<UserRole>().AddAsync(userRole);
+
                 await _unitOfWork.CommitTransactionAsync();
                 return true;
             }
@@ -77,21 +73,21 @@ namespace Business.Concrete
 
         public async Task<int> TotalCount()
         {
-            return await _unitOfWork.Company.RowCount();
+            return await _unitOfWork.Repository<Company>().RowCount();
         }
 
         public async Task<bool> Update(Company company)
         {
-            await _unitOfWork.Company.UpdateAsync(company);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<Company>().UpdateAsync(company);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1) { return true; }
             return false;
         }
 
         public async Task<bool> Delete(Company company)
         {
-            await _unitOfWork.Company.Delete(company);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<Company>().Delete(company);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1) { return true; }
             return false;
         }

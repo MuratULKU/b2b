@@ -1,16 +1,21 @@
 ﻿@page "/extre"
 
 @using Business.Abstract
+@using CoreUI.BackOrder
+@using CoreUI.BackOrder.Mikro
 @using CoreUI.Components.DataGrid
 
 @using System.Text.Json
 @using CoreUI.Components.UserPanel
 @using CoreUI.Data
 @using Entity
+@using System.Text
+@using System.Security.Cryptography
 @inject IUserIdentityProcessor userIdenetity
 @inject IConfiguration configuration
 @inject ICompanyService companyService
 @inject ILogger<ConfirmOrder> _logger
+
 
 @attribute [Authorize]
 <div class="container">
@@ -34,10 +39,11 @@
          </div>
     </div>
     <div>
-        <DataGrid TItem="ClientFiche" Items="clientFiches" Pager TotalCount="totalCount" RowsPerPage="rowsPerPageChange" SelectedPageChange="selectedPageChange">
+        <DataGrid TItem="ClientFiche" Items="clientFiches" TotalCount="totalCount" RowsPerPage="rowsPerPageChange" 
+            SelectedPageChange="selectedPageChange" Pager="true" Virtualize="true">
             <Columns>
                 <Column Caption="Tarih" Field="@nameof(ClientFiche.Date)" />
-                <Column Caption="Fiş Türü" Field="@nameof(ClientFiche.TrCode)" />
+                <Column Caption="Belge No" Field="@nameof(ClientFiche.DocNo)" />
                 <Column Caption="Fiş Türü" Field="@nameof(ClientFiche.TrString)" />
                 <Column Caption="Açıklama" Field="@nameof(ClientFiche.LineExp)" />
                 <Column Caption="Borç" Field="@nameof(ClientFiche.Debit)" TextAlign="TextAlignmet.Right" />
@@ -49,8 +55,8 @@
 </div>
 @code {
     private Guid userId { get; set; }
-    private DateTime? firstDate { get; set; }
-    private DateTime? lastDate { get; set; }
+    private DateTime firstDate { get; set; }
+    private DateTime lastDate { get; set; }
     private int _currentPage { get; set; } = 0;
     private int _rowsPerPage { get; set; } = 10;
     List<ClientFiche> clientFiches = new List<ClientFiche>();
@@ -60,40 +66,28 @@
         userId = await userIdenetity.GetCurrentUserId();
         lastDate = DateTime.Now.AddDays(1).AddSeconds(-1);
         firstDate = DateTime.Now.AddMonths(-1).Date;
-        GetExtre(1, _rowsPerPage);
         StateHasChanged();
     }
 
-
+    [Inject] private ApiStrategyFactory _strategyFactory { get; set; }
 
     private async void GetExtre(int currentPage,int pageSize)
     {
-        HttpClient _httpClient = new HttpClient();
-        _httpClient.BaseAddress = new Uri(configuration.GetSection("ApiService").GetSection("Url").Value);
-        Company company = await companyService.GetByUserId(userId);
-        try
-        {  //'http://localhost:5050/api/v1/Client/extre?code=3&startDate=01.01.2025&endDate=12.31.2025&currentPage=1&pageSize=10'
-            var httpResponseMessage =
-              await _httpClient.GetAsync($"/api/v1/client/extre?code={company.ProgramCode}&startDate={firstDate?.ToString("MM.dd.yyyy")}&endDate={lastDate?.ToString("MM.dd.yyyy")}&currentPage={currentPage}&pageSize={pageSize}");
-            var response =  httpResponseMessage.Content.ReadFromJsonAsync<PageResult<ClientFiche>>().Result;
-            totalCount = response.TotalCount;
-            clientFiches = response.Items;
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogCritical(ex.Message);
-        }
+        var company = await companyService.GetByUserId(userId);
+        var strategy = _strategyFactory.GetStrategy();
+        clientFiches =  await strategy.GetExtre(_currentPage,_rowsPerPage , company.ProgramCode, firstDate, lastDate);
+        totalCount = clientFiches.Count ;
+        StateHasChanged();
     }
 
     private async void rowsPerPageChange(int rowsPerPage)
     {
         _rowsPerPage = rowsPerPage;
-        GetExtre(_currentPage, _rowsPerPage);
+       
     }
     private void selectedPageChange(int currentPage)
     {
         _currentPage = currentPage;
-        GetExtre(_currentPage, _rowsPerPage);
+      
     }
 }

@@ -22,18 +22,18 @@ namespace Business.Concrete
 
         public async Task<string> GetDocNo(int doctype)
         {
-            var docno = await _unitOfWork.DocumentNo.SingleOrDefaultAsync(x=>x.DocType == doctype);
+            var docno = await _unitOfWork.Repository<DocumentNo>().SingleOrDefaultAsync(x=>x.DocType == doctype);
             if (docno == null)
             {
                 await Insert(new DocumentNo() { DocType = doctype, DocNo = 1, Prefix = "" });
-                docno = await _unitOfWork.DocumentNo.SingleOrDefaultAsync(x => x.DocType == doctype);
+                docno = await _unitOfWork.Repository<DocumentNo>().SingleOrDefaultAsync(x => x.DocType == doctype);
             }
             else
             {
                docno.DocNo+=1;
                await Update(docno);
             }
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.SaveChangesAsync();
             return docno.Prefix + docno.DocNo;
         }
 
@@ -41,7 +41,7 @@ namespace Business.Concrete
         {
             try
             {
-                await _unitOfWork.DocumentNo.AddAsync(documentNo);
+                await _unitOfWork.Repository<DocumentNo>().AddAsync(documentNo);
                 return new Result(ResultStatus.Success, "DocumentNo inserted successfully.");
             }
             catch (Exception ex)
@@ -55,7 +55,7 @@ namespace Business.Concrete
         {
             try
             {
-                await _unitOfWork.DocumentNo.UpdateAsync(documentNo);
+                await _unitOfWork.Repository<DocumentNo>().UpdateAsync(documentNo);
                 return new Result(ResultStatus.Success, "DocumentNo update successfully.");
             }
             catch (Exception ex)

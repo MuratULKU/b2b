@@ -1,7 +1,25 @@
 ﻿@page "/login"
-<CoreUI.Components.UserPanel.Login  />
+@inject NavigationManager navManager
+<CoreUI.Components.UserPanel.Login />
 
 @code {
     [Parameter]
     public string? returnUrl { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authState { get; set; }
+
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+
+            var state = authState.GetAwaiter().GetResult();
+            if (state.User.Identity.IsAuthenticated)
+            {
+                navManager.NavigateTo("/clientlist", true);
+            }
+        }
+    }
 }

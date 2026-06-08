@@ -4,9 +4,11 @@ using Business.Abstract;
 using Business.Concrete;
 using Core.Logger;
 using CoreUI.Components.Base;
+using CoreUI.Components.Confirm;
 using CoreUI.Components.Utilities;
 using DataAccess.Abstract;
 using DataAccess.Concrete;
+using SanalMagaza.Business.Concrete;
 
 
 
@@ -20,23 +22,15 @@ namespace B2C.Components.Base
             serviceCollection.AddSingleton<BootstrapClassProvider>();
             serviceCollection.AddScoped<SessionManager>();
             serviceCollection.AddScoped<IIdGenerator, IdGenerator>();
-        
+           
             return serviceCollection;
         }
 
         public static IServiceCollection AddRepositoryService(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped<IRoleRepository, RoleRepository>();
-            serviceCollection.AddScoped<IUserRepository, UserRepository>();
-            serviceCollection.AddScoped<IUserRoleRepository, UserRoleRepository>();
-            serviceCollection.AddScoped<IFirmParamRepository,FirmParamRepository>();
-            serviceCollection.AddScoped<IProductRepository, ProductRepository>();
-            serviceCollection.AddScoped<ICategoryRepository, CategoryRepository>();
+            serviceCollection.AddScoped<IPaymentRepository, PaymentRepository>();
             serviceCollection.AddScoped<IOrdFicheRepository, OrdFicheRepository>();
-            serviceCollection.AddScoped<IDocumentNoRepository, DocumentNoRepository>();
-            serviceCollection.AddScoped<ICompanyRepository, CompanyRepository>();
-            serviceCollection.AddScoped<ICurrenciesRepository, CurrenciesRepository>();
-            
+            serviceCollection.AddScoped<IProductRepository, ProductRepository>();
             return serviceCollection;
         }
         public static IServiceCollection AddBusinessService(this IServiceCollection serviceCollection)
@@ -51,7 +45,14 @@ namespace B2C.Components.Base
             serviceCollection.AddScoped<IFirmParamService,FirmParamManager>();
             serviceCollection.AddScoped<IDocumentNoService,DocumentNoManager>();
             serviceCollection.AddScoped<ICompanyService, CompanyManager>();
-           serviceCollection.AddScoped<ICurrencyService, CurrencyManager>();
+            serviceCollection.AddScoped<ICurrencyService, CurrencyManager>();
+            serviceCollection.AddScoped<IVirtualPosService, VirtualPosManager>();
+            serviceCollection.AddScoped<ICreditCardPrefixService, CreditCardPrefixManager>();
+            serviceCollection.AddScoped<ICreditCardService, CreditCardManager>();
+            serviceCollection.AddScoped<ICardBrandService, CardBrandManager>();
+            serviceCollection.AddScoped<IClFicheService,ClFicheManager>();
+            serviceCollection.AddScoped<IBankCardService, BankCardManager>();
+            serviceCollection.AddScoped<IVatListService, VatListManager>();
             return serviceCollection;
         }
     }

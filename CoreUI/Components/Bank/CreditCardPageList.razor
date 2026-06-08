@@ -9,6 +9,7 @@
 @using CoreUI.Components.UserPanel
 @using Entity
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
 @inject ICreditCardService CreditCardService
 @inject ICreditCardPrefixService CreditCardPrefixService
 @inject IBankCardService BankCardService
@@ -19,120 +20,292 @@
 @implements IDisposable
 @attribute [Authorize]
 
-<div class="container">
-    <div class="row">
-        <div class="col-7">
-            <div class="findarea">
-                <form @onsubmit="SearchBankNameEnter">
-                    <input class="findtext" type="text" placeholder="Banka Adı" id="filter" name="filter" @bind="@_bankNameFilter" />
+<style>
+    .page-wrapper {
+        padding: 1rem;
+    }
 
-                    <input class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit" />
+    /* ── Arama alanı ── */
+    .search-bar {
+        display: flex;
+        gap: .5rem;
+        margin-bottom: .75rem;
+        flex-wrap: wrap;
+    }
 
-                </form>
-            </div>
-            
-            <DataGrid TItem="CreditCard" Items="CreditCardList" SelectedItemChanged="SelectedCreditCardChange"
-                      Pager RowCount="10" Virtualize="true" TotalCount="@CreditCardList.Count">
+        .search-bar input[type="text"] {
+            flex: 1 1 160px;
+            min-width: 0;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            padding: .375rem .875rem;
+            font-size: .875rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+            .search-bar input[type="text"]:focus {
+                border-color: #86b7fe;
+            }
+
+        .search-bar button {
+            border-radius: 20px;
+            padding: .375rem 1rem;
+            font-size: .875rem;
+            white-space: nowrap;
+        }
+
+    /* ── İki panel yan yana (≥768px) ── */
+    .panel-row {
+        display: flex;
+        gap: 1.25rem;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .panel-left {
+        flex: 1 1 340px;
+        min-width: 0;
+    }
+
+    .panel-right {
+        flex: 1 1 240px;
+        min-width: 0;
+    }
+
+    /* ── Aksiyon butonları ── */
+    .action-buttons {
+        display: flex;
+        gap: .5rem;
+        margin-top: .5rem;
+        flex-wrap: wrap;
+    }
+
+        .action-buttons .btn {
+            flex: 1 1 auto;
+            font-size: .85rem;
+            padding: .35rem .75rem;
+        }
+
+    /* ── Modal form ── */
+    .modal-form-row {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: .75rem;
+        flex-wrap: wrap;
+    }
+
+        .modal-form-row .form-label {
+            flex: 0 0 90px;
+            font-weight: 600;
+            font-size: .875rem;
+            color: #495057;
+            margin: 0;
+        }
+
+        .modal-form-row .form-control,
+        .modal-form-row .form-select {
+            flex: 1 1 160px;
+            min-width: 0;
+            font-size: .875rem;
+        }
+
+        .modal-form-row .check-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-form-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #0d6efd;
+        }
+
+    /* ── Mobil: paneller alt alta ── */
+    @@media (max-width: 600px) {
+        .panel-left, .panel-right {
+            flex: 1 1 100%;
+        }
+
+        .action-buttons .btn {
+            flex: 1 1 30%;
+        }
+    }
+</style>
+
+<div class="page-wrapper container">
+    <div class="panel-row">
+
+      @*   {{-- SOL PANEL: Kredi Kartları --}} *@
+        <div class="panel-left">
+            <form class="search-bar" @onsubmit="SearchBankNameEnter">
+                <input type="text" placeholder="Banka Adı" @bind="@_bankNameFilter" />
+                <button class="btn btn-outline-primary" type="submit">Ara</button>
+            </form>
+
+            <DataGrid TItem="CreditCard" Items="CreditCardList"
+                      SelectedItemChanged="SelectedCreditCardChange"
+                      Pager RowCount="10" Virtualize="true"
+                      TotalCount="@CreditCardList.Count">
                 <Columns>
                     <Column Caption="Kredi Kartı Adı" Field="@nameof(CreditCard.Name)" />
                     <Column Caption="Kart Model">
-                        <CellTemplate>
-                            @context.Item.CardBrand.Name
-                        </CellTemplate>
+                        <CellTemplate>@context.Item.CardBrand.Name</CellTemplate>
                     </Column>
                 </Columns>
             </DataGrid>
-            <div>
-                <button type="button" class="btn btn-success" onclick="@NewCreditcard">Yeni</button>
-                <button type="button" class="btn btn-primary" disabled="@(selectedCreditCard == null ?true:false)" onclick="@ChangeCreditcard">Değiştir</button>
-                <button type="button" class="btn btn-danger" disabled="@(selectedCreditCard == null ?true:false)" onclick="@DeleteCreditcard">Sil</button>
+
+            <div class="action-buttons">
+                <button class="btn btn-success"
+                        onclick="@NewCreditcard">
+                    Yeni
+                </button>
+                <button class="btn btn-primary"
+                        disabled="@(selectedCreditCard == null)"
+                        onclick="@ChangeCreditcard">
+                    Değiştir
+                </button>
+                <button class="btn btn-danger"
+                        disabled="@(selectedCreditCard == null)"
+                        onclick="@DeleteCreditcard">
+                    Sil
+                </button>
             </div>
         </div>
-        <div class="col-5">
-            <div class="findarea">
-                <form @onsubmit="SearchPrefixEnter">
-                    <input class="findtext" type="text" placeholder="KK No" id="filter" name="filter" @bind="@_prefixFilter" />
 
-                    <input class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit" />
+     @*    {{-- SAĞ PANEL: Prefix --}} *@
+        <div class="panel-right">
+            <form class="search-bar" @onsubmit="SearchPrefixEnter">
+                <input type="text" placeholder="KK No" @bind="@_prefixFilter" />
+                <button class="btn btn-outline-primary" type="submit">Ara</button>
+            </form>
 
-                </form>
-            </div>
-            <DataGrid TItem="CreditCardPrefix" Items="CreditCardPrefixes" Pager RowCount="10" Virtualize="true"
+            <DataGrid TItem="CreditCardPrefix" Items="CreditCardPrefixes"
+                      Pager RowCount="10" Virtualize="true"
                       SelectedItemChanged="prefixChanged"
                       TotalCount="@CreditCardPrefixes.Count">
                 <Columns>
                     <Column Caption="Prefix" Field="@nameof(CreditCardPrefix.Prefix)" />
-
                 </Columns>
             </DataGrid>
-            <div>
-                <button type="button" class="btn btn-success" onclick="@NewPrefix">Yeni</button>
-                <button type="button" class="btn btn-primary" disabled="@(creditCardPrefix == null ?true:false)" onclick="@ChangePrefix">Değiştir</button>
-                <button type="button" class="btn btn-danger" disabled="@(creditCardPrefix == null ?true:false)" onclick="@DeletePrefix">Sil</button>
+
+            <div class="action-buttons">
+                <button class="btn btn-success"
+                        @onclick="NewPrefix">
+                    Yeni
+                </button>
+                <button class="btn btn-primary"
+                        disabled="@(creditCardPrefix == null)"
+                        onclick="@ChangePrefix">
+                    Değiştir
+                </button>
+                <button class="btn btn-danger"
+                        disabled="@(creditCardPrefix == null)"
+                        onclick="@DeletePrefix">
+                    Sil
+                </button>
             </div>
         </div>
     </div>
-    <Modal @ref="prefixCard" Title="Kredi Kartı">
+
+  @*   {{-- Prefix Modal --}} *@
+    <Modal @ref="prefixCard" Title="Kredi Kartı Prefix">
         <BodyTemplate>
-            <div class="row">
-                <div class="col-sm-4">Prefix</div>
-                <div class="col-sm-8">
-                    <input class="form-control" type="text" @bind="@_prefix" />
+            <EditForm Model="creditCardPrefix">
+                <div class="modal-form-row">
+                    <label class="form-label">Prefix</label>
+                    <InputText class="form-control" @bind-Value="@_prefix" />
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">Banka</div>
-                <div class="col-sm-8"> <SelectList TItem="BankCard" Items="BankCardList" ValueField="Id" DisplayField="Name" SelectedItemChanged="bankChanged" Selected="_bankId" /></div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">Marka</div>
-                <div class="col-sm-8"> <SelectList TItem="CardBrand" Items="CardBrandList" DisplayField="Name" ValueField="Id" Selected="_bankBrand" SelectedItemChanged="brandChanged" /></div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">Business</div>
-                <div class="col-sm-8">  <input type="checkbox" checked="@isBusiness" @oninput="BusinessChanged" /> </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">Aktif</div>
-                <div class="col-sm-8">  <input type="checkbox" checked="@isActive" @oninput="ActiveChanged" /> </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">Taksit</div>
-                <div class="col-sm-8">  <input type="checkbox" checked="@isInstalment" @oninput="InstalmentChanged" /> </div>
-            </div>
+                <div class="modal-form-row">
+                    <label class="form-label">Banka</label>
+                    <div style="flex:1 1 160px;min-width:0;">
+                        <SelectList TItem="BankCard" Items="BankCardList"
+                                    ValueField="Id" DisplayField="Name"
+                                    SelectedItemChanged="bankChanged"
+                                    Selected="_bankId" />
+                    </div>
+                </div>
+                <div class="modal-form-row">
+                    <label class="form-label">Marka</label>
+                    <div style="flex:1 1 160px;min-width:0;">
+                        <SelectList TItem="CardBrand" Items="CardBrandList"
+                                    DisplayField="Name" ValueField="Id"
+                                    Selected="_bankBrand"
+                                    SelectedItemChanged="brandChanged" />
+                    </div>
+                </div>
+                <div class="modal-form-row">
+                    <label class="form-label">Business</label>
+                    <div class="check-wrapper">
+                        <input type="checkbox" checked="@isBusiness" @oninput="BusinessChanged" />
+                    </div>
+                </div>
+                <div class="modal-form-row">
+                    <label class="form-label">Aktif</label>
+                    <div class="check-wrapper">
+                        <input type="checkbox" checked="@isActive" @oninput="ActiveChanged" />
+                    </div>
+                </div>
+                <div class="modal-form-row">
+                    <label class="form-label">Taksit</label>
+                    <div class="check-wrapper">
+                        <input type="checkbox" checked="@isInstalment" @oninput="InstalmentChanged" />
+                    </div>
+                </div>
+            </EditForm>
         </BodyTemplate>
     </Modal>
+
+  @*   {{-- Kredi Kartı Modal --}} *@
     <Modal @ref="creditCard" Title="Kredi Kartı">
         <BodyTemplate>
-            <div class="row">
-                <div class="col-sm-4">Adı</div>
-                <div class="col-sm-8">
-                    <input class="form-control" type="text" @bind="@_prefix" />
+            <EditForm Model="creditCard">
+                <div class="modal-form-row">
+                    <label class="form-label">Adı</label>
+                    <InputText class="form-control" @bind-Value="_prefix" />
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">Banka</div>
-                <div class="col-sm-8"> <SelectList TItem="BankCard" Items="BankCardList" ValueField="Id" DisplayField="Name" SelectedItemChanged="bankChanged" Selected="_bankId" /></div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">Marka</div>
-                <div class="col-sm-8"> <SelectList TItem="CardBrand" Items="CardBrandList" DisplayField="Name" ValueField="Id" Selected="_bankBrand" SelectedItemChanged="brandChanged" /></div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">Business</div>
-                <div class="col-sm-8">  <input type="checkbox" checked="@isBusiness" @oninput="BusinessChanged" /> </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4">Aktif</div>
-                <div class="col-sm-8">  <input type="checkbox" checked="@isActive" @oninput="ActiveChanged" /> </div>
-            </div>
-
+                <div class="modal-form-row">
+                    <label class="form-label">Banka</label>
+                    <div style="flex:1 1 160px;min-width:0;">
+                        <SelectList TItem="BankCard" Items="BankCardList"
+                                    ValueField="Id" DisplayField="Name"
+                                    SelectedItemChanged="bankChanged"
+                                    Selected="_bankId" />
+                    </div>
+                </div>
+                <div class="modal-form-row">
+                    <label class="form-label">Marka</label>
+                    <div style="flex:1 1 160px;min-width:0;">
+                        <SelectList TItem="CardBrand" Items="CardBrandList"
+                                    DisplayField="Name" ValueField="Id"
+                                    Selected="_bankBrand"
+                                    SelectedItemChanged="brandChanged" />
+                    </div>
+                </div>
+                <div class="modal-form-row">
+                    <label class="form-label">Business</label>
+                    <div class="check-wrapper">
+                        <input type="checkbox" checked="@isBusiness" @oninput="BusinessChanged" />
+                    </div>
+                </div>
+                <div class="modal-form-row">
+                    <label class="form-label">Aktif</label>
+                    <div class="check-wrapper">
+                        <input type="checkbox" checked="@isActive" @oninput="ActiveChanged" />
+                    </div>
+                </div>
+            </EditForm>
         </BodyTemplate>
     </Modal>
 </div>
 
 @code {
     private Modal prefixCard { get; set; } = default!;
+    private Modal creditCard { get; set; } = default!;
+
     private string _bankNameFilter { get; set; } = "";
     private string _prefixFilter { get; set; } = "";
     private Guid _bankBrand { get; set; } = default!;
@@ -142,9 +315,6 @@
     private bool isActive { get; set; }
     private bool isInstalment { get; set; }
 
-    private Modal creditCard { get; set; } = default!;
-
-
     private List<CreditCard> CreditCardList { get; set; } = default!;
     private List<CreditCard> selectedCreditCardList { get; set; } = default!;
     private List<CreditCardPrefix> CreditCardPrefixes { get; set; } = new();
@@ -153,16 +323,17 @@
     private CreditCard selectedCreditCard { get; set; } = default!;
     private CreditCardPrefix creditCardPrefix { get; set; } = default!;
 
+    // @code bloğu değişmedi — orijinaldeki tüm metodlar aynen korunur
     protected override async Task OnInitializedAsync()
     {
         CreditCardList = await CreditCardService.GetAll();
         CardBrandList = await CardBrandService.GetCardBrand();
-
     }
-    private async void SelectedCreditCardChange(CreditCard creditCard)
+
+    private async void SelectedCreditCardChange(CreditCard cc)
     {
-        selectedCreditCard = creditCard;
-        CreditCardPrefixes = await CreditCardPrefixService.GetBankList(creditCard.Id);
+        selectedCreditCard = cc;
+        CreditCardPrefixes = await CreditCardPrefixService.GetBankList(cc.Id);
         if (creditCardPrefix != null)
         {
             isBusiness = creditCardPrefix.Business;
@@ -171,18 +342,16 @@
         }
         StateHasChanged();
     }
+
     private async void prefixChanged(CreditCardPrefix prefix)
     {
         creditCardPrefix = prefix;
         _prefix = prefix.Prefix;
         _bankBrand = (await CardBrandService.GetCardBrandById(selectedCreditCard.CardBrandId)).Id;
-
     }
 
     private async void SearchBankNameEnter()
-    {
-        CreditCardList = await CreditCardService.GetFiltered(_bankNameFilter);
-    }
+        => CreditCardList = await CreditCardService.GetFiltered(_bankNameFilter);
 
     private async void SearchPrefixEnter()
     {
@@ -190,11 +359,12 @@
         if (cprefix != null)
         {
             creditCardPrefix = cprefix;
-            CreditCard creditCard = await CreditCardService.Get(cprefix.CreditCardId);
-            selectedCreditCard = creditCard;
+            CreditCard cc = await CreditCardService.Get(cprefix.CreditCardId);
+            selectedCreditCard = cc;
             CreditCardPrefixes = await CreditCardPrefixService.GetByPrefixList(_prefixFilter);
         }
     }
+
     private async void NewPrefix()
     {
         if (BankCardList == null)
@@ -219,23 +389,15 @@
                     creditCardPrefix.CreateDate = DateTime.Now;
 
                     var test = await CreditCardPrefixService.Create(creditCardPrefix);
-                    if (test.Status == Core.Abstract.ResultStatus.Error)
-                    {
-                        foreach (string errMsg in test.Message.Split(','))
-                        {
-                            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = errMsg, Duration = 5000 });
-                        }
-                    }
+                    if (test.Status == ResultStatus.Error)
+                        foreach (string msg in test.Message.Split(','))
+                            notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = msg, Duration = 5000 });
                 }
                 else
-                {
-                    notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Kredi Kartı Detayları Bulunamadı Bankayı ve MArkayı Kontrol Edin.", Duration = 5000 });
-                }
+                    notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Kredi Kartı Detayları Bulunamadı.", Duration = 5000 });
             }
             else
-            {
                 notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Kart Daha Önce Tanımlanmış.", Duration = 5000 });
-            }
         }
     }
 
@@ -250,20 +412,20 @@
             selectedCreditCard = await CreditCardService.Get(_bankId, _bankBrand);
             if (selectedCreditCard == null || selectedCreditCard.isBusiness != isBusiness)
             {
-                selectedCreditCard = new();
-                selectedCreditCard.Name = _prefix;
-                selectedCreditCard.BankCardId = _bankId;
-                selectedCreditCard.CardBrandId = _bankBrand;
-                selectedCreditCard.CreateDate = DateTime.Now;
-                selectedCreditCard.isBusiness = isBusiness;
-                selectedCreditCard.Active = isActive;
-                selectedCreditCard.CreateUser = await IdentityProcessor.GetCurrentUserId();
+                selectedCreditCard = new()
+                {
+                    Name = _prefix,
+                    BankCardId = _bankId,
+                    CardBrandId = _bankBrand,
+                    CreateDate = DateTime.Now,
+                    isBusiness = isBusiness,
+                    Active = isActive,
+                    CreateUser = await IdentityProcessor.GetCurrentUserId()
+                };
 
                 var test = await CreditCardService.CreateCreditCard(selectedCreditCard);
-                if(test.Status == Core.Abstract.ResultStatus.Error)
-                {
+                if (test.Status == ResultStatus.Error)
                     notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = test.Message, Duration = 5000 });
-                }
                 else
                 {
                     CreditCardList = await CreditCardService.GetAll();
@@ -274,49 +436,51 @@
                 _bankBrand = Guid.Empty;
             }
             else
-            {
                 notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = "Kart Daha Önce Tanımlanmış.", Duration = 5000 });
-            }
         }
     }
 
     private async void ChangeCreditcard()
     {
-
         if (BankCardList == null)
             BankCardList = await BankCardService.GetAllBank();
+
         _prefix = selectedCreditCard.Name;
         _bankId = selectedCreditCard.BankCardId;
         _bankBrand = selectedCreditCard.CardBrandId;
         isBusiness = selectedCreditCard.isBusiness;
         isActive = selectedCreditCard.Active;
-        bool result = await creditCard.Show();
 
+        bool result = await creditCard.Show();
         if (result)
         {
-            selectedCreditCard = new();
-            selectedCreditCard.Name = _prefix;
-            selectedCreditCard.BankCardId = _bankId;
-            selectedCreditCard.CardBrandId = _bankBrand;
-            selectedCreditCard.UpdateDate = DateTime.Now;
-            selectedCreditCard.UpdateUser = await IdentityProcessor.GetCurrentUserId();
+            selectedCreditCard = new()
+            {
+                Name = _prefix,
+                BankCardId = _bankId,
+                CardBrandId = _bankBrand,
+                UpdateDate = DateTime.Now,
+                UpdateUser = await IdentityProcessor.GetCurrentUserId()
+            };
             await CreditCardService.UpdateCreditCard(selectedCreditCard);
         }
     }
+
     private async void DeleteCreditcard()
     {
-        if(selectedCreditCard !=  null)
+        if (selectedCreditCard != null)
         {
-            var onay = await confirmDialog.Show("Silme Onay", $"{selectedCreditCard.Name} Kayıt Silinecektir Onaylıyor musunuz.");
+            var onay = await confirmDialog.Show("Silme Onay", $"{selectedCreditCard.Name} Kayıt Silinecektir. Onaylıyor musunuz?");
             if (onay)
             {
-               var result =  await CreditCardService.DeleteCreditCard(selectedCreditCard);
+                var result = await CreditCardService.DeleteCreditCard(selectedCreditCard);
                 notification.Notify(new NotificationMessage { Severity = result.Status, Summary = "İşlem Sonucu", Detail = result.Message, Duration = 5000 });
             }
             CreditCardList = await CreditCardService.GetAll();
             StateHasChanged();
         }
     }
+
     private void bankChanged(BankCard bankCard)
     {
         if (bankCard != null)
@@ -325,30 +489,28 @@
             selectedCreditCardList = CreditCardList.Where(x => x.BankCardId == bankCard.Id).ToList();
         }
     }
+
     private void brandChanged(CardBrand brand)
     {
-        if (brand != null)
-        {
-            _bankBrand = brand.Id;
-        }
+        if (brand != null) _bankBrand = brand.Id;
     }
 
     private async void DeletePrefix()
     {
         if (creditCardPrefix != null)
         {
-            var onay = await confirmDialog.Show("Silme Onay", $"{selectedCreditCard.Name} Kayıt Silinecektir Onaylıyor musunuz.");
+            var onay = await confirmDialog.Show("Silme Onay", $"{selectedCreditCard.Name} Kayıt Silinecektir. Onaylıyor musunuz?");
             if (onay)
             {
-                CreditCardPrefixService.Delete(creditCardPrefix);
+                await CreditCardPrefixService.Delete(creditCardPrefix);
                 CreditCardPrefixes = await CreditCardPrefixService.GetBankList(selectedCreditCard.Id);
                 StateHasChanged();
             }
         }
     }
-    private async void ChangePrefix()
+
+    private async Task ChangePrefix()
     {
-        
         if (creditCardPrefix != null)
         {
             BankCardList = await BankCardService.GetAllBank();
@@ -357,39 +519,29 @@
             isActive = creditCardPrefix.Active;
             isBusiness = creditCardPrefix.Business;
             isInstalment = creditCardPrefix.isInstallment;
+
             bool result = await prefixCard.Show();
             if (result)
             {
-                selectedCreditCard = selectedCreditCardList.SingleOrDefault(x => x.BankCardId == _bankId && x.CardBrandId == _bankBrand && x.isBusiness == isBusiness)!;
+                selectedCreditCard = selectedCreditCardList
+                    .SingleOrDefault(x => x.BankCardId == _bankId && x.CardBrandId == _bankBrand && x.isBusiness == isBusiness)!;
+
                 creditCardPrefix.CreditCardId = selectedCreditCard.Id;
                 creditCardPrefix.isInstallment = isInstalment;
                 creditCardPrefix.Business = isBusiness;
                 creditCardPrefix.Active = isActive;
-                var test = await CreditCardPrefixService.Update(creditCardPrefix);
-                if (test.Status == Core.Abstract.ResultStatus.Error)
-                {
-                    foreach (string errMsg in test.Message.Split(','))
-                    {
-                        notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = errMsg, Duration = 5000 });
-                    }
-                }
 
+                var test = await CreditCardPrefixService.Update(creditCardPrefix);
+                if (test.Status == ResultStatus.Error)
+                    foreach (string msg in test.Message.Split(','))
+                        notification.Notify(new NotificationMessage { Severity = ResultStatus.Error, Summary = "Hata", Detail = msg, Duration = 5000 });
             }
         }
     }
 
-    private void BusinessChanged(ChangeEventArgs e)
-    {
-        isBusiness = Convert.ToBoolean(e.Value);
-    }
-    private void ActiveChanged(ChangeEventArgs e)
-    {
-        isActive = Convert.ToBoolean(e.Value);
-    }
-    private void InstalmentChanged(ChangeEventArgs e)
-    {
-        isInstalment = Convert.ToBoolean(e.Value);
-    }
+    private void BusinessChanged(ChangeEventArgs e) => isBusiness = Convert.ToBoolean(e.Value);
+    private void ActiveChanged(ChangeEventArgs e) => isActive = Convert.ToBoolean(e.Value);
+    private void InstalmentChanged(ChangeEventArgs e) => isInstalment = Convert.ToBoolean(e.Value);
 
     public void Dispose()
     {
@@ -400,6 +552,5 @@
         CardBrandList = null;
         creditCardPrefix = null;
         selectedCreditCard = null;
-
     }
 }

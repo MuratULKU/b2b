@@ -22,8 +22,8 @@ namespace Business.Concrete
 
         public async Task<IResult> CreateBank(BankCard bankCard)
         {
-            await _unitOfWork.BankCards.AddAsync(bankCard);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<BankCard>().AddAsync(bankCard);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Başarılı");
             return new Result(ResultStatus.Error, "Kayıt İşlemi Hatalı");
@@ -31,8 +31,8 @@ namespace Business.Concrete
 
         public async Task<IResult> DeleteBank(BankCard bankCard)
         {
-            await _unitOfWork.BankCards.Delete(bankCard);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<BankCard>().Delete(bankCard);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt Silindi");
             return new Result(ResultStatus.Error, "Kayıt Silinemedi");
@@ -40,13 +40,13 @@ namespace Business.Concrete
 
         public async Task<List<BankCard>> GetAllBank()
         {
-            return await _unitOfWork.BankCards.GetAllAsync();
+            return await _unitOfWork.Repository<BankCard>().GetAllAsync();
             
         }
 
         public async Task<IDataResult<BankCard>> GetBank(Guid id)
         {
-            var result = await _unitOfWork.BankCards.SingleOrDefaultAsync(x => x.Id == id);
+            var result = await _unitOfWork.Repository<BankCard>().SingleOrDefaultAsync(x => x.Id == id);
             if(result != null)
                 return new DataResult<BankCard>(ResultStatus.Success, result);
             return new DataResult<BankCard>(ResultStatus.Error,result!);
@@ -54,13 +54,13 @@ namespace Business.Concrete
 
         public async Task<BankCard> GetBankbyCode(int Code)
         {
-           return await _unitOfWork.BankCards.SingleOrDefaultAsync(x => x.BankCode == Code);
+           return await _unitOfWork.Repository<BankCard>().SingleOrDefaultAsync(x => x.BankCode == Code);
             
         }
 
         public async Task UpdateBank(BankCard bankCard)
         {
-            await _unitOfWork.BankCards.UpdateAsync(bankCard);
+            await _unitOfWork.Repository<BankCard>().UpdateAsync(bankCard);
         }
     }
 }

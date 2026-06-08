@@ -26,8 +26,8 @@ namespace Business.Concrete
             try
             {
                 role.Role = null;
-                await _unitOfWork.UserRole.AddAsync(role);
-                var result = await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<UserRole>().AddAsync(role);
+                var result = await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Kullanıcı Yetkisi Eklendi.");
                
             }
@@ -40,8 +40,8 @@ namespace Business.Concrete
 
         public async Task<IResult> DeleteRole(UserRole role)
         {
-            await _unitOfWork.UserRole.Delete(role);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<UserRole>().Delete(role);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "UserRole Deleted");
             return new Result(ResultStatus.Error, "UserRole not Deleted");
@@ -49,20 +49,20 @@ namespace Business.Concrete
 
         public async Task<List<UserRole>> GetAll(Guid UserId)
         {
-            var result = await _unitOfWork.UserRole.Find(x => x.UserId == UserId,x=>x.Include(x=>x.Role));
+            var result = await _unitOfWork.Repository<UserRole>().Find(x => x.UserId == UserId,x=>x.Include(x=>x.Role));
             return result;
         }
 
         public async Task<UserRole> GetUserRole(Guid id)
         {
-           var result = await _unitOfWork.UserRole.SingleOrDefaultAsync(x => x.Id == id);
+           var result = await _unitOfWork.Repository<UserRole>().SingleOrDefaultAsync(x => x.Id == id);
             return result;
         }
 
         public async Task<IResult> UpdateRole(UserRole role)
         {
-            await _unitOfWork.UserRole.UpdateAsync(role);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<UserRole>().UpdateAsync(role);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "UserRole Updated Successfuly");
             return new Result(ResultStatus.Error, "UserRole Not Updated");

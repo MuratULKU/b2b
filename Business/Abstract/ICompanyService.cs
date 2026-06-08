@@ -11,7 +11,7 @@ namespace Business.Abstract
     {
         Task<Company> Get(Guid id);
         Task<Company> GetByUserId(Guid userId);
-        List<Company> GetAll(int currentPage, int pageSize);
+       
         Task<List<Company>> GetAllAsync(int CurrentPage, int PageSize);
         Task<int> TotalCount();
         Task<bool> Insert(Company company);

@@ -24,6 +24,7 @@ using CoreUI.Components.Confirm;
 using CoreUI.Components.LoadingService;
 using CoreUI.Components.UserPanel;
 using CoreUI;
+using CoreUI.BackOrder.Mikro;
 
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("tr-TR");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("tr-TR");
@@ -41,10 +42,26 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-builder.Services.AddDbContext<RepositoryContext>(
-    options => options.UseSqlite(builder.Configuration.GetConnectionString("sqlConnection"), b => b.MigrationsAssembly("B2B")),
-     ServiceLifetime.Transient);
+var provider = builder.Configuration["DatabaseProvider"];
 
+builder.Services.AddDbContext<RepositoryContext>(options =>
+{
+    if (provider == "Sqlite")
+    {
+        options.UseSqlite(
+            builder.Configuration.GetConnectionString("Sqlite"),
+            // SQLite'a özel migration dosyalarýný DataAccess.EFCore altýndaki SqliteMigrations klasöründe toplar
+            x => x.MigrationsAssembly("DataAccess"));
+    }
+    else
+    {
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("SqlServer"),
+            // SQL Server'a özel migration
+            // dosyalarýný DataAccess.EFCore altýndaki SqlServerMigrations klasöründe toplar
+            x => x.MigrationsAssembly("DataAccess"));
+    }
+});
 builder.Services.AddSingleton<ILoggerService>(provider =>
             new FileLogger("app.log"));
 //utilities
@@ -57,36 +74,27 @@ builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddSingleton<LoadingService>();
 
-builder.Services.AddScoped<IDocumentNoRepository, DocumentNoRepository>();  
-builder.Services.AddScoped<IDocumentNoService,DocumentNoManager>();
-builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();  
-builder.Services.AddScoped<IUserRoleService,UserRoleManager>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IDocumentNoService, DocumentNoManager>();
+builder.Services.AddScoped<IUserRoleService, UserRoleManager>();
 builder.Services.AddScoped<IUserService, UserManager>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductManager>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryManager>();
 builder.Services.AddScoped<IFirmParamRepository, FirmParamRepository>();
 builder.Services.AddScoped<IFirmParamService, FirmParamManager>();
-builder.Services.AddScoped<IOrderService,OrderManager>();
-builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IOrderService, OrderManager>();
 builder.Services.AddScoped<IClientCardService, ClientCardManager>();
-builder.Services.AddScoped<ICharValRepository, CharValRepository>();
-builder.Services.AddScoped<ICharValService,CharValManager>();
-builder.Services.AddScoped<IBankCardRepository, BankCardRepository>();
-
-
-
-//builder.Services.AddScoped<IVirtualPosParameterRepository, VirtualPosParameterRepository>();
-
-
-
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IRoleService,RoleManager>();
-builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ICharValService, CharValManager>();
+builder.Services.AddScoped<IVirtualPosService, VirtualPosManager>();
+builder.Services.AddScoped<ICreditCardInstallmentService, CreditCardInstallmentManager>();
+builder.Services.AddScoped<ICreditCardPrefixService, CreditCardPrefixManager>();
+builder.Services.AddScoped<IBankCardService, BankCardManager>();
+builder.Services.AddScoped<ICardBrandService, CardBrandManager>();
+builder.Services.AddScoped<ICreditCardService, CreditCardManager>();
+builder.Services.AddScoped<IPaymentService, PaymentManager>();
+builder.Services.AddScoped<IVirtualPosParameterService, VirtualPosParameterManager>();
+builder.Services.AddScoped<IClFicheService, ClFicheManager>();
 builder.Services.AddScoped<ICompanyService, CompanyManager>();
-
+builder.Services.AddScoped<IRoleService, RoleManager>();
 
 
 builder.Services.AddScoped<IFirmDocService, FirmDocManager>();
@@ -95,14 +103,30 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddBusinessServices(builder.Configuration);
 
 builder.Services.AddSingleton<FirmParameter>();
-builder.Services.AddBackOrederServices();
+builder.Services.AddBackOrederServices(builder.Configuration);
 builder.Services.AddHostedService<BackOrder>();
 builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<IUnitofWork, UnitofWork>();
-builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUnitofWork, UnitOfWork>();
+builder.Services.AddHttpClient<ITokenService, TokenService>(client =>
+   client.BaseAddress = new Uri(builder.Configuration["ApiService:Url"]));
 
 
-builder.Services.AddHttpClient<BackOrder>();
+builder.Services.AddHttpClient<BackOrder>(service =>service.BaseAddress = new Uri(builder.Configuration["ApiService:Url"]));
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IOrdFicheRepository, OrdFicheRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+builder.Services.AddSingleton<LogoApiStrategy>();
+builder.Services.AddSingleton<MikroApiStrategy>();
+builder.Services.AddSingleton<UlkuApiStrategy>();
+builder.Services.AddSingleton<ApiStrategyFactory>();
+
+builder.Services.AddHttpClient<IMikroClientService, MikroClientService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiService:Url"]);
+});
+builder.Services.AddHttpClient<IMikroProductService, MikroProductService>(client =>
+   client.BaseAddress = new Uri(builder.Configuration["ApiService:Url"]));
 
 
 var app = builder.Build();

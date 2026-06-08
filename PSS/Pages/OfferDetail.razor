@@ -314,6 +314,7 @@
 
     private async void RemoveLine(OrdLine line)
     {
+        
         await orderService.DeleteLine(line);
         _ordFiche.Lines?.Remove(line);
         short count = 0;

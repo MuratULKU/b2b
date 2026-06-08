@@ -24,12 +24,12 @@ namespace Business.Concrete
         {
             try
             {
-                var pricelists = await _unitOfWork.PriceList.GetAllAsync();
+                var pricelists = await _unitOfWork.Repository<PriceList>().GetAllAsync();
                 foreach (var pricelist in pricelists)
                 {
-                    await _unitOfWork.PriceList.Delete(pricelist);
+                    await _unitOfWork.Repository<PriceList>().Delete(pricelist);
                 }
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.SaveChangesAsync();
 
             }
             catch (Exception ex)
@@ -41,27 +41,27 @@ namespace Business.Concrete
 
         public async Task<PriceList> GetByCode(string code)
         {
-            var result = await _unitOfWork.PriceList.SingleOrDefaultAsync(x => x.Code == code);
+            var result = await _unitOfWork.Repository<PriceList>().SingleOrDefaultAsync(x => x.Code == code);
             return result;
         }
 
         public async Task<PriceList> GetByLogicalref(int Logicalref)
         {
-            var result = await _unitOfWork.PriceList.SingleOrDefaultAsync(x => x.Logicalref == Logicalref);
+            var result = await _unitOfWork.Repository<PriceList>().SingleOrDefaultAsync(x => x.Logicalref == Logicalref);
             return result;
         }
 
         public async Task<List<PriceList>> GetPriceListAsync()
         {
-            return await _unitOfWork.PriceList.GetAllAsync();
+            return await _unitOfWork.Repository<PriceList>().GetAllAsync();
         }
 
         public async Task<IResult> Insert(PriceList priceList)
         {
             try
             {
-                await _unitOfWork.PriceList.AddAsync(priceList);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<PriceList>().AddAsync(priceList);
+                await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "PriceList inserted successfully.");
             }
             catch (Exception ex)
@@ -74,8 +74,8 @@ namespace Business.Concrete
         {
             try
             {
-                await _unitOfWork.PriceList.UpdateAsync(priceList);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<PriceList>().UpdateAsync(priceList);
+                await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "PriceList updated successfully.");
             }
             catch (Exception ex)

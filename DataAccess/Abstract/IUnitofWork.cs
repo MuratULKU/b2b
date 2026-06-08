@@ -9,44 +9,62 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Abstract
 {
-    public interface IUnitofWork:IDisposable
+    public interface IUnitofWork : IDisposable
     {
-        IBankCardRepository BankCards { get; }
-        IBrandCardRepository BrandCards { get; }
-        ICreditCardInstallmentRepository CreditCardInstallment { get; }
-        ICreditCardRepository CreditCards { get; }
-        ICreditCardPrefixRepository CreditCardPrefixs { get; }
-        IVirtualPosRepository VirtualPoses { get; }
-        IVirtualPosParameterRepository VirtualPosParameter { get; }
+        IRepository<T> Repository<T>() where T : class;
+
+        Task<int> SaveChangesAsync();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
+
         IPaymentRepository Payment { get; }
-        ICategoryRepository Category { get; }
-        ICharSetRepository CharSet { get; }
-        ICharAsgnRepository CharAsgn { get; }
-        ICharCodeRepository CharCode { get; }
-        ICharValRepository CharVal { get; } 
-        IPriceListRepository PriceList { get; }
-        IProductAmountRepository ProductAmount { get; }
-        IClientRepository Client { get; }
         IOrdFicheRepository OrdFiche { get; }
-        IOrdLineRepository OrdLine { get; }
-        IDocumentNoRepository DocumentNo { get; }
-        IFirmParamRepository FirmParam { get; }
-        ICompanyRepository Company { get; }
-        IUserRepository User { get; }
-        IRoleRepository Role { get; }
-        IUserRoleRepository UserRole { get; }
-        IClFicheRepository ClFiche { get; }
         IProductRepository Product { get; }
-        IFirmDocRepository FirmDoc { get; }
-        ICurrenciesRepository Currencies { get; }
-        public void BeginTransaction();
-        public Task CommitTransactionAsync();
-        public Task RollbackTransactionAsync();
-        public IEnumerable<EntityEntry> ChangedEntries();
-        public EntityState ChangedEntity<TEntity>(TEntity entity);
-        public IEnumerable<string> GetTrackedChanges();
+
+
         public EntityEntry Entry(object entity);
-        Task<int> CommitAsync();
         ChangeTracker ChangeTracker { get; }
+
     }
+    //public interface IUnitofWork:IDisposable
+    //{
+    //    IBankCardRepository BankCards { get; }
+    //    IBrandCardRepository BrandCards { get; }
+    //    ICreditCardInstallmentRepository CreditCardInstallment { get; }
+    //    ICreditCardRepository CreditCards { get; }
+    //    ICreditCardPrefixRepository CreditCardPrefixs { get; }
+    //    IVirtualPosRepository VirtualPoses { get; }
+    //    IVirtualPosParameterRepository VirtualPosParameter { get; }
+    //    IPaymentRepository Payment { get; }
+    //    ICategoryRepository Category { get; }
+    //    ICharSetRepository CharSet { get; }
+    //    ICharAsgnRepository CharAsgn { get; }
+    //    ICharCodeRepository CharCode { get; }
+    //    ICharValRepository CharVal { get; } 
+    //    IPriceListRepository PriceList { get; }
+    //    IProductAmountRepository ProductAmount { get; }
+    //    IClientRepository Client { get; }
+    //    IOrdFicheRepository OrdFiche { get; }
+    //    IOrdLineRepository OrdLine { get; }
+    //    IDocumentNoRepository DocumentNo { get; }
+    //    IFirmParamRepository FirmParam { get; }
+    //    ICompanyRepository Company { get; }
+    //    IUserRepository User { get; }
+    //    IRoleRepository Role { get; }
+    //    IUserRoleRepository UserRole { get; }
+    //    IClFicheRepository ClFiche { get; }
+    //    IProductRepository Product { get; }
+    //    IFirmDocRepository FirmDoc { get; }
+    //    ICurrenciesRepository Currencies { get; }
+    //    public void BeginTransaction();
+    //    public Task CommitTransactionAsync();
+    //    public Task RollbackTransactionAsync();
+    //    public IEnumerable<EntityEntry> ChangedEntries();
+    //    public EntityState ChangedEntity<TEntity>(TEntity entity);
+    //    public IEnumerable<string> GetTrackedChanges();
+    //    public EntityEntry Entry(object entity);
+    //    Task<int> CommitAsync();
+    //    ChangeTracker ChangeTracker { get; }
+    //}
 }

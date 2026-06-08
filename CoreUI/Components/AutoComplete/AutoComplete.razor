@@ -1,0 +1,118 @@
+﻿@using System.Linq.Expressions
+@typeparam TItem
+
+<div class="position-relative">
+
+    <input class="form-control"
+           type="text"
+           value="@searchText"
+            oninput="@OnInput" 
+           />
+    @if (!string.IsNullOrWhiteSpace(searchText))
+    {
+        <button type="button"
+                class="clear-btn"
+                onclick="@(()=>Clear())">
+            ✕
+        </button>
+    }
+
+    @if (showList && items.Any())
+    {
+        <div class="autocomplete-list">
+
+            @foreach (var item in items)
+            {
+                <div class="autocomplete-item"
+                     onclick="@(() => SelectItem(ValueField(item)))">
+
+                    @ItemText(item)
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>
+
+@code {
+
+    [Parameter]
+    public Func<TItem, string> ValueField { get; set; }
+
+    [Parameter]
+    public Func<TItem, string> DisplayField { get; set; }
+
+    [Parameter]
+    public Func<string, Task<List<TItem>>> SearchMethod { get; set; }
+
+    [Parameter]
+    public Func<TItem, string> ItemText { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+
+    [Parameter]
+    public int MinLength { get; set; } = 2;
+
+    [Parameter]
+    public string Value { get; set; }
+
+    private string searchText = "";
+
+    private bool showList;
+
+    private List<TItem> items = new();
+
+    private CancellationTokenSource cts;
+
+    public async Task OnInput(ChangeEventArgs e)
+    {
+        searchText = e.Value?.ToString() ?? "";
+
+
+        if (searchText.Length < MinLength)
+        {
+            items.Clear();
+            showList = false;
+            return;
+        }
+
+        cts?.Cancel();
+        cts = new();
+
+        try
+        {
+            await Task.Delay(300, cts.Token);
+
+            items = await SearchMethod.Invoke(searchText);
+
+            showList = true;
+        }
+        catch
+        {
+
+        }
+    }
+
+    private async void Clear()
+    {
+        Value = "";
+        searchText = "";
+        items.Clear();
+        await ValueChanged.InvokeAsync(Value);
+
+    }
+
+
+    private async Task SelectItem(string value)
+    {
+        var item = items.FirstOrDefault(x => ValueField(x) == value);
+        searchText = DisplayField(item);
+        showList = false;
+        Value = searchText;
+        await ValueChanged.InvokeAsync(ValueField(item));
+    }
+}

@@ -5,6 +5,7 @@
 @using CoreUI.Components.InputNumber
 @using CoreUI.Components.NotificationService
 @using CoreUI.Components.UserPanel
+@using CoreUI.Components.AutoComplete
 @using CoreUI.Data
 @using Entity
 @using Microsoft.EntityFrameworkCore
@@ -20,199 +21,226 @@
 @inject IProductService productService
 @attribute [Authorize]
 <div class="container">
-<TabControl ChangedActivePage="OnActiveTabChanged">
-     @if (q != "1")
+    <TabControl ChangedActivePage="OnActiveTabChanged">
+        @if (q != "1")
         {
-    <TabPage Text="Müşteri Seçimi">
-        <h1>Müşteri</h1>
-        <div>
-           <div class="row">
-               <div class="col-4">
-                  
-                   <div>
-                        <input class="@newClient ? btn btn-secondary: btn-primary" type="button" value="Mevcut Müşteri" @onclick="@(()=>newClient = false)"/>
-                        <input class="@newClient ? btn-primary:btn btn-secondary" type="button" value="Yeni Müşteri" @onclick="@(()=>newClient=true)"/>
-                   </div>
-                    <label>Müşteri</label>
-                        <SelectList Items="_clientList" DisplayField="Name" ValueField="Id" @bind-Selected="ChangedClient" />
-                    <label>Vergi No</label>
-                    <input class="form-control" type="tel" @bind-value="_client.VKN" />
-                    <label>Vergi Dairesi</label>
-                    <input class="form-control" type="text" @bind-value="_client.VatOffice" />
-                    <label>Mail Adres</label>
-                    <input class="form-control" type="tel" @bind-value="_client.MailAdress" />
-                    <label>Telefon Numarası</label>
-                    <input class ="form-control" type="tel" @bind-value="_client.Phone1" />
-               </div>
-                <div class="col-4">
-                    <h3>Adress</h3>
-                    <label>Adres</label>
-                    <input class="form-control" type="text" @bind-value="_client.Address1" />
-                    <label>Adres</label>
-                    <input class="form-control" type="text" @bind-value="_client.Address2" />
-                    <label>İlçe</label>
-                    <input class="form-control" type="text" @bind-value="_client.Town" />
-                    <label>İl</label>
-                    <input class="form-control" type="text" @bind-value="_client.City" />
-                    <label>Ülke</label>
-                    <input class ="form-control" type="text" @bind-value="_client.Country" />
-                </div>
-                <div class="col-4">
-                    <h3>Firma Yetkilisi</h3>
-                    <label>Adı</label>
-                    <inputclass ="form-control" type="text" @bind-value="_client.FirmExecutiveName" />
-                    <label>SoyAdı</label>
-                    <input class="form-control" type="text" @bind-value="_client.FirmExecutiveSurName" />
-                    <label>Telefon</label>
-                    <input class="form-control" type="text" @bind-value="_client.Phone2" />
-                    <label>Mail Adres</label>
-                    <input class="form-control" type="text" @bind-value="_client.MailAdress2" />
-                </div>
-           </div>
-            
+            <TabPage Text="Müşteri Seçimi">
+                <h1>Müşteri</h1>
+                <div>
+                    <div class="row">
+                        <div class="col-4">
 
-        </div>
-        <div>
-        </div>
-    </TabPage>
+                            <div>
+                                <input class="@newClient ? btn btn-secondary: btn-primary" type="button" value="Mevcut Müşteri" @onclick="@(()=>newClient = false)" />
+                                <input class="@newClient ? btn-primary:btn btn-secondary" type="button" value="Yeni Müşteri" @onclick="@(()=>newClient=true)" />
+                            </div>
+                            <label>Müşteri</label>
+                            <AutoComplete TItem="Client"
+                                          SearchMethod="SearchClients"
+                                          ValueField="x => x.Code"
+                                          DisplayField="x=>x.Name"
+                                          ItemText="@(x => $"{x.Code} - {x.Name}")"
+                                          ValueChanged="ClientSelected" />
+                            @*   <SelectList Items="_clientList" DisplayField="Name" ValueField="Id" @bind-Selected="ChangedClient" /> *@
+                            <label>Vergi No</label>
+                            <input class="form-control" type="tel" @bind-value="_client.VKN" />
+                            <label>Vergi Dairesi</label>
+                            <input class="form-control" type="text" @bind-value="_client.VatOffice" />
+                            <label>Mail Adres</label>
+                            <input class="form-control" type="tel" @bind-value="_client.MailAdress" />
+                            <label>Telefon Numarası</label>
+                            <input class="form-control" type="tel" @bind-value="_client.Phone1" />
+                        </div>
+                        <div class="col-4">
+                            <h3>Adress</h3>
+                            <label>Adres</label>
+                            <input class="form-control" type="text" @bind-value="_client.Address1" />
+                            <label>Adres</label>
+                            <input class="form-control" type="text" @bind-value="_client.Address2" />
+                            <label>İlçe</label>
+                            <input class="form-control" type="text" @bind-value="_client.Town" />
+                            <label>İl</label>
+                            <input class="form-control" type="text" @bind-value="_client.City" />
+                            <label>Ülke</label>
+                            <input class="form-control" type="text" @bind-value="_client.Country" />
+                        </div>
+                        <div class="col-4">
+                            <h3>Firma Yetkilisi</h3>
+                            <label>Adı</label>
+                            <inputclass ="form-control" type="text" @bind-value="_client.FirmExecutiveName" />
+                            <label>SoyAdı</label>
+                            <input class="form-control" type="text" @bind-value="_client.FirmExecutiveSurName" />
+                            <label>Telefon</label>
+                            <input class="form-control" type="text" @bind-value="_client.Phone2" />
+                            <label>Mail Adres</label>
+                            <input class="form-control" type="text" @bind-value="_client.MailAdress2" />
+                        </div>
+                    </div>
+
+
+                </div>
+                <div>
+                </div>
+            </TabPage>
         }
-    <TabPage Text="Ürün Seçimi" IsValid="pageValid" >
-        <div class="container">
-  <div class="findarea">
-                <form @onsubmit="SearchEnter">
-                    <input class="findtext" type="text" placeholder="Arama" id="filter" name="filter" @bind-value="@Filter" />
-                    <input type="hidden" id="category" name="category" value="@selectCategory" />
-                    <button class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit">
-                       
-                    </button>
-                </form>
-            </div>
-        
-            <DataGridView TItem="Product" Data="pdata.Results" UserId="UserId" AddProduct="addproduct"/>
-            <Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="pdata.PageSize" RowCount="pdata.RowCount" OnPageSizeChanged="pageSizeOnchanged" />
-        </div>
-    </TabPage>
-    <TabPage Text="Toplamlar" IsValid="pageValid">
-        <div class="basket-container">
-            <div class="cart-basket">
+        <TabPage Text="Ürün Seçimi" IsValid="pageValid">
+            <div class="container">
+                <div class="findarea">
+                    <form @onsubmit="SearchEnter">
+                        <input class="findtext" type="text" placeholder="Arama" id="filter" name="filter" @bind-value="@Filter" />
+                        <input type="hidden" id="category" name="category" value="@selectCategory" />
+                        <button class="btn btn-outline-primary my-2 my-sm-0" style="border-radius:20px;" type="submit">
+                        </button>
+                    </form>
+                </div>
 
-                @if (_ordFiche?.Lines != null)
-                {
-                    int _count = 0;
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th class="text-center" scope="col">#</th>
-                                <th class="text-center" scope="col">Ürün Kodu</th>
-                                <th class="text-center" scope="col">Ürün Adı</th>
-                                <th class="text-center" scope="col">Miktarı</th>
-                                <th class="text-center" scope="col">Birim</th>
-                                <th class="text-center" scope="col">Birim Fiyatı</th>
-                                <th class="text-center" scope="col">Iskonto %</th>
-                                <th class="text-center" scope="col">Vergi %</th>
-                                <th class="text-center" scope="col">Tutar</th>
-                                <th class="text-center" scope="col">İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var cartitem in _ordFiche.Lines)
-                            {
-                                _count++;
+                <DataGridView TItem="Product" Data="pdata.Results" UserId="UserId" AddProduct="addproduct" />
+                <Pager Result="@pdata" PageChanged="PagerPageChanged" PageSize="pdata.PageSize" RowCount="pdata.RowCount" OnPageSizeChanged="pageSizeOnchanged" />
+            </div>
+        </TabPage>
+        <TabPage Text="Toplamlar" IsValid="pageValid">
+            <div class="basket-container">
+                <div class="cart-basket">
+
+                    @if (_ordFiche?.Lines != null)
+                    {
+                        int _count = 0;
+                        <table class="table table-hover">
+                            <thead>
                                 <tr>
-                                    <td scope="row">@_count</td>
-                                    <td>@cartitem.Product?.Code</td>
-                                    <td>@cartitem.Product?.Name</td>
-                                    <td class="text-end" width="80px">
-                                        <InputMNumber TValue="double" Value="@cartitem.Amount" Change="@((e)=>AmountChange(e,cartitem))" />
-                                    </td>
-                                    <td>@cartitem.Unit</td>
-                                    <td class="text-end"><InputMNumber TValue="double" Value="@cartitem.Price" Change="@((e)=>PriceChange(e,cartitem))" DisplayValue="N2" /></td>
-                                    <td class="text-end"><InputMNumber TValue="double" Value="@cartitem.Discper" Change="@((e)=>DiscountChange(e,cartitem))" DisplayValue="N2" /></td>
-                                    <td class="text-end">@cartitem.VatAmnt.ToString("N2")</td>
-                                    <td class="text-end"><InputMNumber TValue="double" Value="@cartitem.Total" Change="@((e)=>TotalChange(e,cartitem))" DisplayValue="N2" /></td>
-                                    <td><input type="button" class="btn btn-danger" onclick="@(()=>{RemoveLine(cartitem);StateHasChanged(); })" value="Sil" /></td>
+                                    <th class="text-center" scope="col">#</th>
+                                    <th class="text-center" scope="col">Ürün Kodu</th>
+                                    <th class="text-center" scope="col">Ürün Adı</th>
+                                    <th class="text-center" scope="col">Miktarı</th>
+                                    <th class="text-center" scope="col">Birim</th>
+                                    <th class="text-center" scope="col">Birim Fiyatı</th>
+                                    <th class="text-center" scope="col">Iskonto %</th>
+                                    <th class="text-center" scope="col">Vergi %</th>
+                                    <th class="text-center" scope="col">Tutar</th>
+                                    <th class="text-center" scope="col">İşlem</th>
                                 </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cartitem in _ordFiche.Lines)
+                                {
+                                    _count++;
+                                    <tr>
+                                        <td scope="row">@_count</td>
+                                        <td>@cartitem.Product?.Code</td>
+                                        <td>@cartitem.Product?.Name</td>
+                                        <td class="text-end" width="80px">
+                                            <InputMNumber TValue="double" Value="@cartitem.Amount" Change="@((e)=>AmountChange(e,cartitem))" />
+                                        </td>
+                                        <td>@cartitem.Unit</td>
+                                        <td class="text-end"><InputMNumber TValue="double" Value="@cartitem.Price" Change="@((e)=>PriceChange(e,cartitem))" DisplayValue="N2" /></td>
+                                        <td class="text-end"><InputMNumber TValue="double" Value="@cartitem.Discper" Change="@((e)=>DiscountChange(e,cartitem))" DisplayValue="N2" /></td>
+                                        <td class="text-end">@cartitem.VatAmnt.ToString("N2")</td>
+                                        <td class="text-end"><InputMNumber TValue="double" Value="@cartitem.Total" Change="@((e)=>TotalChange(e,cartitem))" DisplayValue="N2" /></td>
+                                        <td><input type="button" class="btn btn-danger" onclick="@(()=>{RemoveLine(cartitem);StateHasChanged(); })" value="Sil" /></td>
+                                    </tr>
 
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <label>Sepetiniz Boş Görünüyor</label>
+                    }
+                </div>
+                <div class="basket-summary">
+                    <div class="card">
+                        <div class="card-header">
+                            <label class="text-center">Siparişi Oluşturan</label>
+                        </div>
+                        <div class="card-body">
+                            @_user?.Username
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <label class="text-center">Müşteri Bilgileri</label>
+                        </div>
+                        <div class="card-body">
+                            @_client?.Name
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <label class="text-center">Sepet Özeti</label>
+                        </div>
+                        <div class="card-body">
+                            @if (_ordFiche.Lines?.Count > 0)
+                            {
+                                <div class="row">
+                                    <label class="col-6">Ara Toplam: </label>
+                                    <span class="col-6 text-end">@_ordFiche.GrossTotal.ToString("N2") TL</span>
+                                </div>
+                                <div class="row">
+                                    <label class="col-6">Iskonto: </label>
+                                    <span class="col-6 text-end">@_ordFiche.TotalDiscounted.ToString("N2") TL</span>
+                                </div>
+                                <div class="row">
+                                    <label class="col-6">Vergi: </label>
+                                    <span class="col-6 text-end">@_ordFiche.TotalVat.ToString("N2") TL</span>
+                                </div>
+                                <div class="row">
+                                    <label class="col-6">Toplam: </label>
+                                    <span class="col-6 text-end">@_ordFiche.Total.ToString("N2") TL</span>
+                                </div>
                             }
-                        </tbody>
-                    </table>
-                }
-                else
-                {
-                    <label>Sepetiniz Boş Görünüyor</label>
-                }
-            </div>
-            <div class="basket-summary">
-                <div class="card">
-                    <div class="card-header">
-                        <label class="text-center">Siparişi Oluşturan</label>
-                    </div>
-                    <div class="card-body">
-                        @_user?.Username
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <label class="text-center">Müşteri Bilgileri</label>
-                    </div>
-                    <div class="card-body">
-                        @_client?.Name
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <label class="text-center">Sepet Özeti</label>
-                    </div>
-                    <div class="card-body">
-                        @if (_ordFiche.Lines?.Count > 0)
-                        {
-                            <div class="row">
-                                <label class="col-6">Ara Toplam: </label>
-                                <span class="col-6 text-end">@_ordFiche.GrossTotal.ToString("N2") TL</span>
-                            </div>
-                            <div class="row">
-                                <label class="col-6">Iskonto: </label>
-                                <span class="col-6 text-end">@_ordFiche.TotalDiscounted.ToString("N2") TL</span>
-                            </div>
-                            <div class="row">
-                                <label class="col-6">Vergi: </label>
-                                <span class="col-6 text-end">@_ordFiche.TotalVat.ToString("N2") TL</span>
-                            </div>
-                            <div class="row">
-                                <label class="col-6">Toplam: </label>
-                                <span class="col-6 text-end">@_ordFiche.Total.ToString("N2") TL</span>
-                            </div>
-                        }
-                    </div>
-                    <div class="card-footer text-end">
-                        <input type="button" class="btn btn-success" onclick="@(()=>SaveChanged())" value="Kaydet" />
+                        </div>
+                        <div class="card-footer text-end">
+                            <input type="button" class="btn btn-success" onclick="@(()=>SaveChanged())" value="Kaydet" />
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </TabPage>
-</TabControl>
+        </TabPage>
+    </TabControl>
 </div>
 @code {
 
     [Parameter]
-    public Guid id { get; set; } 
+    public Guid id { get; set; }
     [SupplyParameterFromQuery(Name = "cid")]
     [Parameter]
-    public Guid clientid {get;set;}
+    public Guid clientid { get; set; }
     private OrdFiche _ordFiche { get; set; }
     private User _user { get; set; }
     private Client _client { get; set; } = new();
     private List<Client> _clientList = new List<Client>();
-    private DocumentNo _documentNo{ get; set; }
+    private DocumentNo _documentNo { get; set; }
     private bool newClient { get; set; } = default!;
 
-    private bool pageValid {get;set;}
+    private bool pageValid { get; set; }
 
     private void SearchEnter()
     {
         PagerPageChanged(0);
     }
+
+
+    private async Task<List<Client>> SearchClients(string text)
+    {
+        return await clientCardManager.Search(text);
+    }
+
+    private async Task ClientSelected(string clientCode)
+    {
+        if (string.IsNullOrWhiteSpace(clientCode))
+        {
+            _client = new();// null atamada hata dönüyor
+            pageValid = false;
+        }
+        else
+        {
+            _client = await clientCardManager.GetByCode(clientCode);
+            clientid = _client.Id;
+            pageValid = true;
+        }
+    }
+
 
     private object ChangedClient
     {
@@ -231,7 +259,7 @@
     }
     private void SaveChanged()
     {
-        if(_documentNo != null)
+        if (_documentNo != null)
             documentNoService.Update(_documentNo);
         orderService.Save(_ordFiche);
         navManager.NavigateTo("/order");
@@ -255,8 +283,10 @@
 
     private void addproduct(Product product)
     {
-
-        AddCart(product.Id, product.OrderAmount, product.PriceLists[0].Price, 0, UserId);
+        double price = 0;
+        if (product.PriceLists.Count >= 1)
+            price = product.PriceLists[0].Price;
+        AddCart(product.Id, product.OrderAmount, price, 0, UserId);
     }
 
     private async void AddFiche(string ClientCode, Guid UserId)
@@ -325,7 +355,7 @@
                     CurrencyId = 1,
 
                 };
-            
+
             _ordFiche.Lines.Add(ordLine);
             notification.Notify(new NotificationMessage { Severity = Core.Abstract.ResultStatus.Information, Summary = "Bilgi", Detail = "Kayıt Eklendi", Duration = 5000 });
         }
@@ -355,7 +385,7 @@
 
     private async Task OnActiveTabChanged(bool isTabChanged)
     {
-        if(isTabChanged)
+        if (isTabChanged)
         {
             _client = await clientCardManager.GetByGuid(clientid);
             if (_client == null)
@@ -369,7 +399,7 @@
     {
         if (q != "1")
         {
-            _clientList = await clientCardManager.GetAll();
+            // _clientList = await clientCardManager.GetAll(); tüm listeyi yüklemeye gerek yok arama sonucu gelsin
         }
         else
         {
@@ -386,8 +416,8 @@
             _user = userService.GetUser(UserId).Result;
             if (id != Guid.Empty)
             {
-                _ordFiche =await  orderService.GetOrderFiche(id);
-                _client= await clientCardManager.GetByCode(_ordFiche.ClientCode);
+                _ordFiche = await orderService.GetOrderFiche(id);
+                _client = await clientCardManager.GetByCode(_ordFiche.ClientCode);
                 ChangedClient = _client.Id;
                 StateHasChanged();
             }
@@ -489,10 +519,10 @@
         if (firstRender)
         {
             PagerPageChanged(pdata.CurrentPage);
-            if(id == Guid.Empty)
+            if (id == Guid.Empty)
             {
-               
-              
+
+
             }
         }
     }

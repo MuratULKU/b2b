@@ -19,14 +19,14 @@ namespace SanalMagaza.Business.Concrete
 
         public async Task<IResult> Create(CreditCardPrefix creditCardPrefix)
         {
-            var result = await _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x => x.Prefix == creditCardPrefix.Prefix);
+            var result = await _unitOfWork.Repository<CreditCardPrefix>().SingleOrDefaultAsync(x => x.Prefix == creditCardPrefix.Prefix);
             if (result == null)
             {
                 var list = creditCardPrefix.Validation();
                 if (list.Count > 0)
                     return new Result(ResultStatus.Error, String.Join(", ", list.ToArray()));
-                await _unitOfWork.CreditCardPrefixs.AddAsync(creditCardPrefix);
-                var test = await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<CreditCardPrefix>().AddAsync(creditCardPrefix);
+                var test = await _unitOfWork.SaveChangesAsync();
                 if (test == 1)
                     return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
                 return new Result(ResultStatus.Error, "Hatalı İşlem");
@@ -36,8 +36,8 @@ namespace SanalMagaza.Business.Concrete
 
         public async Task<IResult> Delete(CreditCardPrefix creditCardPrefix)
         {
-           await _unitOfWork.CreditCardPrefixs.Delete(creditCardPrefix);
-            var result = await _unitOfWork.CommitAsync();
+           await _unitOfWork.Repository<CreditCardPrefix>().Delete(creditCardPrefix);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt Silme İşlemi Tamanlandı");
             return new Result(ResultStatus.Error, "Hatalı İşlem");
@@ -45,36 +45,36 @@ namespace SanalMagaza.Business.Concrete
 
         public async Task<CreditCardPrefix> Get(Guid id)
         {
-            var result = await _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x => x.Id == id);
+            var result = await _unitOfWork.Repository<CreditCardPrefix>().SingleOrDefaultAsync(x => x.Id == id);
            return result;
         }
 
         public async Task<CreditCardPrefix> GetByPrefix(string prefix)
         {
-            return await _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x => x.Prefix == prefix); 
+            return await _unitOfWork.Repository<CreditCardPrefix>().SingleOrDefaultAsync(x => x.Prefix == prefix); 
         }
 
         public async Task<List<CreditCardPrefix>> GetByPrefixList(string prefix)
         {
-            return await _unitOfWork.CreditCardPrefixs.Find(x=>x.Prefix == prefix);
+            return await _unitOfWork.Repository<CreditCardPrefix>().Find(x=>x.Prefix == prefix);
         }
 
         public async Task<IList<CreditCardPrefix>> GetAll()
         {
-            var result = await _unitOfWork.CreditCardPrefixs.GetAllAsync();
+            var result = await _unitOfWork.Repository<CreditCardPrefix>().GetAllAsync();
             return result;
         }
 
         public async Task<IResult> Update(CreditCardPrefix creditCardPrefix)
         {
-            var test = _unitOfWork.CreditCardPrefixs.SingleOrDefaultAsync(x=>x.Prefix ==  creditCardPrefix.Prefix);
+            var test = _unitOfWork.Repository<CreditCardPrefix>().SingleOrDefaultAsync(x=>x.Prefix ==  creditCardPrefix.Prefix);
             if (test != null)
             {
                 var list = creditCardPrefix.Validation();
                 if (list.Count > 0)
                     return new Result(ResultStatus.Error, String.Join(", ", list.ToArray()));
-               await _unitOfWork.CreditCardPrefixs.UpdateAsync(creditCardPrefix);
-                var result = await _unitOfWork.CommitAsync();
+               await _unitOfWork.Repository<CreditCardPrefix>().UpdateAsync(creditCardPrefix);
+                var result = await _unitOfWork.SaveChangesAsync();
                 if (result == 1)
                     return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
                 return new Result(ResultStatus.Error, "Hatalı İşlem");
@@ -84,7 +84,7 @@ namespace SanalMagaza.Business.Concrete
 
         public async Task<List<CreditCardPrefix>> GetBankList(Guid BankId)
         {
-            var result = await _unitOfWork.CreditCardPrefixs.Find(x=> x.CreditCardId == BankId);  
+            var result = await _unitOfWork.Repository<CreditCardPrefix>().Find(x=> x.CreditCardId == BankId);  
             return result;
         }
 

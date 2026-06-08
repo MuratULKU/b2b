@@ -2,10 +2,10 @@
 using DataAccess.Abstract;
 using Entity;
 
-namespace CoreUI.BackOrder
+namespace CoreUI.BackOrder.Ulku
 {
     public interface IBackOrderCharSets
-    { 
+    {
         Task<bool> updateCharSets(DateTime? date, HttpClient _httpClient);
         Task deleteCharSets();
         Task<bool> updateCharCodes(DateTime? date, HttpClient _httpClient);
@@ -133,9 +133,10 @@ namespace CoreUI.BackOrder
         public async Task<bool> updateCharAsgns(DateTime? date, HttpClient _httpClient)
         {
             try
-            {   using var scope = _serviceProvider.CreateScope();
+            {
+                using var scope = _serviceProvider.CreateScope();
                 var _charCodeRepository = scope.ServiceProvider.GetRequiredService<ICharCodeService>();
-                var _charValRepository =  scope.ServiceProvider.GetRequiredService<ICharValService>();
+                var _charValRepository = scope.ServiceProvider.GetRequiredService<ICharValService>();
                 var _charAsgnRepository = scope.ServiceProvider.GetRequiredService<ICharAsgnService>();
                 var _productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
                 HttpResponseMessage respone;
@@ -169,7 +170,7 @@ namespace CoreUI.BackOrder
                             }
                             else
                             {
-                               // _charAsgnRepository.Update(charAsgn);
+                                // _charAsgnRepository.Update(charAsgn);
                             }
                         }
 

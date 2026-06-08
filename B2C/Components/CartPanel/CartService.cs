@@ -82,7 +82,7 @@ namespace B2C.Components.CartPanel
             UserId = await userIdentityProcessor.GetCurrentUserId();
             if(UserId != Guid.Empty)
             {
-                _client =await  unitofWork.Client.SingleOrDefaultAsync(x=>x.Id== UserId);
+                _client =await  unitofWork.Repository<Client>().SingleOrDefaultAsync(x=>x.Id== UserId);
                 AddCart(ProductCode, Amount, Price, Discount,UserId);  
             }
             else
@@ -151,7 +151,7 @@ namespace B2C.Components.CartPanel
                 ordLine.VatMatrah = Math.Round((ordLine.Total - ordLine.Distdisc), 2);
                 ordLine.VatAmnt = Math.Round((ordLine.VatMatrah * ordLine.Vat / 100), 2);
             }
-            var s = unitofWork.ChangedEntity(ordLine);
+           
             _ordFiche.GrossTotal = Math.Round(_ordFiche.Lines.Sum(x => x.Total), 2);
             _ordFiche.TotalDiscounted = Math.Round(_ordFiche.Lines.Sum(x => x.Distdisc), 2);
             _ordFiche.TotalVat = Math.Round(_ordFiche.Lines.Sum(x => x.VatAmnt), 2);
@@ -170,7 +170,7 @@ namespace B2C.Components.CartPanel
             //documentNoService.Update(_documentNo);
             foreach (OrdLine line in _ordFiche.Lines)
             {
-                var s = unitofWork.ChangedEntity(line);
+                //var s = unitofWork.ChangedEntity(line);
             }
             return orderService.Save(_ordFiche);
         }

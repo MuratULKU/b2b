@@ -40,6 +40,7 @@ namespace Entity
         public List<PriceList>? PriceLists { get; set; }
         public List<FirmDoc>? firmDocs { get; set; }
         public List<CharAsgn>? CharAsgn { get; set; }
+   
         public CharSet? CharSet { get; set; }  
 
         [NotMapped]

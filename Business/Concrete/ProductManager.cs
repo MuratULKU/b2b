@@ -24,7 +24,7 @@ namespace Business.Concrete
         }
         public async Task<List<Product>> GetAll()
         {
-           return await _unitOfWork.Product.GetAllAsync();
+           return await _unitOfWork.Repository<Product>().GetAllAsync();
            
         }
 
@@ -37,26 +37,26 @@ namespace Business.Concrete
 
         public async Task<Product> GetByCode(string Code)
         {
-            var result = await _unitOfWork.Product.GetByCode(Code);
+            var result = await _unitOfWork.Repository<Product>().FirstOrDefaultAsync(x => x.Code == Code);
             return result;
         }
 
         public async Task<Product> GetByGuid(Guid id)
         {
-            var result = await _unitOfWork.Product.GetByGuid(id);
+            var result = await _unitOfWork.Repository<Product>().FirstOrDefaultAsync(x=>x.Id == id);
             return result;
         }
 
         public async Task<Product> GetByLogicalref(int Logicalref)
         {
-            var result = await _unitOfWork.Product.GetByLogicalref(Logicalref);
+            var result = await _unitOfWork.Repository<Product>().FirstOrDefaultAsync(x => x.LogicalRef == Logicalref);
             return result;
         }
 
         public async Task<IResult> Insert(Product product)
         {
-          var result = await _unitOfWork.Product.AddAsync(product);
-          await _unitOfWork.CommitAsync();
+          var result = await _unitOfWork.Repository<Product>().AddAsync(product);
+          await _unitOfWork.SaveChangesAsync();
           return new Result(ResultStatus.Success, "Product inserted successfully.");
           
 
@@ -74,13 +74,13 @@ namespace Business.Concrete
 
             if (product.Id == Guid.Empty)
             {
-                await _unitOfWork.Product.AddAsync(product);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<Product>().AddAsync(product);
+                await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Kayıt Başarılı");
             }else
             {
-                await _unitOfWork.Product.UpdateAsync(product);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<Product>().UpdateAsync(product);
+                await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Günceleme Başarılı");
             }
 
@@ -88,7 +88,7 @@ namespace Business.Concrete
 
         public Task<int> TotalCount(string Filtre, Dictionary<Guid, List<string>> PropertySet, int CategoryId, int CurrentPage, int PageSize)
         {
-           return _unitOfWork.Product.TotalCount(Filtre,PropertySet, CategoryId, CurrentPage, PageSize);
+          return _unitOfWork.Product.TotalCount(Filtre,PropertySet, CategoryId, CurrentPage, PageSize);
         }
     }
 }

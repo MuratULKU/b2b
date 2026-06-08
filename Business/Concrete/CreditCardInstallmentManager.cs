@@ -24,15 +24,15 @@ namespace Business.Concrete
 
         public async Task<CreditCardInstallment> Create(CreditCardInstallment creditCardInstallment)
         {
-            await _unitOfWork.CreditCardInstallment.AddAsync(creditCardInstallment);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<CreditCardInstallment>().AddAsync(creditCardInstallment);
+            var result = await _unitOfWork.SaveChangesAsync();
             return creditCardInstallment;
         }
 
         public async Task<CreditCardInstallment> Delete(CreditCardInstallment creditCardInstallment)
         {
-            await _unitOfWork.CreditCardInstallment.Delete(creditCardInstallment);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<CreditCardInstallment>().Delete(creditCardInstallment);
+            var result = await _unitOfWork.SaveChangesAsync();
           
 
             return creditCardInstallment;
@@ -40,29 +40,29 @@ namespace Business.Concrete
 
         public async Task<CreditCardInstallment> Get(Guid id)
         {
-            return await _unitOfWork.CreditCardInstallment.SingleOrDefaultAsync(x => x.Id == id);
+            return await _unitOfWork.Repository<CreditCardInstallment>().SingleOrDefaultAsync(x => x.Id == id);
 
         }
 
         public async Task<List<CreditCardInstallment>> GetAll()
         {
-            return await _unitOfWork.CreditCardInstallment.GetAllAsync();
+            return await _unitOfWork.Repository<CreditCardInstallment>().GetAllAsync();
         }
 
         public Task<List<CreditCardInstallment>> GeyBankId(Guid id)
         {
-            return _unitOfWork.CreditCardInstallment.Find(x => x.CreditCard.BankCardId == id);
+            return _unitOfWork.Repository<CreditCardInstallment>().Find(x => x.CreditCard.BankCardId == id);
         }
 
         public Task<List<CreditCardInstallment>> GeyCreditId(Guid id)
         {
-            return _unitOfWork.CreditCardInstallment.Find(x => x.CreditCardId == id);
+            return _unitOfWork.Repository<CreditCardInstallment>().Find(x => x.CreditCardId == id);
         }
 
         public async Task<IResult> Update(CreditCardInstallment creditCardInstallment)
         {
-            await _unitOfWork.CreditCardInstallment.UpdateAsync(creditCardInstallment);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<CreditCardInstallment>().UpdateAsync(creditCardInstallment);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Başarılı");
             return new Result(ResultStatus.Error, "Taksit Daha Önce Eklenmiş");

@@ -31,8 +31,8 @@ namespace Business.Concrete
             {
                 try
                 {
-                    await _unitOfWork.VirtualPoses.AddAsync(virtualPos);
-                    var result = await _unitOfWork.CommitAsync();
+                    await _unitOfWork.Repository<VirtualPos>().AddAsync(virtualPos);
+                    var result = await _unitOfWork.SaveChangesAsync();
                     if (result == 1)
                         return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
                     return new Result(ResultStatus.Error, "Hatalı İşlem");
@@ -58,8 +58,8 @@ namespace Business.Concrete
 
         public async Task<IResult> DeleteVirtualPos(VirtualPos virtualPos)
         {
-            await _unitOfWork.VirtualPoses.Delete(virtualPos);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<VirtualPos>().Delete(virtualPos);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt İşlemi Tamamlandı");
             return new Result(ResultStatus.Error, "Hatalı İşlem");
@@ -68,22 +68,22 @@ namespace Business.Concrete
 
         public async Task<VirtualPos> GetByBrandId(Guid id)
         {
-            return await _unitOfWork.VirtualPoses.FirstOrDefaultAsync(x => x.CardBrandId == id && x.Active == false, x => x.Include(x => x.BankCard));
+            return await _unitOfWork.Repository<VirtualPos>().FirstOrDefaultAsync(x => x.CardBrandId == id && x.Active == false, x => x.Include(x => x.BankCard));
 
         }
 
         public async Task<List<VirtualPos>> GetByBrandCode(Guid id)
         {
-            return await _unitOfWork.VirtualPoses.Find(x => x.CardBrandId.Equals(id), x => x.Include(x => x.CreditCardInstallments).ThenInclude(y => y.CreditCard));
+            return await _unitOfWork.Repository<VirtualPos>().Find(x => x.CardBrandId.Equals(id), x => x.Include(x => x.CreditCardInstallments).ThenInclude(y => y.CreditCard));
         }
         public async Task<VirtualPos> GetByBankId(Guid id)
         {
-            return await _unitOfWork.VirtualPoses.SingleOrDefaultAsync(x => x.BankCardId == id && x.Active == false, x => x.Include(x => x.BankCard));
+            return await _unitOfWork.Repository<VirtualPos>().SingleOrDefaultAsync(x => x.BankCardId == id && x.Active == false, x => x.Include(x => x.BankCard));
         }
 
         public async Task<List<VirtualPos>> GetVirtualListsAsync()
         {
-            var result = await _unitOfWork.VirtualPoses.GetAllAsync();
+            var result = await _unitOfWork.Repository<VirtualPos>().GetAllAsync();
             if (result == null)
                 return null;
             return result;
@@ -91,7 +91,7 @@ namespace Business.Concrete
 
         public async Task<VirtualPos> GetVirtualPosAsync(Guid virtualPosId)
         {
-            var result = await _unitOfWork.VirtualPoses.SingleOrDefaultAsync(x => x.Id == virtualPosId, x => x.Include(x => x.BankCard).Include(y => y.VirtualPosParameters));
+            var result = await _unitOfWork.Repository<VirtualPos>().SingleOrDefaultAsync(x => x.Id == virtualPosId, x => x.Include(x => x.BankCard).Include(y => y.VirtualPosParameters));
             if (result == null)
                 return null;
             return result;
@@ -100,7 +100,7 @@ namespace Business.Concrete
 
         public async Task<IDataResult<List<VirtualPosParameter>>> GetVirtualPosParameters(Guid bankId)
         {
-            var result = await _unitOfWork.VirtualPosParameter.Find(x => x.VirtualPosId == bankId);
+            var result = await _unitOfWork.Repository<VirtualPosParameter>().Find(x => x.VirtualPosId == bankId);
             if (result == null)
                 return null;
             return new DataResult<List<VirtualPosParameter>>(ResultStatus.Success, result);
@@ -117,9 +117,9 @@ namespace Business.Concrete
                 entry.State = EntityState.Detached;
 
             _unitOfWork.Entry(virtualPos).State = EntityState.Modified;
-        
-              
-            var result = await _unitOfWork.CommitAsync();
+
+            await _unitOfWork.Repository<VirtualPos>().UpdateAsync(virtualPos);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
                 return new Result(ResultStatus.Success, "Kayıt Tamamlandı");
             return new Result(ResultStatus.Error, "Hatalı Kayıt");

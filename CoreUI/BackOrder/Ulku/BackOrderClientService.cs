@@ -4,44 +4,72 @@ using Business.Concrete;
 using CoreUI.Data;
 using DataAccess.Abstract;
 using Entity;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-namespace CoreUI.BackOrder
+namespace CoreUI.BackOrder.Ulku
 {
     public interface IBackOrderClientService
     {
-        Task<bool> UpdateClient(DateTime? date, HttpClient _httpClient);
-        void SentData(HttpClient _httpClient);
+        Task<bool> UpdateClient(DateTime? date);
+        Task SentData();
+        Task<List<ClientFiche>> GetExtre(int currentPage, int pageSize, string cLientCode, DateTime firstDate, DateTime lastDate);
+        Task DeleteAll();
+
     }
     public class BackOrderClientService : IBackOrderClientService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<BackOrderClientService> _logger;
-        public BackOrderClientService(IServiceProvider serviceProvider, ILogger<BackOrderClientService> logger)
+        private readonly HttpClient _httpClient;
+        public BackOrderClientService(IServiceProvider serviceProvider, ILogger<BackOrderClientService> logger, HttpClient httpClient = null)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
+            _httpClient = httpClient;
         }
 
-        public async Task<bool> UpdateClient(DateTime? date, HttpClient _httpClient)
+        public async Task DeleteAll()
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var _clientService = scope.ServiceProvider.GetRequiredService<IClientCardService>();
+            await _clientService.DeleteAll();
+
+        }
+        public async Task<bool> UpdateClient(DateTime? date)
         {
             try
-            {
-                using var scope = _serviceProvider.CreateScope();
+            {   
+                    using var scope = _serviceProvider.CreateScope();
+                    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                    var tokenResponse = await tokenService.GetToken();
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                            new AuthenticationHeaderValue("Bearer", tokenResponse);
+
+                
+                
+
+             
                 var _clientService = scope.ServiceProvider.GetRequiredService<IClientCardService>();
 
                 HttpResponseMessage respone;
-               
+
 
                 int currentpage = 1;
                 int totalpage = 0;
                 do
                 {
-                    respone = await _httpClient.GetAsync($"/api/v1/Client/clients?page={currentpage}&pageSize=10");
-                  
+                    string url = $"/api/v1/Client/clients?page={currentpage}&pageSize=10";
+                    if (date.HasValue)
+                    {
+                        url += $"&updateDate={date.Value.ToString("MM.dd.yyyy HH:mm")}";
+                    }
+                    respone = await _httpClient.GetAsync(url);
+
                     if (respone.IsSuccessStatusCode)
                     {
                         var pList = await respone.Content.ReadFromJsonAsync<PageResult<Client>>();
@@ -73,7 +101,7 @@ namespace CoreUI.BackOrder
                                         clientcard.MailAdress2 = client.MailAdress2;
                                         await _clientService.Update(clientcard);
                                     }
-                                        
+
                                 }
                             }
                         }
@@ -93,18 +121,26 @@ namespace CoreUI.BackOrder
             }
         }
 
-        public async void SentData(HttpClient _httpClient)
+        public async Task SentData()
         {
             try
             {
+
                 using var scope = _serviceProvider.CreateScope();
+                var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                var tokenResponse = await tokenService.GetToken();
+                _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", tokenResponse);
+
+
+              
                 var _ClFicheService = scope.ServiceProvider.GetRequiredService<IClFicheService>();
 
 
                 List<ClFiche> clFiche = await _ClFicheService.GetClFicheFiche(70, 1);
                 if (clFiche != null && clFiche.Count > 0)
                 {
-                   // _httpClient.DefaultRequestHeaders.Clear();
+                    // _httpClient.DefaultRequestHeaders.Clear();
                     _httpClient.DefaultRequestHeaders.Accept.Add(
     new MediaTypeWithQualityHeaderValue("application/json"));
                     StringContent content = new StringContent(JsonSerializer.Serialize(clFiche), Encoding.UTF8, "application/json");
@@ -137,6 +173,23 @@ namespace CoreUI.BackOrder
             catch (Exception ex)
             {
                 _logger.LogCritical(ex.Message);
+            }
+
+        }
+
+        public async Task<List<ClientFiche>> GetExtre(int currentPage, int pageSize, string cLientCode, DateTime firstDate, DateTime lastDate)
+        {
+            try
+            { 
+                var httpResponseMessage =
+                  await _httpClient.GetAsync($"/api/v1/client/extre?code={cLientCode}&startDate={firstDate.ToString("MM.dd.yyyy")}&endDate={lastDate.ToString("MM.dd.yyyy")}&currentPage={currentPage}&pageSize={pageSize}");
+                var response =  httpResponseMessage.Content.ReadFromJsonAsync<PageResult<ClientFiche>>().Result;
+                return response.Items;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex.Message);
+                return new List<ClientFiche>();
             }
 
         }

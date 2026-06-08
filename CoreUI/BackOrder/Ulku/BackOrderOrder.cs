@@ -10,30 +10,37 @@ using CoreUI.Data;
 
 
 
-namespace CoreUI.BackOrder
+namespace CoreUI.BackOrder.Ulku
 {
     public interface IBackOrderOder
     {
-        void SentData(HttpClient _httpClient);
-        Task<bool> OrderFicheState(DateTime? date, HttpClient _httpClient);
+        Task SentData();
+        Task<bool> OrderFicheState(DateTime? date);
     }
     public class BackOrderOrder : IBackOrderOder
     {
 
         private readonly IServiceProvider _serviceProvider;
         private ILogger<BackOrderOrder> _logger;
-
-        public BackOrderOrder(IServiceProvider serviceProvider, ILogger<BackOrderOrder> logger)
+        private readonly HttpClient _httpClient;
+        public BackOrderOrder(IServiceProvider serviceProvider, ILogger<BackOrderOrder> logger, HttpClient httpClient = null)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
+            _httpClient = httpClient;
         }
 
-        public async Task<bool> OrderFicheState(DateTime? date, HttpClient _httpClient)
+        public async Task<bool> OrderFicheState(DateTime? date)
         {
             try
             {
                 using var scope = _serviceProvider.CreateScope();
+                var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                var tokenResponse = await tokenService.GetToken();
+                _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", tokenResponse);
+
+               
                 var _orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
                 HttpResponseMessage respone;
                 int currentpage = 1;
@@ -60,7 +67,7 @@ namespace CoreUI.BackOrder
                         }
                         currentpage++;
                     }
-                   
+
                 } while (currentpage <= totalpage);
 
                 return true;
@@ -74,15 +81,21 @@ namespace CoreUI.BackOrder
                 return false;
             }
         }
-        public async void SentData(HttpClient _httpClient)
+        public async Task SentData()
         {
             try
             {
                 using var scope = _serviceProvider.CreateScope();
+                var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+                var tokenResponse = await tokenService.GetToken();
+                _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", tokenResponse);
+
+              
                 var _orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
 
 
-                List<OrdFiche> ordFiche = await _orderService.GetOrderFiche(1, 1);
+                List<OrdFiche> ordFiche = await _orderService.GetOrderFiche(1, 1,false);
                 if (ordFiche != null && ordFiche.Count > 0)
                 {
                     //_httpClient.DefaultRequestHeaders.Clear();
@@ -134,6 +147,6 @@ namespace CoreUI.BackOrder
     public class ResposeStateModel
     {
         public int logicalref { get; set; }
-        public Int16 status { get; set; }
+        public short status { get; set; }
     }
 }

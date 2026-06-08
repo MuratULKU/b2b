@@ -20,7 +20,7 @@ namespace Business.Concrete
 
         public Task<Currency> GetCurrency(int id)
         {
-           return _unitOfWork.Currencies.FirstOrDefaultAsync(c => c.Id == id);
+           return _unitOfWork.Repository<Currency>().FirstOrDefaultAsync(c => c.Id == id);
         }
     }
 }

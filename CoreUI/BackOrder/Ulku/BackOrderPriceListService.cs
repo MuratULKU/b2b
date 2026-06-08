@@ -4,7 +4,7 @@ using DataAccess.Abstract;
 using DataAccess.Concrete;
 using Entity;
 
-namespace CoreUI.BackOrder
+namespace CoreUI.BackOrder.Ulku
 {
     public interface IBackOrderPriceListService
     {
@@ -27,7 +27,7 @@ namespace CoreUI.BackOrder
         {
             using var scope = _serviceProvider.CreateScope();
             var _priceListRepository = scope.ServiceProvider.GetRequiredService<IPriceListRepository>();
-          //  _priceListRepository.DeleteAll();
+            //  _priceListRepository.DeleteAll();
             return Task.CompletedTask;
         }
         public async Task updatePrice(DateTime? date, HttpClient _httpClient)
@@ -35,8 +35,8 @@ namespace CoreUI.BackOrder
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-               var _productRepository = scope.ServiceProvider.GetRequiredService<IProductService>();
-               var _priceRepository = scope.ServiceProvider.GetRequiredService<IPriceListService>();
+                var _productRepository = scope.ServiceProvider.GetRequiredService<IProductService>();
+                var _priceRepository = scope.ServiceProvider.GetRequiredService<IPriceListService>();
                 HttpResponseMessage respone;
 
 
@@ -54,7 +54,7 @@ namespace CoreUI.BackOrder
                             foreach (var item in pList.Items)
                             {
                                 var product = _productRepository.GetByLogicalref(item.Cardref);
-                                if(product != null)
+                                if (product != null)
                                 {
                                     var pricelist = _priceRepository.GetByLogicalref(item.Logicalref);
                                 }
@@ -62,13 +62,13 @@ namespace CoreUI.BackOrder
                     }
                 } while (currentpage <= totalpage);
 
-               
+
             }
             catch (Exception ex)
             {
                 _logger.LogCritical(ex.Message);
                 await Task.FromException(ex);
-              
+
             }
         }
     }

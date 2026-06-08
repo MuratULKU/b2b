@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Security.Cryptography;
+using System.Net.Http;
 namespace _3DPayment.Providers
 {
     public class DenizbankPaymentProvider : IPaymentProvider

@@ -1,7 +1,10 @@
-﻿namespace CoreUI.Data
+﻿using System.Text.Json.Serialization;
+
+namespace CoreUI.Data
 {
     public class ClientFiche
     {
+      
         public DateTime Date { get; set; }
         public string TranNo { get; set; }
         public string DocNo { get; set; }

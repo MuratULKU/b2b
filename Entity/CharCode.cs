@@ -14,5 +14,6 @@ namespace Entity
        
         public string CSetCode { get; set; }
         public List<CharVal> CharVals { get; set; } 
+       public List<CharAsgn> CharAsgns { get; set; }
     }
 }

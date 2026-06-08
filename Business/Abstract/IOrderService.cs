@@ -20,7 +20,7 @@ namespace Business.Abstract
         Task<int> GetOrderFicheCount(Guid firmId,int trCode);
         Task<List<OrdFiche>> GetOrderFiche(int trCode, int CurrentPage, int PageSize);
         Task<List<OrdFiche>> GetOrderFiche(Guid FirmId,int trCode, int CurrentPage, int PageSize);
-        Task<List<OrdFiche>> GetOrderFiche(int trCode, byte send);
+        Task<List<OrdFiche>> GetOrderFiche(int trCode, byte send, bool include);
         Task<OrdFiche> GetOrderFiche(int send,Guid userId);
         Task<OrdFiche> GetOrderFiche(Guid id);
         Task<OrdFiche> GetOrderFiche(int id);

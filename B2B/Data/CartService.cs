@@ -8,16 +8,16 @@ using Entity;
 
 namespace B2B.Data
 {
-    public class CartService:IDisposable
+    public class CartService : IDisposable
     {
         private readonly IProductService productServices;
         private readonly IOrderService orderService;
         private readonly ICompanyService companyService;
         private readonly IUserService userService;
         private readonly IDocumentNoService documentNoService;
-     
 
-        public OrdFiche _ordFiche;
+
+        public OrdFiche _ordFiche { get; set; }
         public Company company { get; set; }
         public User user { get; set; }
 
@@ -30,46 +30,82 @@ namespace B2B.Data
             this.companyService = companyService;
             this.userService = userService;
             this.documentNoService = documentNoService;
-          
+
         }
 
-
-
-
-        public async Task<List<OrdLine>> ReadCart(Guid userId)
+        public async Task<OrdFiche> GetOrdFiche(Guid userId)
         {
             user = await userService.GetUser(userId);
             company = await companyService.Get(user.CompanyId ?? default);
+
             if (user != null && company != null)
             {
-                _ordFiche = await orderService.GetOrderFiche(0, userId);
-                if (_ordFiche == null)
+                var ordFiche = await orderService.GetOrderFiche(0, userId);
+
+                if (ordFiche == null)
                 {
-                    _ordFiche = new();
-                    _ordFiche.Lines = new();
-                    _ordFiche.Id = Guid.Empty;
-                    _ordFiche.Docode = await documentNoService.GetDocNo(1);
-                    _ordFiche.Date_ = DateTime.Now;
-                    _ordFiche.Send = 0;
-                    _ordFiche.Active = true;
-                    _ordFiche.ClientCode = company.ProgramCode;
-                    _ordFiche.FicheNo = _ordFiche.Docode;
-                    _ordFiche.UpdateDate = DateTime.Now;
-                    _ordFiche.CreateDate = DateTime.Now;
-                    _ordFiche.UpdateUser = userId;
-                    _ordFiche.CreateUser = userId;
-                    _ordFiche.UserId = userId;
-                    _ordFiche.TrCode = 1;
-                    _ordFiche.CurrencyId = 1;
-                    _ordFiche.Lines = new();
+                    ordFiche = new();
+                    ordFiche.Lines = new();
+                    ordFiche.Id = Guid.Empty;
+                    ordFiche.Docode = await documentNoService.GetDocNo(1);
+                    ordFiche.Date_ = DateTime.Now;
+                    ordFiche.Send = 0;
+                    ordFiche.Active = true;
+                    ordFiche.ClientCode = company.ProgramCode;
+                    ordFiche.FicheNo = ordFiche.Docode;
+                    ordFiche.UpdateDate = DateTime.Now;
+                    ordFiche.CreateDate = DateTime.Now;
+                    ordFiche.UpdateUser = userId;
+                    ordFiche.CreateUser = userId;
+                    ordFiche.UserId = userId;
+                    ordFiche.TrCode = 1;
+                    ordFiche.CurrencyId = 1;
+                    ordFiche.CompanyId = company.Id;
+                    ordFiche.Lines = new();
                 }
-                return _ordFiche.Lines;
+
+                return ordFiche;
             }
-            else
-                return null;
 
-
+            return null;
         }
+
+
+        //public async Task<List<OrdLine>> ReadCart(Guid userId)
+        //{
+        //    user = await userService.GetUser(userId);
+        //    company = await companyService.Get(user.CompanyId ?? default);
+        //    if (user != null && company != null)
+        //    {
+        //        _ordFiche = await orderService.GetOrderFiche(0, userId);
+        //        if (_ordFiche == null)
+        //        {
+        //            _ordFiche = new();
+        //            _ordFiche.Lines = new();
+        //            _ordFiche.Id = Guid.Empty;
+        //            _ordFiche.Docode = await documentNoService.GetDocNo(1);
+        //            _ordFiche.Date_ = DateTime.Now;
+        //            _ordFiche.Send = 0;
+        //            _ordFiche.Active = true;
+        //            _ordFiche.ClientCode = company.ProgramCode;
+        //            _ordFiche.FicheNo = _ordFiche.Docode;
+        //            _ordFiche.UpdateDate = DateTime.Now;
+        //            _ordFiche.CreateDate = DateTime.Now;
+        //            _ordFiche.UpdateUser = userId;
+        //            _ordFiche.CreateUser = userId;
+        //            _ordFiche.UserId = userId;
+        //            _ordFiche.TrCode = 1;
+        //            _ordFiche.CurrencyId = 1;
+        //            _ordFiche.Lines = new();
+        //        }
+
+        //        return _ordFiche.Lines;
+        //    }
+        //    else
+        //        return null;
+
+
+        //}
 
 
 
@@ -82,7 +118,7 @@ namespace B2B.Data
             company = await companyService.Get(user.CompanyId ?? default);
             if (company != null)
             {
-                _ordFiche = await orderService.GetOrderFiche(0, userId);
+
                 if (_ordFiche == null)
                 {
                     _ordFiche = new();
@@ -103,7 +139,7 @@ namespace B2B.Data
                     _ordFiche.CurrencyId = 1; //döviz kuru seçildiğinde değişecek
                     _ordFiche.CompanyId = user.CompanyId ?? default;
                 }
-                OrdLine ordLine =  _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == productId);
+                OrdLine ordLine = _ordFiche.Lines?.FirstOrDefault(x => x.ProductId == productId);
                 if (ordLine == null)
                 {
                     var product = await productServices.GetByGuid(productId);
@@ -117,7 +153,7 @@ namespace B2B.Data
                     short.TryParse(_ordFiche.Lines?.Count.ToString(), out lineno);
                     ordLine.LineNo = (short)(lineno + (short)1);
                     ordLine.TrCode = 1;
-
+                    //ordLine.Product = product;
                     ordLine.UomRef = product.UomRef;
                     ordLine.UsRef = product.UsRef;
                     ordLine.AvailableStock = 0;
@@ -148,7 +184,7 @@ namespace B2B.Data
                     var valid = ordLine.Validation();
                     if (valid.Count == 0)
                     {
-                        await orderService.AddLine(ordLine);
+                        // await orderService.AddLine(ordLine);
                     }
                     else
                     {
@@ -176,16 +212,16 @@ namespace B2B.Data
                     }
                     ordLine.VatMatrah = Math.Round((ordLine.Total - ordLine.Distdisc), 2);
                     ordLine.VatAmnt = Math.Round((ordLine.VatMatrah * ordLine.Vat / 100), 2);
-                    await orderService.UpdateLine(ordLine);
-                    
+                   // await orderService.UpdateLine(ordLine);
+
                 }
                 CalculateFiche();
-               
+
                 await orderService.Save(_ordFiche);
 
-                
+
             }
-          return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
+            return new Result(ResultStatus.Success, "Kayıt İşlemi Tamanlandı");
         }
 
         private void CalculateFiche()
@@ -207,23 +243,20 @@ namespace B2B.Data
                 await orderService.DeleteLine(ordLine);
                 CalculateFiche();
                 //fişdeki toplam değişikliği için
-               await orderService.Save(_ordFiche);
+                await orderService.Save(_ordFiche);
             }
         }
 
-        public void RemoveCartGuid(Guid pruductGuid)
-        {
 
-        }
         public async Task<Core.Abstract.IResult> OrderSend()
         {
             _ordFiche.Send = 1;
-           return await orderService.Save(_ordFiche);
+            return await orderService.Save(_ordFiche);
         }
 
         public void Dispose()
         {
-           _ordFiche = null;
+            _ordFiche = null;
             company = null;
             user = null;
         }

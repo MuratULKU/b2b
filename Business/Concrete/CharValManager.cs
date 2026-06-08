@@ -21,7 +21,7 @@ namespace Business.Concrete
 
         public async Task<CharVal> GetByCode(string code)
         {
-           return await _unitOfWork.CharVal.SingleOrDefaultAsync(x => x.Code == code);
+           return await _unitOfWork.Repository<CharVal>().SingleOrDefaultAsync(x => x.Code == code);
           
         }
     }

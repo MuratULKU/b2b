@@ -1,18 +1,17 @@
 ﻿@page "/confirmorder/{id:guid}"
 @using B2B.Data
 @using Business.Abstract
-@using CoreUI.BackOrder
+@using CoreUI.BackOrder.Ulku
 @using Entity
-@using Microsoft.Extensions.Configuration
-
-@using Newtonsoft.Json.Linq
+@using System.Text.Json
 @using System.Net.Http.Headers
 @using System.Text
-@using System.Text.Json
+
 @inject IOrderService orderService
 @inject CartService cartService
 @inject IConfiguration configuration
 @inject ILogger<ConfirmOrder> _logger
+@inject ITokenService tokenService
 @attribute [Authorize]
 <div class="container">
     @if(cartService._ordFiche != null)
@@ -33,7 +32,7 @@
 
     protected async override void OnInitialized()
     {
-
+        message = string.Empty;
         if(cartService._ordFiche.Id == id)
         {
             message = "Siparişiniz Başarılı Şekilde Kayıt Edildi.";
@@ -42,9 +41,15 @@
             List<OrdFiche> ordFiches = new List<OrdFiche>();
             ordFiches.Add(cartService._ordFiche);
             StringContent content = new StringContent(JsonSerializer.Serialize(ordFiches), Encoding.UTF8, "application/json");
-
+           
             try
             {
+                var tokenResponse = await tokenService.GetToken();
+
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", tokenResponse);
+
+
                 var httpResponseMessage =
                   await _httpClient.PostAsync($"/api/v1/Orders/order", content);
                 var response = await httpResponseMessage.Content.ReadAsStringAsync();
@@ -56,15 +61,19 @@
                     {
                         cartService._ordFiche.LogicalRef = result.logicalref;
                         cartService._ordFiche.Send = 2;
-                    
+
                         await orderService.Save(cartService._ordFiche);
                     }
                 }
                 message = "Siparişiniz Başarlı Şekilde İletildi.";
+               
                 StateHasChanged();
+                cartService._ordFiche = null; //kayıt başarılı bir şekilde tamamlanınca sepeti boşalt
             }
             catch (Exception ex)
             {
+                message = "Bağlantı Hatası Sipariş Daha Sonra Aktarılcak...";
+                StateHasChanged();
                 _logger.LogCritical(ex.Message);
             }
            

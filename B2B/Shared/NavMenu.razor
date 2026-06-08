@@ -130,9 +130,9 @@
 
     private async void exitUser()
     {
-        // var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
-        // await customAuthStateProvider.UpdateAuthenticationState(null);
-        // navManager.NavigateTo("/", true);
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        navManager.NavigateTo("/", true);
     }
 
     protected override void OnInitialized()

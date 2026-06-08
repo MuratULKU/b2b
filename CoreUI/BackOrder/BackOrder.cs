@@ -2,17 +2,20 @@
 using Business.Abstract;
 using Business.Concrete;
 using Business.SingletonServices;
+using Core.Logger;
+using CoreUI.BackOrder.Ulku;
 using CoreUI.Data;
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Security.AccessControl;
 using System.Text;
 using static System.Formats.Asn1.AsnWriter;
 namespace CoreUI.BackOrder
 {
     public class BackOrder : BackgroundService
     {
-        private readonly ILogger<BackOrder> _logger;
+        private readonly ILoggerService _logger;
         private readonly IBackOrderProductService _productService;
         private readonly FirmParameter _firmParameterService;
         private readonly IBackOrderClientService _clientService;
@@ -22,10 +25,13 @@ namespace CoreUI.BackOrder
 
         private DateTime _lastUpdateCheck = DateTime.MinValue;
         private DateTime _lastSendCheck = DateTime.MinValue;
-        private DateTime _tokenExpireTime = DateTime.MinValue;
-        public BackOrder(ILogger<BackOrder> logger, HttpClient httpClient, IBackOrderProductService productService,
+
+
+        private readonly ApiStrategyFactory _strategyFactory;
+
+        public BackOrder(ILoggerService logger, HttpClient httpClient, IBackOrderProductService productService,
              IBackOrderClientService clientCardService,
-            FirmParameter firmParameterService, IConfiguration configuration, IBackOrderOder backOrderOder, IServiceProvider serviceProvider)
+            FirmParameter firmParameterService, IConfiguration configuration, IBackOrderOder backOrderOder, IServiceProvider serviceProvider, ApiStrategyFactory strategyFactory = null)
         {
             _logger = logger;
             _productService = productService;
@@ -35,6 +41,8 @@ namespace CoreUI.BackOrder
             _backOrderOder = backOrderOder;
             _httpClient = httpClient;
             _serviceProvider = serviceProvider;
+            _strategyFactory = strategyFactory;
+            
         }
 
 
@@ -69,14 +77,14 @@ namespace CoreUI.BackOrder
 
                 if (result != null && result.HasUpdate)
                 {
-                    _logger.LogWarning($"Yeni versiyon bulundu : {result.Version}");
+                    _logger.Warn($"Yeni versiyon bulundu : {result.Version}");
 
                     await DownloadUpdate(result.DownloadUrl);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError("Update kontrol hatası : " + ex.Message);
+                _logger.Error("Update kontrol hatası : " + ex.Message);
             }
         }
 
@@ -100,115 +108,65 @@ namespace CoreUI.BackOrder
             Environment.Exit(0);
         }
 
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
 
-            try
+            _logger.Info("Started Connection Api");
+           
+
+            var strategy = _strategyFactory.GetStrategy();
+            _lastUpdateCheck = Convert.ToDateTime(_firmParameterService.ToString(8));
+
+            while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Started Connection Api");
-                _httpClient.BaseAddress = new Uri(_configuration.GetSection("ApiService").GetSection("Url").Value);
-                using var scope = _serviceProvider.CreateScope();
-                var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
-               
-              
-                while (!stoppingToken.IsCancellationRequested)
+                try
                 {
-                    // Saatte bir update kontrolü
-                    if (DateTime.Now >= _tokenExpireTime)
+                    var updateDate = DateTime.Now;
+
+                    if (_firmParameterService.ToString(22) == "True")
                     {
-                        _logger.LogInformation("Token refreshing...");
-
-                        var tokenResponse = await tokenService.GetToken(_httpClient);
-
-                        _httpClient.DefaultRequestHeaders.Authorization =
-                            new AuthenticationHeaderValue("Bearer", tokenResponse);
-
-                        _tokenExpireTime = DateTime.Now.AddMinutes(55);
+                        // await _clientService.DeleteAll();
                     }
 
-
-                    if ((DateTime.Now - _lastUpdateCheck).TotalHours >= 1)
+                    if ((DateTime.Now - _lastSendCheck).TotalMinutes > 1)
                     {
-                        await CheckServiceUpdate();
-                        _lastUpdateCheck = DateTime.Now;
+                        try
+                        {
+                            await strategy.SendAsync(_lastSendCheck);
+                            _lastSendCheck = updateDate; 
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error("SendAsync hata: " + ex.Message);
+                        }
                     }
-                    if ((DateTime.Now - _lastSendCheck).TotalMinutes >= 1)
+
+                    if ((DateTime.Now - _lastUpdateCheck).TotalMinutes > 10)
                     {
-                        DateTime? lastUpdateDate = Convert.ToDateTime(_firmParameterService.ToString(8));
-
-                        _backOrderOder.SentData(_httpClient);
-                        _clientService.SentData(_httpClient);
-                        await _backOrderOder.OrderFicheState(lastUpdateDate,_httpClient);
-                        _logger.LogInformation("SendData");
-                      
-                        string updatedate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-                        if (_firmParameterService.ToString(22) == "True")
+                        try
                         {
-                            _firmParameterService.Set(22, "False");
-                            await _productService.CharAsgnDeleteAll();
-                            await _productService.CharCodeDeleteAll();
-                            await _productService.CharSetDeleteAll();
-                            await _productService.PriceListDeleteAll();
-                            await _productService.ProductAmountDeleteAll();
-                            await _productService.CategoriesDeleteAll();
-                            await _productService.deleteProducts();
-                            lastUpdateDate = null;
-                            _logger.LogInformation("Tables deleted");
+                            await strategy.RunAsync(_lastUpdateCheck);
+
+                            _lastUpdateCheck = updateDate;
+                            _firmParameterService.Set(8, updateDate);
+
+                            _logger.Info($"Completed Connection Api...{DateTime.Now}");
                         }
-                        //   var deleteproduct = _productService.DeleteProduct(lastUpdateDate, _httpClient);
-                        await _productService.CharSetUpdate(lastUpdateDate, _httpClient); //_charSetRepository.updateCharSets(lastUpdateDate, _httpClient);
-                        var category = await _productService.CategoryUpdate(lastUpdateDate, _httpClient);
-                        if (category)
+                        catch (Exception ex)
                         {
-                            var product = await _productService.updateProducts(lastUpdateDate, _httpClient);
-                            if (product)
-                            {
-                                await _productService.PriceListUpdate(lastUpdateDate, _httpClient);
-                                await _productService.ProductAmountUpdate(lastUpdateDate, _httpClient);
-                            }
+                            _logger.Error("RunAsync hata: " + ex.Message);
                         }
-                        _logger.LogInformation("Products tables updated");
-                        //ürünlerle eşeleştirilme yapıldığı için ürünlerden sonra yüklenecek
-
-
-
-                        var charCode = await _productService.CharCodeUpdate(lastUpdateDate, _httpClient);
-                        var charAsgn = await _productService.CharAsgnUpdate(lastUpdateDate, _httpClient);
-
-                        //silinmiş ürünleri veri tabanından sil
-
-
-                        if (_firmParameterService.ToString(27) == "True")
-                        {
-                            await _productService.DeleteImages();
-                            await _productService.updateImages(lastUpdateDate,_httpClient);
-                            _firmParameterService.Set(27, "False");
-                        }
-                        _logger.LogInformation("Image table updated");
-
-                        if (category)
-                        {
-                            _firmParameterService.Set(8, updatedate);
-                            _firmParameterService.Set(22, "False");
-                        }
-                        _logger.LogInformation("All Tables Updated.");
-
-                        await _clientService.UpdateClient(lastUpdateDate, _httpClient);
-
-                        var time = Convert.ToInt32(_firmParameterService.ToString(18));
-                        _logger.LogCritical($"Completed Connection Api...{lastUpdateDate.Value.ToString()} -- {DateTime.Now}");
-                        _lastSendCheck = DateTime.Now;
                     }
-                  
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical(ex.Message);
-            }
+                catch (Exception ex)
+                {
+                  
+                    _logger.Error("Loop genel hata: " + ex.Message);
+                }
 
-            
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            }
         }
     }
 

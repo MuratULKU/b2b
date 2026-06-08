@@ -160,7 +160,7 @@
                 userRole.UserId = user.Id;
                 userRole.CreateUser = user.CreateUser;
                 userRole.CreateDate = DateTime.Now;
-                userRole.CreateDate = DateTime.Now;
+               
               
                 var success = await companyService.Insert(company, user, userRole);
                 if (success)

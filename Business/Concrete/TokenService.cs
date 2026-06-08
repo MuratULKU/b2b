@@ -13,10 +13,14 @@ namespace Business.Concrete
        
         private string _token;
         private DateTime _expireDate;
-       
-        
+       private readonly HttpClient _httpClient;
 
-        public async Task<string> GetToken(HttpClient _httpClient)
+        public TokenService(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
+
+        public async Task<string> GetToken()
         {
             
             if (!string.IsNullOrEmpty(_token) && _expireDate > DateTime.Now)

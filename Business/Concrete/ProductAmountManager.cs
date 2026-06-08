@@ -25,12 +25,12 @@ namespace Business.Concrete
         {
             try
             {
-                var productamounts = await _unitOfWork.ProductAmount.GetAllAsync();
+                var productamounts = await _unitOfWork.Repository<ProductAmount>().GetAllAsync();
                 foreach (var productamount in productamounts)
                 {
-                    await _unitOfWork.ProductAmount.Delete(productamount);
+                    await _unitOfWork.Repository<ProductAmount>().Delete(productamount);
                 }
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.SaveChangesAsync();
 
             }
             catch (Exception ex)
@@ -42,7 +42,7 @@ namespace Business.Concrete
 
         public async Task<ProductAmount> GetByCode(string code)
         {
-            var result = await _unitOfWork.ProductAmount.SingleOrDefaultAsync(x => x.Code == code);
+            var result = await _unitOfWork.Repository<ProductAmount>().SingleOrDefaultAsync(x => x.Code == code);
             return result;
         }
 
@@ -50,8 +50,8 @@ namespace Business.Concrete
         {
             try
             {
-                await _unitOfWork.ProductAmount.AddAsync(productamount);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<ProductAmount>().AddAsync(productamount);
+                await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Product Amount inserted successfully.");
             }
             catch (Exception ex)
@@ -64,8 +64,8 @@ namespace Business.Concrete
         {
             try
             {
-                await _unitOfWork.ProductAmount.UpdateAsync(productamount);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<ProductAmount>().UpdateAsync(productamount);
+                await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Product Amount updated successfully.");
             }
             catch (Exception ex)

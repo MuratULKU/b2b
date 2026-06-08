@@ -21,12 +21,12 @@ namespace Business.Concrete
         {
             try
             {
-                var charasgns = await _unitOfWork.CharAsgn.GetAllAsync();
+                var charasgns = await _unitOfWork.Repository<CharAsgn>().GetAllAsync();
                 foreach (var charasgn in charasgns)
                 {
-                    await _unitOfWork.CharAsgn.Delete(charasgn);
+                    await _unitOfWork.Repository<CharAsgn>().Delete(charasgn);
                 }
-                await _unitOfWork.CommitAsync();
+                var result = await _unitOfWork.SaveChangesAsync();
 
             }
             catch (Exception ex)
@@ -38,15 +38,15 @@ namespace Business.Concrete
 
         public async Task<CharAsgn> GetByCode(string code)
         {
-            return await _unitOfWork.CharAsgn.SingleOrDefaultAsync(x => x.Code == code);
+            return await _unitOfWork.Repository<CharAsgn>().SingleOrDefaultAsync(x => x.Code == code);
         }
 
         public async Task<IResult> Insert(CharAsgn charAsgn)
         {
             try
             {
-                await _unitOfWork.CharAsgn.AddAsync(charAsgn);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<CharAsgn>().AddAsync(charAsgn);
+                var result = await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Charasgn set inserted successfully.");
             }
             catch (Exception ex)
@@ -59,8 +59,8 @@ namespace Business.Concrete
         {
             try
             {
-                await _unitOfWork.CharAsgn.UpdateAsync(charAsgn);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<CharAsgn>().UpdateAsync(charAsgn);
+                var result = await _unitOfWork.SaveChangesAsync();
                 return new Result(ResultStatus.Success, "Charasgn set updated successfully.");
             }
             catch (Exception ex)

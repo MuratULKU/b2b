@@ -4,6 +4,7 @@
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    width:100%;
 }
 .disabled {
     cursor: default !important;
@@ -14,6 +15,7 @@
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    width:100%
 }
 
 @media (max-width: 600px) {

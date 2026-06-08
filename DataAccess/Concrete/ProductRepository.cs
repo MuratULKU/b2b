@@ -126,13 +126,18 @@ namespace DataAccess.Concrete
 
         public Task<List<Product>> GetAllAsync(string Filtre, Dictionary<Guid, List<string>> PropertySet, int CategoryId, int CurrentPage, int PageSize)
         {
-            //gelen id nin içerisinde parentler var ise parent refe göre sorgula
+            // Hangi DB kullanıldığını kontrol et
+            bool isSqlite = dbContext.Database.IsSqlite();
 
             var where = WhereSentence(Filtre);
             string category = "";
+
             if (isParent(CategoryId))
             {
-                var parent = dbContext.Set<Category>().Where(x => x.Parent == CategoryId).Select(x => x.LogicalRef).ToArray();
+                var parent = dbContext.Set<Category>()
+                    .Where(x => x.Parent == CategoryId)
+                    .Select(x => x.LogicalRef)
+                    .ToArray();
                 category = string.Join(",", parent);
                 category += "," + ParentRef(CategoryId);
             }
@@ -143,17 +148,12 @@ namespace DataAccess.Concrete
 
             if (CategoryId != 0)
             {
-                if (where == null || where == string.Empty)
-                {
+                if (string.IsNullOrEmpty(where))
                     where = "where ParentRef in (" + category + ")";
-                }
                 else
-                {
                     where += " and ParentRef in (" + category + ")";
-                }
             }
-          
-           
+
             if (PropertySet != null && PropertySet.Values.Count >= 1)
             {
                 where += " and Id in (select ProductId from CharAsgns WHERE (";
@@ -164,27 +164,32 @@ namespace DataAccess.Concrete
                     {
                         where += $"CharValCode = '{property.ElementAt(i)}'";
                         if (i < property.Count - 1)
-                        {
                             where += " or ";
-                        }
                     }
                     if (p < PropertySet.Count - 1)
-                    {
                         where += " or ";
-                    }
-
                 }
-
-                where += $")GROUP by ProductId having count(ProductId)>={PropertySet.Count})";
+                where += $") GROUP BY ProductId HAVING COUNT(ProductId) >= {PropertySet.Count})";
             }
 
-            var queryText = $"select * from Products {where} order by Code LIMIT {PageSize} OFFSET {(CurrentPage - 1) * PageSize}";
+            // ✅ SQLite ve SQL Server için ayrı sayfalama sözdizimi
+            string queryText;
+            if (isSqlite)
+            {
+                queryText = $"SELECT * FROM Products {where} ORDER BY Code LIMIT {PageSize} OFFSET {(CurrentPage - 1) * PageSize}";
+            }
+            else
+            {
+                queryText = $@"SELECT * FROM Products {where} 
+                   ORDER BY Code 
+                   OFFSET {(CurrentPage - 1) * PageSize} ROWS 
+                   FETCH NEXT {PageSize} ROWS ONLY";
+            }
 
-
-             return Task.FromResult(dbContext.Set<Product>()
+            return Task.FromResult(dbContext.Set<Product>()
                 .FromSqlRaw(queryText)
-                 .AsNoTracking().Include(x => x.PriceLists)
-                //.ThenInclude(y => y.Currency)
+                .AsNoTracking()
+                .Include(x => x.PriceLists)
                 .Include(x => x.ProductAmounts)
                 .Include(x => x.firmDocs)
                 .Include(x => x.CharAsgn)
@@ -288,7 +293,7 @@ namespace DataAccess.Concrete
         }
         public async Task<int> DeleteAll()
         {
-            dbContext.Set<Product>().ExecuteDelete();
+            //dbContext.Set<Product>().ExecuteDelete();
             return await dbContext.SaveChangesAsync();
         }
         public Task<int> TotalCount(string Filtre, Dictionary<Guid, List<string>> PropertySet, int CategoryId, int CurrentPage, int PageSize)

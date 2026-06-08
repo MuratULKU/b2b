@@ -22,25 +22,25 @@ namespace Business.Concrete
 
         public Task<ClFiche> GetClFiche(Guid id)
         {
-           return _unitOfWork.ClFiche.SingleOrDefaultAsync(c => c.Id == id);
+           return _unitOfWork.Repository<ClFiche>().SingleOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<List<ClFiche>> GetClFicheFiche(int trCode, byte send)
         {
-           var result = await _unitOfWork.ClFiche.Find(x=>x.Send == send && x.TrCode == trCode);
+           var result = await _unitOfWork.Repository<ClFiche>().Find(x=>x.Send == send && x.TrCode == trCode);
             return result;
         }
 
         public Task<ClFiche> GetPaymetId(Guid id)
         {
-            return _unitOfWork.ClFiche.SingleOrDefaultAsync(x=>x.PaymentTransactionId == id);
+            return _unitOfWork.Repository<ClFiche>().SingleOrDefaultAsync(x=>x.PaymentTransactionId == id);
         }
 
         public async Task<IResult> Insert(ClFiche clFiche)
         {
-           await _unitOfWork.ClFiche.AddAsync(clFiche);
-           var result = await _unitOfWork.CommitAsync();
-            if(result == 1)
+           await _unitOfWork.Repository<ClFiche>().AddAsync(clFiche);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result == 1)
             {
                 return new Result(ResultStatus.Success, "Inserted Client Fiche");
             }
@@ -49,8 +49,8 @@ namespace Business.Concrete
 
         public async Task<IResult> Update(ClFiche clFiche)
         {
-            await _unitOfWork.ClFiche.UpdateAsync(clFiche);
-            var result = await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<ClFiche>().UpdateAsync(clFiche);
+            var result = await _unitOfWork.SaveChangesAsync();
             if (result == 1)
             {
                 return new Result(ResultStatus.Success, "Updated Client Fiche");

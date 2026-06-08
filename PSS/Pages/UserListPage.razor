@@ -17,8 +17,8 @@
                 </Columns>
                 <ButtonRowTemplate>
                     <button class="btn btn-success" style="width:130px;" onclick="@AddUser">Ekle</button>
-                    <input class="btn btn-primary" style="width:130px;" disabled="@(selecetedUser == null ? true:false)" onclick="@ChangeUser" value="Değiştir" />
-                    <input class="btn btn-danger" style="width:130px;" disabled="@(selecetedUser == null ? true:false)" onclick="@DeleteUser" value="sil" />
+                    <input class="btn btn-primary" style="width:130px;" disabled="@(selecetedUser == null ? true : false)" onclick="@ChangeUser" value="Değiştir" />
+                    <input class="btn btn-danger" style="width:130px;" disabled="@(selecetedUser == null ? true : false)" onclick="@DeleteUser" value="sil" />
                 </ButtonRowTemplate>
             </DataGrid>
         </div>
@@ -61,7 +61,7 @@
                     <SelectList TItem="Role" Items="roles" DisplayField="RoleName" ValueField="Id" @bind-Selected="ChangedUserRole" />
                 </div>
                 <div col-sm-4>
-                    <input type="button" class="btn btn-success" value="Role Ekle" onclick="@(()=>AddUserRole())" />
+                    <input type="button" class="btn btn-success" value="Role Ekle" onclick="@(() => AddUserRole())" />
                 </div>
             </div>
             <div class="row">
@@ -73,7 +73,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (selecetedUser.UsersRoles != null)
+                        @*  @if (selecetedUser != null && selecetedUser.UsersRoles != null)
                         {
                             @foreach (var item in selecetedUser.UsersRoles)
                             {
@@ -82,12 +82,12 @@
                                     <td><button class="btn-danger" value="@item.Id" @onclick="()=>DeleteRole(item.Id)">Sil</button></td>
                                 </tr>
                             }
-                        }
+                        } *@
                     </tbody>
                 </table>
             </div>
         </div>
-      
+
     </div>
 </div>
 @code {
@@ -97,11 +97,13 @@
     private Guid selectRoleId { get; set; }
     private List<Company> companies { get; set; }
     private Guid companyId { get; set; } = new();
-    protected override async void OnInitialized()
+
+    protected async override Task OnInitializedAsync()
     {
         users = await userService.GetAllUser();
-        roles = roleService.GetAllRole().Result.Data;
-        companies = companyService.GetAll(0, 10);
+        var test = await roleService.GetAllRole();
+        roles = test.Data;
+        companies = await companyService.GetAllAsync(0, 10);
         StateHasChanged();
     }
     private async void selectUser(User user)
@@ -143,15 +145,15 @@
     private async void AddUserRole()
     {
         UserRole userRole = new UserRole
-            {
-                Id = Guid.NewGuid(),
-                UserId = selecetedUser.Id,
-                RoleId = selectRoleId,
-                CreateDate = DateTime.Now,
-                UpdateDate = DateTime.Now,
-                CreateUser = await userIdentity.GetCurrentUserId(),
-                UpdateUser = await userIdentity.GetCurrentUserId()
-            };
+        {
+            Id = Guid.NewGuid(),
+            UserId = selecetedUser.Id,
+            RoleId = selectRoleId,
+            CreateDate = DateTime.Now,
+            UpdateDate = DateTime.Now,
+            CreateUser = await userIdentity.GetCurrentUserId(),
+            UpdateUser = await userIdentity.GetCurrentUserId()
+        };
         await userRoleService.AddRole(userRole);
         StateHasChanged();
     }
@@ -166,16 +168,16 @@
         selecetedUser.CompanyId = companyId;
 
         UserRole userRole = new UserRole
-            {
-                Id = Guid.NewGuid(),
-                UserId = selecetedUser.Id,
-                RoleId = selectRoleId,
-                CreateDate = selecetedUser.CreateDate,
-                UpdateDate = selecetedUser.UpdateDate,
-                CreateUser = selecetedUser.CreateUser,
-                UpdateUser = selecetedUser.UpdateUser
-            };
-       
+        {
+            Id = Guid.NewGuid(),
+            UserId = selecetedUser.Id,
+            RoleId = selectRoleId,
+            CreateDate = selecetedUser.CreateDate,
+            UpdateDate = selecetedUser.UpdateDate,
+            CreateUser = selecetedUser.CreateUser,
+            UpdateUser = selecetedUser.UpdateUser
+        };
+
         await userService.AddUser(selecetedUser);
         await userRoleService.AddRole(userRole);
 

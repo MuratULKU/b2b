@@ -1,12 +1,12 @@
-
-
 using B2C.Components.Base;
 using B2C.Components.UserPanel;
+using Business.Abstract;
 using Business.Concrete;
 using Business.SingletonServices;
 using Core.Logger;
 using CoreUI;
 using CoreUI.BackOrder;
+using CoreUI.BackOrder.Mikro;
 using CoreUI.Components.Confirm;
 using CoreUI.Components.NotificationService;
 
@@ -16,8 +16,8 @@ using DataAccess.Concrete;
 using DataAccess.EFCore;
 
 using Microsoft.AspNetCore.Components.Authorization;
-
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer; // Ekleyin: UseSqlServer uzantýsý için gerekli
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,12 +25,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddControllersWithViews();
-//database conneciton
-builder.Services.AddDbContext<RepositoryContext>(
-    options => options.UseSqlite(builder.Configuration.GetConnectionString("sqlConnection"), b => b.MigrationsAssembly("B2C")),
+var provider = builder.Configuration["DatabaseProvider"];
 
- ServiceLifetime.Transient);
-
+builder.Services.AddDbContext<RepositoryContext>(options =>
+{
+    if (provider == "Sqlite")
+    {
+        options.UseSqlite(
+            builder.Configuration.GetConnectionString("Sqlite"),
+            // SQLite'a özel migration dosyalarýný DataAccess.EFCore altýndaki SqliteMigrations klasöründe toplar
+            x => x.MigrationsAssembly("DataAccess"));
+    }
+    else
+    {
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("SqlServer"),
+            // SQL Server'a özel migration
+            // dosyalarýný DataAccess.EFCore altýndaki SqlServerMigrations klasöründe toplar
+            x => x.MigrationsAssembly("DataAccess"));
+    }
+});
 
 builder.Services.AddSingleton<ILoggerService>(provider =>
             new FileLogger("app.log"));
@@ -39,20 +53,32 @@ builder.Services.AddSingleton<ILoggerService>(provider =>
 builder.Services.AddUtiliesService();
 builder.Services.AddRepositoryService();
 builder.Services.AddBusinessService();
-builder.Services.AddScoped<IUnitofWork, UnitofWork>();
+builder.Services.AddScoped<IUnitofWork, UnitOfWork>();
 //back order service
 
 builder.Services.AddSingleton<FirmParameter>();
 builder.Services.AddSingleton<ConfirmDialogService>();
 
-builder.Services.AddBackOrederServices();
-builder.Services.AddHostedService<BackOrder>();
+builder.Services.AddBackOrederServices(builder.Configuration);
+builder.Services.AddHttpClient<BackOrder>(service => service.BaseAddress = new Uri(builder.Configuration["ApiService:Url"]));
 
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<FirmParameterService>();
 //user aAuthentication
 builder.Services.AddBusinessServices(builder.Configuration);
+
+builder.Services.AddHttpClient<ITokenService, TokenService>(client =>
+   client.BaseAddress = new Uri(builder.Configuration["ApiService:Url"]));
+
+builder.Services.AddHttpClient<IMikroClientService, MikroClientService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiService:Url"]);
+});
+
+builder.Services.AddHttpClient<IMikroProductService, MikroProductService>(client =>
+   client.BaseAddress = new Uri(builder.Configuration["ApiService:Url"]));
+
 
 var app = builder.Build();
 //initalize database

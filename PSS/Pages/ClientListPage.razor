@@ -4,87 +4,93 @@
 @inject IClientCardService cardService
 @inject NavigationManager navManager
 @attribute [Authorize]
+
 <div class="container">
-    <div class="row">
+    <div class="row mb-2">
         <div class="col-sm-4">
-           
-              
-                <input class="form-control" type="search" @bind="@searchText" oninput="@searchClick">
-             
-        
-           
+            <input class="form-control" type="search" @bind="searchText" @bind:event="oninput" @onkeyup="SearchClick" placeholder="Ara..." />
         </div>
-      <div class="col-sm-8">
-            <button type="button" class="btn btn-outline-primary" onclick="@(()=>navManager.NavigateTo($"/extre/{selectedClient.Code}"))">Cari Hesap Extresi</button>
-            <button type="button" class="btn btn-outline-primary" onclick="@(() => navManager.NavigateTo($"/ccpayment?code={selectedClient.Code}", true))">Tahsilat</button>
-            <button type="button" class="btn btn-outline-primary" onclick="@(() => navManager.NavigateTo($"/OrderDetail?cid={selectedClient.Id}&q=1", true))">Sipariş</button>
-            <button type="button" class="btn btn-outline-primary" onclick="@(() => navManager.NavigateTo($"/OfferDetail?cid={selectedClient.Id}&q=1", true))">Teklif</button>
-      </div>
-       
+        <div class="col-sm-8">
+            <button type="button" class="btn btn-outline-primary"
+                    disabled="@(selectedClient == null)"
+                    @onclick="@(() => navManager.NavigateTo($"/extre/{selectedClient?.Code}"))">
+                Cari Hesap Extresi
+            </button>
+            <button type="button" class="btn btn-outline-primary"
+                    disabled="@(selectedClient == null)"
+                    @onclick="@(() => navManager.NavigateTo($"/ccpayment?code={selectedClient?.Code}", true))">
+                Tahsilat
+            </button>
+            <button type="button" class="btn btn-outline-primary"
+                    disabled="@(selectedClient == null)"
+                    @onclick="@(() => navManager.NavigateTo($"/OrderDetail?cid={selectedClient?.Id}&q=1", true))">
+                Sipariş
+            </button>
+            <button type="button" class="btn btn-outline-primary"
+                    disabled="@(selectedClient == null)"
+                    @onclick="@(() => navManager.NavigateTo($"/OfferDetail?cid={selectedClient?.Id}&q=1", true))">
+                Teklif
+            </button>
+        </div>
     </div>
+
     <div>
-        <DataGrid TItem="Client" Items="clientList" Pager 
-            TotalCount="totalCount" RowsPerPage="rowsPerPageChange" 
-            SelectedPageChange="selectedPageChange" 
-            SelectedItemChanged="selectItemChange">
+        <DataGrid TItem="Client" Items="clientList" Pager
+                  TotalCount="totalCount"
+                  RowsPerPage="RowsPerPageChange"
+                  SelectedPageChange="SelectedPageChange"
+                  SelectedItemChanged="SelectItemChange">
             <Columns>
-                <Column Caption="Kodu" Field="@nameof(Client.Code)" />
+                <Column Caption="Kodu" Field="@nameof(Client.Code)" Width="100" />
                 <Column Caption="Unvanı" Field="@nameof(Client.Name)" />
-                <Column Caption="Vkn" Field="@nameof(Client.VKN)" />
-               
+                <Column Caption="Vkn" Field="@nameof(Client.VKN)" Width="100" />
             </Columns>
         </DataGrid>
-        
     </div>
 </div>
+
 @code {
-    private Guid userId { get; set; }
-    private DateTime? firstDate { get; set; }
-    private DateTime? lastDate { get; set; }
-    private int _currentPage { get; set; } = 0;
-    private int _rowsPerPage { get; set; } = 10;
-
-    private int totalCount{ get; set; }
-
+    private int _currentPage = 0;
+    private int _rowsPerPage = 10;
+    private int totalCount;
     private List<Client> clientList = new();
     private string searchText = string.Empty;
-    private Client selectedClient{ get; set; }
+    private Client? selectedClient;
 
-    protected override async void OnInitialized()
+    // ✅ async void yerine async Task
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
     {
         clientList = await cardService.GetAllAsync(searchText, _currentPage, _rowsPerPage);
         totalCount = await cardService.TotalCount(searchText, _currentPage, _rowsPerPage);
     }
 
-    private async void searchClick()
+    // ✅ searchText'i parametre olarak değil @bind ile al
+    private async Task SearchClick()
     {
-        clientList = await cardService.GetAllAsync(searchText,_currentPage,_rowsPerPage);
-        totalCount = await cardService.TotalCount(searchText, _currentPage, _rowsPerPage);
-        StateHasChanged();
+        _currentPage = 0; // Aramada sayfayı sıfırla
+        await LoadData();
     }
 
-    private void extreClick()
-    {
-        navManager.NavigateTo($"/extre/{selectedClient.Code}");
-    }
-
-    private void selectItemChange(Client item)
+    private void SelectItemChange(Client item)
     {
         selectedClient = item;
     }
 
-    private async void rowsPerPageChange(int rowsPerPage)
+    private async Task RowsPerPageChange(int rowsPerPage)
     {
         _rowsPerPage = rowsPerPage;
-        clientList = await cardService.GetAllAsync(searchText, _currentPage, _rowsPerPage);
+        _currentPage = 0;
+        await LoadData();
     }
-    private async void selectedPageChange(int currentPage)
+
+    private async Task SelectedPageChange(int currentPage)
     {
         _currentPage = currentPage;
-        clientList = await cardService.GetAllAsync(searchText, _currentPage, _rowsPerPage);
+        await LoadData();
     }
-
-
-
-
 }

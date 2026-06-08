@@ -333,7 +333,7 @@
 
     protected async override void OnInitialized()
     {
-        firmParamList = firmParamService.GetAll().Result;
+        firmParamList = await firmParamService.GetAll();
         stateList.Add(new EvetHayır() { Name = "Hayır", State = false });
         stateList.Add(new EvetHayır() { Name = "Evet", State = true });
         viewList.Add(new ViewMode() { Name = "Kart Mode", Mode = 0 });

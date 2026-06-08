@@ -38,7 +38,7 @@
     }
     protected override async void OnInitialized()
     {
-        companies = await companyManager.GetAllAsync(0, RowCount);
+        companies = await companyManager.GetAllAsync(1, RowCount);
         TotalCount = await companyManager.TotalCount();
        
     }
@@ -50,6 +50,6 @@
     private async void rowsPerPage(int rowCount)
     {
         RowCount = rowCount;
-        companies = await companyManager.GetAllAsync(0, RowCount);
+        companies = await companyManager.GetAllAsync(1, RowCount);
     }
 }
